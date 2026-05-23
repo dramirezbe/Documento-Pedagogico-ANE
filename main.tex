@@ -1,0 +1,49 @@
+\documentclass[12pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{enumitem}
+
+\title{Informe T\'ecnico General del Sistema\\\large Versi\'on base con contenido placeholder}
+\author{Equipo de trabajo}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Este archivo genera un PDF base para el documento pedag\'ogico/t\'ecnico del sistema.
+Las secciones incluidas a continuaci\'on contienen texto provisional para facilitar la
+edici\'on colaborativa, el ensamblaje del informe y la validaci\'on temprana del flujo
+de compilaci\'on en \LaTeX.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\input{section/1_introduction}
+\input{section/2_requirements-restrictions}
+\input{section/3_general_design_system}
+\input{section/4_HW}
+\input{section/5_SDR-acquisition}
+\input{section/6_Platform_cloud}
+\input{section/7_Spectral-localization_cloud}
+\input{section/8_Test_protocols_edge-cloud}
+\input{section/9_System_integration}
+\input{section/10_General_conclusions}
+\input{section/11_Recommendations}
+\input{section/12_References}
+
+\appendix
+\input{section/A_IA-collaboration-technique}
+\input{section/B_Additional_diagrams}
+\input{section/C_Relevant_code_fragments}
+\input{section/D_Manuals_guides}
+\input{section/E_Test_results}
+
+\end{document}
