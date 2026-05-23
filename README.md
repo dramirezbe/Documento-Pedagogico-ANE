@@ -1,1 +1,1 @@
-# Documento-Pedagojico-ANE
+# Documento-Pedagogico-ANE
