@@ -21,6 +21,7 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{url}
+\usepackage{ifthen}
 
 % =========================================================
 % CONFIGURACIÓN DE PÁGINA
@@ -42,28 +43,52 @@
 \setlength{\parskip}{0.6em}
 \setlength{\parindent}{0pt}
 
+\renewcommand{\arraystretch}{1.2}
+
 % =========================================================
-% COMANDOS ÚTILES
+% COMANDOS GENERALES
 % =========================================================
+
+% Marca texto pendiente. Antes de la entrega final no debe quedar ningún \pendiente{}.
 \newcommand{\pendiente}[1]{\textcolor{red}{\textbf{[PENDIENTE: #1]}}}
 
-\newcommand{\repositorio}[4]{
+% Entrada segura de capítulos. Si el archivo no existe, el documento compila con advertencia.
+\newcommand{\inputchapter}[1]{
+    \IfFileExists{#1.tex}{
+        \input{#1}
+    }{
+        \chapter*{Archivo no encontrado}
+        \addcontentsline{toc}{chapter}{Archivo no encontrado: #1}
+        \textcolor{red}{No se encontró el archivo \texttt{#1.tex}.}
+    }
+}
+
+% Tabla estándar para repositorios de software.
+% Uso:
+% \softwareRepo{Nombre}{URL}{Rama/versión/commit}{Responsable}{Función}{Entradas}{Salidas}{Estado}
+\newcommand{\softwareRepo}[8]{
 \begin{table}[H]
 \centering
 \caption{Repositorio asociado: #1}
-\begin{tabularx}{\textwidth}{>{\bfseries}l X}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{4cm} X}
 \toprule
 Nombre del software & #1 \\
 Repositorio & \url{#2} \\
 Rama, versión o commit & #3 \\
-Función dentro del sistema & #4 \\
+Responsable & #4 \\
+Función dentro del sistema & #5 \\
+Entradas & #6 \\
+Salidas & #7 \\
+Estado actual & #8 \\
 \bottomrule
 \end{tabularx}
 \end{table}
 }
 
-\newcommand{\tablaProblemas}{
-\begin{longtable}{p{2.7cm} p{2.7cm} p{2.7cm} p{2.7cm} p{2.7cm}}
+% Tabla estándar de problemas, decisiones y ajustes.
+% Los autores pueden copiar esta estructura y completar filas.
+\newcommand{\problemTableTemplate}{
+\begin{longtable}{p{2.6cm} p{2.6cm} p{2.6cm} p{3cm} p{3cm}}
 \caption{Problemas presentados, decisiones y ajustes realizados.}\\
 \toprule
 \textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Decisión o ajuste} & \textbf{Resultado} \\
@@ -75,47 +100,60 @@ Función dentro del sistema & #4 \\
 \midrule
 \endhead
 
-\pendiente{Describir problema} &
-\pendiente{Log, captura, error, medición o prueba} &
-\pendiente{Explicar causa técnica probable} &
-\pendiente{Indicar cambio realizado y justificación} &
-\pendiente{Indicar resultado obtenido} \\
+\pendiente{Problema identificado} &
+\pendiente{Log, captura, medición o prueba} &
+\pendiente{Causa técnica probable} &
+\pendiente{Cambio aplicado y justificación} &
+\pendiente{Resultado posterior} \\
+
 \bottomrule
 \end{longtable}
 }
 
-\newcommand{\estructuraCapitulo}{
-\section{Propósito del capítulo}
-\pendiente{Explicar qué documenta este capítulo y por qué es importante dentro del informe final.}
+% Tabla estándar de pruebas.
+\newcommand{\testTableTemplate}{
+\begin{longtable}{p{1.8cm} p{3.5cm} p{3cm} p{4cm} p{2.5cm}}
+\caption{Matriz de pruebas del capítulo.}\\
+\toprule
+\textbf{ID} & \textbf{Prueba} & \textbf{Módulo} & \textbf{Resultado esperado} & \textbf{Estado} \\
+\midrule
+\endfirsthead
 
-\section{Contexto dentro del sistema general}
-\pendiente{Explicar cómo se conecta este tema con el sistema completo. Indicar qué recibe, qué procesa y qué entrega.}
+\toprule
+\textbf{ID} & \textbf{Prueba} & \textbf{Módulo} & \textbf{Resultado esperado} & \textbf{Estado} \\
+\midrule
+\endhead
 
-\section{Desarrollo técnico}
-\pendiente{Desarrollar el contenido técnico principal. Incluir arquitectura, metodología, componentes, parámetros, herramientas o criterios según corresponda.}
+\pendiente{PR-XXX} &
+\pendiente{Nombre de la prueba} &
+\pendiente{Módulo} &
+\pendiente{Resultado esperado} &
+\pendiente{Pendiente/Aprobada/Fallida} \\
 
-\section{Entradas, salidas e interfaces}
-\pendiente{Describir entradas, salidas, formatos de datos, interfaces, dependencias y comunicación con otros módulos.}
+\bottomrule
+\end{longtable}
+}
 
-\section{Decisiones de diseño o implementación}
-\pendiente{Explicar qué decisiones se tomaron, qué alternativas se consideraron y por qué se eligió la solución adoptada.}
+% Tabla estándar de transferencia de conocimiento.
+\newcommand{\knowledgeTransferTableTemplate}{
+\begin{longtable}{p{4cm} p{5cm} p{5cm}}
+\caption{Aprendizajes y conocimiento transferible.}\\
+\toprule
+\textbf{Tema} & \textbf{Aprendizaje obtenido} & \textbf{Recurso o evidencia asociada} \\
+\midrule
+\endfirsthead
 
-\section{Problemas presentados y ajustes realizados}
-\pendiente{Documentar problemas encontrados durante el desarrollo, integración o pruebas. Explicar cómo se decidió el ajuste requerido.}
+\toprule
+\textbf{Tema} & \textbf{Aprendizaje obtenido} & \textbf{Recurso o evidencia asociada} \\
+\midrule
+\endhead
 
-\tablaProblemas
+\pendiente{Tema} &
+\pendiente{Aprendizaje práctico} &
+\pendiente{Figura, prueba, repositorio, tabla o evidencia} \\
 
-\section{Validación, pruebas o evidencias}
-\pendiente{Indicar cómo se verificó el funcionamiento. Incluir pruebas, resultados, gráficas, logs, capturas o criterios de aceptación.}
-
-\section{Aprendizajes y transferencia de conocimiento}
-\pendiente{Explicar qué aprendizajes técnicos o prácticos deja este capítulo. Incluir recomendaciones para nuevos integrantes o futuros desarrollos.}
-
-\section{Limitaciones}
-\pendiente{Describir restricciones, problemas no resueltos, condiciones de operación y alcance real de esta parte del sistema.}
-
-\section{Recomendaciones específicas}
-\pendiente{Indicar mejoras futuras, ajustes sugeridos o aspectos que deben revisarse posteriormente.}
+\bottomrule
+\end{longtable}
 }
 
 % =========================================================
@@ -150,643 +188,55 @@ Función dentro del sistema & #4 \\
 \chapter*{Nota para los autores}
 \addcontentsline{toc}{chapter}{Nota para los autores}
 
-Este documento corresponde al \textbf{informe final del sistema}. Su propósito es consolidar de forma organizada los aportes técnicos de los diferentes participantes.
+Este documento corresponde al \textbf{informe final del sistema}. El archivo \texttt{main.tex} es el archivo maestro y debe ser modificado únicamente por el integrador del documento.
 
-Cada capítulo debe documentar no solo el resultado final, sino también:
+Cada autor debe trabajar únicamente en el archivo correspondiente a su capítulo dentro de la carpeta \texttt{section/}. La estructura, reglas de escritura y criterios de calidad se encuentran en el archivo \texttt{README.md}.
+
+Cada capítulo técnico debe documentar:
 
 \begin{itemize}
-    \item El propósito del componente o tema.
-    \item Su relación con el sistema general.
-    \item Las decisiones técnicas tomadas.
-    \item Los problemas encontrados.
-    \item Los ajustes realizados.
-    \item Los criterios usados para decidir dichos ajustes.
-    \item Las pruebas o evidencias disponibles.
-    \item Los aprendizajes derivados de la práctica.
-    \item Los enlaces reales a repositorios de software, cuando aplique.
+    \item Propósito del capítulo.
+    \item Contexto dentro del sistema general.
+    \item Desarrollo técnico.
+    \item Entradas, salidas e interfaces.
+    \item Decisiones de diseño o implementación.
+    \item Problemas presentados y ajustes realizados.
+    \item Validación, pruebas o evidencias.
+    \item Aprendizajes y transferencia de conocimiento.
+    \item Limitaciones.
+    \item Recomendaciones específicas.
 \end{itemize}
 
-Si se menciona software, no se debe incluir el código fuente completo en este informe. En su lugar, se debe describir su función, entradas, salidas, integración y agregar el enlace al repositorio real correspondiente.
+Si se menciona software, el código fuente completo no debe incluirse en este informe. Debe explicarse la función del software y enlazarse el repositorio real correspondiente. Si el repositorio no existe todavía, debe escribirse explícitamente: \textit{Repositorio pendiente de publicación}.
 
-Cuando no exista un repositorio publicado, se debe escribir explícitamente: \textit{Repositorio pendiente de publicación}. No se deben inventar enlaces.
-
-% =========================================================
-% CAPÍTULO 1
-% =========================================================
-\chapter{Introducción general}
-
-\section{Contexto del sistema}
-\pendiente{Describir el contexto general del sistema, su motivación y la necesidad técnica que atiende.}
-
-\section{Propósito del informe final}
-\pendiente{Explicar que el informe consolida la documentación técnica, decisiones, problemas, ajustes, pruebas y aprendizajes del sistema.}
-
-\section{Alcance del informe}
-\pendiente{Indicar qué módulos, procesos y componentes cubre el informe.}
-
-\section{Organización del documento}
-\pendiente{Describir brevemente el contenido de cada capítulo.}
+Antes de la versión final no debe quedar ninguna marca \verb|\pendiente{}| en el documento.
 
 % =========================================================
-% CAPÍTULO 2
+% CAPÍTULOS PRINCIPALES
 % =========================================================
-\chapter{Análisis de requerimientos, restricciones y uso}
 
-\section{Propósito del capítulo}
-Este capítulo debe documentar qué debe hacer el sistema, quién lo usará, bajo qué condiciones operará y cuáles son sus restricciones principales.
-
-\section{Usuarios o actores principales}
-\pendiente{Describir los usuarios o actores que interactúan con el sistema.}
-
-\section{Casos de uso}
-\pendiente{Describir los principales escenarios de uso.}
-
-\section{Requerimientos funcionales}
-
-\begin{longtable}{p{2cm} p{8cm} p{3cm}}
-\caption{Requerimientos funcionales del sistema.}\\
-\toprule
-\textbf{ID} & \textbf{Descripción} & \textbf{Prioridad} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{ID} & \textbf{Descripción} & \textbf{Prioridad} \\
-\midrule
-\endhead
-RF-001 & \pendiente{Describir requerimiento funcional} & Alta / Media / Baja \\
-\bottomrule
-\end{longtable}
-
-\section{Requerimientos no funcionales}
-
-\begin{longtable}{p{2cm} p{8cm} p{3cm}}
-\caption{Requerimientos no funcionales del sistema.}\\
-\toprule
-\textbf{ID} & \textbf{Descripción} & \textbf{Criterio de evaluación} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{ID} & \textbf{Descripción} & \textbf{Criterio de evaluación} \\
-\midrule
-\endhead
-RNF-001 & \pendiente{Describir requerimiento no funcional} & \pendiente{Criterio} \\
-\bottomrule
-\end{longtable}
-
-\section{Restricciones técnicas, operativas y económicas}
-\pendiente{Documentar restricciones de hardware, software, conectividad, procesamiento, presupuesto, despliegue u operación.}
-
-\section{Supuestos del proyecto}
-\pendiente{Indicar condiciones que se asumen válidas para el diseño y operación del sistema.}
-
-\section{Criterios de aceptación}
-\pendiente{Indicar cómo se determinará si el sistema cumple con los requerimientos definidos.}
-
-\section{Problemas presentados y ajustes realizados}
-\pendiente{Documentar problemas encontrados durante el levantamiento o ajuste de requerimientos.}
-
-\tablaProblemas
-
-\section{Aprendizajes y transferencia de conocimiento}
-\pendiente{Explicar qué se aprendió sobre definición de requerimientos, restricciones reales y uso esperado del sistema.}
-
-% =========================================================
-% CAPÍTULO 3
-% =========================================================
-\chapter{Diseño general del sistema}
-
-\section{Propósito del capítulo}
-Este capítulo debe describir la arquitectura general del sistema y la relación entre sus módulos principales.
-
-\section{Arquitectura general}
-\pendiente{Describir la arquitectura completa del sistema.}
-
-\section{Diagrama de bloques}
-\pendiente{Incluir diagrama de bloques del sistema.}
-
-\section{Flujo de datos extremo a extremo}
-\pendiente{Explicar el recorrido de los datos desde la adquisición hasta la visualización o análisis final.}
-
-\section{Separación entre borde y nube}
-\pendiente{Indicar qué funciones se ejecutan en el borde y cuáles en la nube.}
-
-\section{Interfaces entre módulos}
-\pendiente{Describir mecanismos de comunicación, formatos de intercambio, APIs o dependencias.}
-
-\section{Decisiones de diseño}
-\pendiente{Explicar las decisiones arquitectónicas tomadas y su justificación.}
-
-\section{Problemas presentados y ajustes realizados}
-\pendiente{Documentar problemas encontrados en el diseño, integración o separación de responsabilidades entre módulos.}
-
-\tablaProblemas
-
-\section{Aprendizajes y transferencia de conocimiento}
-\pendiente{Explicar aprendizajes sobre diseño modular, integración borde-nube y arquitectura del sistema.}
-
-\section{Limitaciones del diseño}
-\pendiente{Describir limitaciones actuales de la arquitectura.}
-
-% =========================================================
-% CAPÍTULO 4
-% =========================================================
-\chapter{Hardware}
-
-\section{Propósito del capítulo}
-Este capítulo documenta los componentes físicos del sistema, su función, conexión, restricciones y recomendaciones de operación.
-
-\section{Lista de componentes}
-
-\begin{longtable}{p{3cm} p{4cm} p{4cm} p{3cm}}
-\caption{Componentes de hardware del sistema.}\\
-\toprule
-\textbf{Componente} & \textbf{Función} & \textbf{Parámetros relevantes} & \textbf{Observaciones} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Componente} & \textbf{Función} & \textbf{Parámetros relevantes} & \textbf{Observaciones} \\
-\midrule
-\endhead
-\pendiente{SDR} & \pendiente{Recepción RF} & \pendiente{Frecuencia, sample rate, ancho de banda} & \pendiente{Limitaciones} \\
-\bottomrule
-\end{longtable}
-
-\section{Diagrama de conexión}
-\pendiente{Incluir diagrama físico o lógico de conexión del hardware.}
-
-\section{Alimentación y consumo}
-\pendiente{Describir fuente de alimentación, consumo estimado, limitaciones y riesgos.}
-
-\section{Conectividad}
-\pendiente{Describir Ethernet, WiFi, LTE u otros mecanismos de comunicación.}
-
-\section{Restricciones del hardware}
-\pendiente{Documentar limitaciones de rango dinámico, temperatura, alimentación, conectividad, montaje o disponibilidad.}
-
-\section{Problemas presentados y ajustes realizados}
-\pendiente{Documentar fallas de hardware, problemas de alimentación, conexión, interferencias, saturación u otros eventos.}
-
-\tablaProblemas
-
-\section{Aprendizajes y transferencia de conocimiento}
-\pendiente{Registrar aprendizajes prácticos sobre selección, conexión, alimentación, operación y diagnóstico del hardware.}
-
-\section{Recomendaciones de operación}
-\pendiente{Incluir buenas prácticas para operar o mantener el hardware.}
-
-% =========================================================
-% CAPÍTULO 5
-% =========================================================
-\chapter{SDR: adquisición y preprocesamiento de señales de radio en borde}
-
-\section{Propósito del capítulo}
-Este capítulo documenta el módulo encargado de adquirir señales de radio mediante SDR y realizar preprocesamiento en el borde.
-
-\section{Función del módulo dentro del sistema}
-\pendiente{Explicar qué hace el módulo SDR y cómo se conecta con el hardware y la nube.}
-
-\section{Parámetros de adquisición}
-
-\begin{longtable}{p{4cm} p{4cm} p{3cm} p{4cm}}
-\caption{Parámetros de adquisición SDR.}\\
-\toprule
-\textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor usado} & \textbf{Justificación} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor usado} & \textbf{Justificación} \\
-\midrule
-\endhead
-Frecuencia central & Frecuencia sintonizada por el SDR & \pendiente{MHz} & \pendiente{Justificación} \\
-Sample rate & Tasa de muestreo IQ & \pendiente{MS/s} & \pendiente{Justificación} \\
-Ganancia & Ganancia del receptor & \pendiente{dB} & \pendiente{Justificación} \\
-Número de muestras & Tamaño del bloque adquirido & \pendiente{N} & \pendiente{Justificación} \\
-NFFT & Tamaño de análisis espectral & \pendiente{N} & \pendiente{Justificación} \\
-\bottomrule
-\end{longtable}
-
-\section{Flujo de adquisición}
-\pendiente{Describir la secuencia de adquisición desde la configuración del SDR hasta la generación de datos.}
-
-\section{Preprocesamiento aplicado}
-\pendiente{Explicar filtrado, estimación espectral, promediado, normalización, limpieza o cualquier transformación realizada.}
-
-\section{Formato de salida}
-\pendiente{Describir si se generan datos IQ, PSD, JSON, CSV, paquetes de red u otro formato.}
-
-\section{Comunicación con la nube}
-\pendiente{Explicar cómo se envían los datos al sistema cloud.}
-
-\section{Repositorio del software}
-Usar esta sección únicamente para enlazar el repositorio real del software. No incluir código fuente completo en el informe.
-
-\repositorio
-{Módulo SDR de adquisición y preprocesamiento en borde}
-{https://github.com/organizacion/repositorio-pendiente}
-{\pendiente{Rama, versión o commit}}
-{Adquisición de señales SDR, preprocesamiento inicial y envío de datos hacia la nube.}
-
-\section{Problemas presentados y ajustes realizados}
-\pendiente{Documentar problemas de adquisición, pérdida de muestras, saturación, configuración, drivers, rendimiento o conectividad.}
-
-\tablaProblemas
-
-\section{Validación y evidencias}
-\pendiente{Incluir resultados de pruebas, capturas de PSD, logs o evidencias de adquisición correcta.}
-
-\section{Aprendizajes y transferencia de conocimiento}
-\pendiente{Explicar aprendizajes sobre adquisición SDR, parámetros críticos, errores frecuentes y recomendaciones prácticas.}
-
-% =========================================================
-% CAPÍTULO 6
-% =========================================================
-\chapter{Plataforma web en la nube}
-
-\section{Propósito del capítulo}
-Este capítulo documenta la plataforma web usada para consultar, visualizar o administrar la información del sistema.
-
-\section{Usuarios y roles}
-\pendiente{Describir usuarios, roles y permisos.}
-
-\section{Funcionalidades principales}
-\pendiente{Listar y describir funcionalidades disponibles.}
-
-\section{Arquitectura web}
-\pendiente{Describir frontend, backend, base de datos, APIs y servicios externos.}
-
-\section{Modelo general de datos}
-\pendiente{Describir entidades principales y relaciones.}
-
-\section{Visualizaciones}
-\pendiente{Explicar dashboards, mapas, gráficas, tablas o reportes.}
-
-\section{Despliegue en la nube}
-\pendiente{Indicar plataforma cloud, contenedores, servicios, dominios o mecanismos de despliegue.}
-
-\section{Seguridad y control de acceso}
-\pendiente{Describir autenticación, autorización, roles y restricciones.}
-
-\section{Repositorio del software}
-Usar esta sección únicamente para enlazar el repositorio real del software. No incluir código fuente completo en el informe.
-
-\repositorio
-{Plataforma web en la nube}
-{https://github.com/organizacion/repositorio-pendiente}
-{\pendiente{Rama, versión o commit}}
-{Visualización, consulta y administración de resultados generados por el sistema.}
-
-\section{Problemas presentados y ajustes realizados}
-\pendiente{Documentar problemas de interfaz, API, despliegue, base de datos, latencia, seguridad o integración.}
-
-\tablaProblemas
-
-\section{Aprendizajes y transferencia de conocimiento}
-\pendiente{Explicar aprendizajes sobre desarrollo web, despliegue cloud, visualización de datos e integración con módulos de análisis.}
-
-% =========================================================
-% CAPÍTULO 7
-% =========================================================
-\chapter{Análisis espectral y localización en la nube}
-
-\section{Propósito del capítulo}
-Este capítulo documenta los métodos de análisis espectral y localización ejecutados en la nube.
-
-\section{Datos de entrada}
-\pendiente{Describir datos recibidos desde el borde: IQ, PSD, metadatos, ubicación, fecha, frecuencia, etc.}
-
-\section{Flujo de procesamiento}
-\pendiente{Describir la secuencia de análisis desde la recepción de datos hasta la generación de resultados.}
-
-\section{Análisis espectral}
-\pendiente{Explicar métodos de PSD, Welch, detección, estimación de frecuencia central, ancho de banda o nivel de señal.}
-
-\section{Localización o estimación espacial}
-\pendiente{Describir método de localización usado o propuesto. Indicar supuestos, entradas y limitaciones.}
-
-\section{Parámetros configurables}
-
-\begin{longtable}{p{4cm} p{5cm} p{3cm} p{4cm}}
-\caption{Parámetros del análisis espectral y localización.}\\
-\toprule
-\textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor} & \textbf{Efecto} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Parámetro} & \textbf{Descripción} & \textbf{Valor} & \textbf{Efecto} \\
-\midrule
-\endhead
-\pendiente{Umbral} & \pendiente{Descripción} & \pendiente{Valor} & \pendiente{Efecto en detección} \\
-\bottomrule
-\end{longtable}
-
-\section{Resultados generados}
-
-\begin{longtable}{p{4cm} p{5cm} p{3cm} p{4cm}}
-\caption{Resultados generados por el módulo de análisis.}\\
-\toprule
-\textbf{Resultado} & \textbf{Descripción} & \textbf{Unidad} & \textbf{Uso en la plataforma} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Resultado} & \textbf{Descripción} & \textbf{Unidad} & \textbf{Uso en la plataforma} \\
-\midrule
-\endhead
-Frecuencia central & Frecuencia estimada de una emisión & Hz / MHz & Identificación de eventos \\
-Ancho de banda & Ocupación espectral estimada & Hz / kHz / MHz & Caracterización \\
-Nivel de señal & Magnitud o potencia estimada & dBm / dBFS & Evaluación \\
-Ubicación estimada & Zona o coordenada probable & Coordenadas & Visualización espacial \\
-\bottomrule
-\end{longtable}
-
-\section{Repositorio del software}
-Usar esta sección únicamente para enlazar el repositorio real del software. No incluir código fuente completo en el informe.
-
-\repositorio
-{Módulo de análisis espectral y localización en la nube}
-{https://github.com/organizacion/repositorio-pendiente}
-{\pendiente{Rama, versión o commit}}
-{Procesamiento espectral, detección, estimación de parámetros y localización.}
-
-\section{Problemas presentados y ajustes realizados}
-\pendiente{Documentar problemas de detección, ruido, umbrales, resolución, localización, precisión o desempeño.}
-
-\tablaProblemas
-
-\section{Validación y evidencias}
-\pendiente{Incluir gráficas, tablas de resultados, comparaciones, métricas o evidencias de procesamiento.}
-
-\section{Aprendizajes y transferencia de conocimiento}
-\pendiente{Explicar aprendizajes sobre estimación espectral, interpretación de resultados y limitaciones prácticas.}
-
-% =========================================================
-% CAPÍTULO 8
-% =========================================================
-\chapter{Protocolos de prueba en nube y borde}
-
-\section{Propósito del capítulo}
-Este capítulo define los protocolos usados para verificar el funcionamiento de los módulos de borde, nube e integración.
-
-\section{Alcance de las pruebas}
-\pendiente{Indicar qué módulos, escenarios y funcionalidades se probarán.}
-
-\section{Ambiente de prueba}
-\pendiente{Describir hardware, software, red, condiciones de operación y datos usados.}
-
-\section{Pruebas del módulo de borde}
-\pendiente{Describir pruebas de adquisición, preprocesamiento, almacenamiento temporal, conectividad y envío de datos.}
-
-\section{Pruebas del módulo cloud}
-\pendiente{Describir pruebas de recepción, procesamiento, almacenamiento, análisis y disponibilidad.}
-
-\section{Pruebas de la plataforma web}
-\pendiente{Describir pruebas de visualización, usuarios, roles, consultas, dashboards y reportes.}
-
-\section{Pruebas de integración extremo a extremo}
-\pendiente{Describir pruebas desde adquisición SDR hasta visualización en la plataforma.}
-
-\section{Matriz de pruebas}
-
-\begin{longtable}{p{1.5cm} p{3cm} p{2.5cm} p{4cm} p{3cm}}
-\caption{Matriz de pruebas del sistema.}\\
-\toprule
-\textbf{ID} & \textbf{Nombre} & \textbf{Módulo} & \textbf{Resultado esperado} & \textbf{Estado} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{ID} & \textbf{Nombre} & \textbf{Módulo} & \textbf{Resultado esperado} & \textbf{Estado} \\
-\midrule
-\endhead
-PR-001 & Verificación de adquisición SDR & Borde & Generación correcta de datos & Pendiente / Aprobada / Fallida \\
-\bottomrule
-\end{longtable}
-
-\section{Formato de registro de resultados}
-
-\begin{table}[H]
-\centering
-\caption{Formato sugerido para documentar una prueba.}
-\begin{tabularx}{\textwidth}{>{\bfseries}l X}
-\toprule
-ID de prueba & \pendiente{PR-XXX} \\
-Nombre & \pendiente{Nombre de la prueba} \\
-Módulo & \pendiente{Borde / Cloud / Web / Integración} \\
-Objetivo & \pendiente{Objetivo de la prueba} \\
-Precondiciones & \pendiente{Condiciones iniciales} \\
-Procedimiento & \pendiente{Pasos ejecutados} \\
-Resultado esperado & \pendiente{Resultado esperado} \\
-Resultado obtenido & \pendiente{Resultado observado} \\
-Estado & \pendiente{Aprobada / Fallida / Parcial} \\
-Evidencia & \pendiente{Log, captura, gráfica o archivo} \\
-Observaciones & \pendiente{Comentarios adicionales} \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\section{Problemas presentados y ajustes realizados}
-\pendiente{Documentar problemas encontrados durante pruebas, ajustes aplicados y criterios de decisión.}
-
-\tablaProblemas
-
-\section{Aprendizajes y transferencia de conocimiento}
-\pendiente{Explicar aprendizajes sobre validación, diagnóstico, pruebas repetibles y criterios de aceptación.}
-
-% =========================================================
-% CAPÍTULO 9
-% =========================================================
-\chapter{Integración general del sistema}
-
-\section{Propósito del capítulo}
-Este capítulo explica cómo se integran los módulos del sistema y cuál es el estado general de la integración.
-
-\section{Flujo completo de operación}
-\pendiente{Describir operación completa desde hardware y SDR hasta nube y plataforma web.}
-
-\section{Dependencias entre módulos}
-\pendiente{Describir dependencias técnicas y funcionales.}
-
-\section{Secuencia de ejecución}
-\pendiente{Explicar orden de inicialización, adquisición, procesamiento, envío, análisis y visualización.}
-
-\section{Formatos de intercambio de datos}
-\pendiente{Describir formatos, metadatos, estructuras y convenciones usadas para intercambiar información.}
-
-\section{Estado actual de integración}
-\pendiente{Indicar qué está integrado, qué está parcialmente integrado y qué está pendiente.}
-
-\section{Problemas presentados y ajustes realizados}
-\pendiente{Documentar problemas de integración, incompatibilidades, formatos, comunicación o despliegue.}
-
-\tablaProblemas
-
-\section{Aprendizajes y transferencia de conocimiento}
-\pendiente{Explicar aprendizajes sobre integración de sistemas, coordinación entre equipos y validación extremo a extremo.}
-
-% =========================================================
-% CAPÍTULO 10
-% =========================================================
-\chapter{Aprendizajes derivados de la práctica y transferencia de conocimiento}
-
-\section{Propósito del capítulo}
-Este capítulo consolida los aprendizajes prácticos obtenidos durante el desarrollo del sistema y propone mecanismos de transferencia de conocimiento.
-
-\section{Aprendizajes técnicos principales}
-\pendiente{Resumir aprendizajes de hardware, SDR, borde, cloud, análisis, web e integración.}
-
-\section{Errores frecuentes identificados}
-\pendiente{Listar errores frecuentes y cómo evitarlos.}
-
-\section{Buenas prácticas derivadas}
-\pendiente{Documentar buenas prácticas técnicas y organizativas.}
-
-\section{Conocimiento transferible}
-\pendiente{Indicar qué elementos pueden ser reutilizados por otros equipos o futuros desarrolladores.}
-
-\section{Guías o materiales recomendados}
-\pendiente{Sugerir manuales, diagramas, tutoriales, repositorios, videos internos o sesiones de capacitación que puedan complementar el informe.}
-
-\section{Matriz de transferencia de conocimiento}
-
-\begin{longtable}{p{4cm} p{4cm} p{4cm} p{3cm}}
-\caption{Matriz de transferencia de conocimiento.}\\
-\toprule
-\textbf{Tema} & \textbf{Conocimiento adquirido} & \textbf{Evidencia o recurso} & \textbf{Responsable} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Tema} & \textbf{Conocimiento adquirido} & \textbf{Evidencia o recurso} & \textbf{Responsable} \\
-\midrule
-\endhead
-\pendiente{SDR} & \pendiente{Aprendizaje adquirido} & \pendiente{Repositorio, figura, prueba, documento} & \pendiente{Autor} \\
-\bottomrule
-\end{longtable}
-
-% =========================================================
-% CAPÍTULO 11
-% =========================================================
-\chapter{Conclusiones generales}
-
-\section{Conclusiones técnicas}
-\pendiente{Presentar conclusiones sobre el diseño, implementación, pruebas e integración del sistema.}
-
-\section{Conclusiones sobre problemas y ajustes}
-\pendiente{Resumir los principales problemas encontrados y cómo los ajustes realizados permitieron avanzar.}
-
-\section{Conclusiones sobre transferencia de conocimiento}
-\pendiente{Explicar cómo el informe y la documentación generada facilitan la comprensión y continuidad del sistema.}
-
-% =========================================================
-% CAPÍTULO 12
-% =========================================================
-\chapter{Recomendaciones}
-
-\section{Recomendaciones técnicas}
-\pendiente{Proponer mejoras de hardware, software, arquitectura, análisis, plataforma o pruebas.}
-
-\section{Recomendaciones de documentación}
-\pendiente{Indicar qué documentación debe mantenerse actualizada.}
-
-\section{Recomendaciones para futuros desarrollos}
-\pendiente{Indicar líneas de mejora o continuidad.}
-
-% =========================================================
-% REFERENCIAS
-% =========================================================
-\chapter{Referencias}
-
-\pendiente{Agregar referencias en formato consistente. Se recomienda estilo IEEE.}
-
-Ejemplos de fuentes aceptadas:
-
-\begin{itemize}
-    \item Manuales técnicos.
-    \item Datasheets.
-    \item Documentación oficial.
-    \item Libros.
-    \item Artículos científicos.
-    \item Repositorios de software.
-    \item Documentación de APIs.
-    \item Normas técnicas.
-\end{itemize}
+\inputchapter{section/1_introduction}
+\inputchapter{section/2_requirements-restrictions}
+\inputchapter{section/3_general_design_system}
+\inputchapter{section/4_HW}
+\inputchapter{section/5_SDR-acquisition}
+\inputchapter{section/6_Platform_cloud}
+\inputchapter{section/7_Spectral-localization_cloud}
+\inputchapter{section/8_Test_protocols_edge-cloud}
+\inputchapter{section/9_System_integration}
+\inputchapter{section/10_General_conclusions}
+\inputchapter{section/11_Recommendations}
+\inputchapter{section/12_References}
 
 % =========================================================
 % ANEXOS
 % =========================================================
 \appendix
 
-\chapter{Técnica de desarrollo en grupo usando agentes IA}
-
-\section{Propósito del uso de agentes IA}
-\pendiente{Explicar cómo se usaron herramientas de IA como apoyo en organización, redacción, revisión, programación, documentación o análisis.}
-
-\section{Herramientas utilizadas}
-\pendiente{Listar herramientas usadas y propósito de cada una.}
-
-\section{Roles asignados a los agentes IA}
-\pendiente{Describir si se usaron como revisores, asistentes de redacción, generadores de estructura, verificadores, apoyo en código, etc.}
-
-\section{Flujo de trabajo colaborativo}
-\pendiente{Explicar cómo se combinó el trabajo humano con apoyo de IA.}
-
-\section{Control humano y validación}
-\pendiente{Indicar cómo se revisaron y validaron los contenidos generados o asistidos por IA.}
-
-\section{Riesgos identificados}
-\pendiente{Documentar riesgos como errores, inconsistencias, alucinaciones, referencias inexistentes o código no validado.}
-
-\section{Buenas prácticas}
-\pendiente{Describir prácticas recomendadas para uso responsable de IA en documentación técnica.}
-
-\section{Declaración de responsabilidad}
-El uso de herramientas de inteligencia artificial se considera un apoyo para la organización, redacción, revisión y sistematización de contenidos técnicos. Las decisiones de diseño, validación y selección final de contenidos permanecen bajo responsabilidad de los autores humanos. Todo contenido generado o asistido por IA debe ser revisado, corregido y validado antes de incorporarse al informe final.
-
-\chapter{Enlaces a repositorios de software}
-
-Este anexo debe listar los repositorios reales asociados al sistema. No se debe incluir código fuente completo en el informe.
-
-\begin{longtable}{p{4cm} p{6cm} p{3cm} p{3cm}}
-\caption{Repositorios de software asociados al sistema.}\\
-\toprule
-\textbf{Componente} & \textbf{Repositorio} & \textbf{Versión / rama / commit} & \textbf{Responsable} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Componente} & \textbf{Repositorio} & \textbf{Versión / rama / commit} & \textbf{Responsable} \\
-\midrule
-\endhead
-SDR borde & \url{https://github.com/organizacion/repositorio-pendiente} & \pendiente{Versión} & \pendiente{Autor} \\
-Plataforma web & \url{https://github.com/organizacion/repositorio-pendiente} & \pendiente{Versión} & \pendiente{Autor} \\
-Análisis cloud & \url{https://github.com/organizacion/repositorio-pendiente} & \pendiente{Versión} & \pendiente{Autor} \\
-\bottomrule
-\end{longtable}
-
-\chapter{Evidencias de pruebas}
-
-\pendiente{Agregar capturas, logs, gráficas, tablas de resultados o evidencias relevantes de pruebas.}
-
-\chapter{Diagramas complementarios}
-
-\pendiente{Agregar diagramas adicionales que no sean indispensables en los capítulos principales, pero que ayuden a comprender el sistema.}
-
-\chapter{Glosario técnico}
-
-\begin{longtable}{p{4cm} p{10cm}}
-\caption{Glosario técnico.}\\
-\toprule
-\textbf{Término} & \textbf{Definición} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Término} & \textbf{Definición} \\
-\midrule
-\endhead
-SDR & Radio definida por software. \\
-IQ & Representación en fase y cuadratura de una señal. \\
-PSD & Densidad espectral de potencia. \\
-FFT & Transformada rápida de Fourier. \\
-Borde & Nodo local cercano al hardware de adquisición. \\
-Cloud & Infraestructura en la nube para almacenamiento, procesamiento o visualización. \\
-API & Interfaz de programación de aplicaciones. \\
-\bottomrule
-\end{longtable}
+\inputchapter{section/A_IA-collaboration-technique}
+\inputchapter{section/B_Additional_diagrams}
+\inputchapter{section/C_Relevant_code_fragments}
+\inputchapter{section/D_Manuals_guides}
+\inputchapter{section/E_Test_results}
 
 \end{document}
