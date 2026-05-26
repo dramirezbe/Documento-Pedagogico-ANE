@@ -2,652 +2,485 @@
 
 ## 1. Propósito del repositorio
 
-Este repositorio contiene la estructura base para construir el **informe final del sistema**.  
-El informe consolida los aportes técnicos de diferentes autores sobre los módulos, decisiones, restricciones, pruebas, problemas encontrados, ajustes realizados y aprendizajes derivados del desarrollo del sistema.
+Este repositorio contiene la estructura base para construir el **informe final del sistema** mediante capítulos escritos por diferentes autores.
 
-El documento debe servir como una memoria técnica organizada, clara y útil para:
+El documento final debe funcionar como:
 
-- Documentar el diseño general del sistema.
-- Explicar las decisiones técnicas tomadas.
-- Registrar problemas encontrados y ajustes realizados.
-- Facilitar la transferencia de conocimiento.
-- Permitir que otros comprendan, repliquen, mantengan o continúen el desarrollo.
-- Consolidar el aprendizaje derivado de la práctica.
+- Memoria técnica del sistema.
+- Documento de integración de módulos.
+- Registro de decisiones de diseño.
+- Registro de problemas, ajustes y aprendizajes.
+- Instrumento de transferencia de conocimiento.
+- Base para que otros puedan comprender, mantener, reproducir o continuar el desarrollo.
 
-Este repositorio usa únicamente dos archivos base:
+La escritura del informe se organizará de forma modular:
 
 ```text
-README.md
-main.tex
+main.tex                 Archivo maestro. Solo debe modificarlo el integrador.
+README.md                Guía oficial de escritura, formato y procedimiento.
+section/                 Carpeta con un archivo .tex por capítulo.
+section/img/             Carpeta de imágenes y evidencias gráficas.
 ```
 
-Cada autor debe revisar cuidadosamente este README antes de escribir su sección en `main.tex`.
+Cada autor editará **únicamente el archivo `.tex` de su capítulo asignado**.  
+El archivo `main.tex` se encargará de ensamblar todos los capítulos.
 
 ---
 
-## 2. Regla principal de escritura
+## 2. Regla principal de trabajo
 
-Cada capítulo debe responder cinco preguntas:
+El informe final no debe ser una suma de textos aislados. Cada capítulo debe explicar:
 
-1. ¿Qué función cumple este componente o tema dentro del sistema?
-2. ¿Cómo fue diseñado, implementado o estructurado?
-3. ¿Qué problemas se presentaron durante su desarrollo o integración?
-4. ¿Cómo se decidió qué ajuste, cambio o solución aplicar?
-5. ¿Qué aprendizaje técnico o práctico deja esta parte del sistema?
+1. Qué función cumple el tema dentro del sistema.
+2. Cómo fue diseñado, implementado, estructurado o evaluado.
+3. Qué entradas, salidas, interfaces o dependencias tiene.
+4. Qué decisiones técnicas se tomaron.
+5. Qué problemas se presentaron.
+6. Cómo se decidió qué ajuste o cambio aplicar.
+7. Qué evidencia demuestra el funcionamiento o avance.
+8. Qué aprendizajes prácticos quedan para transferir conocimiento.
+9. Qué limitaciones existen.
+10. Qué recomendaciones se proponen.
 
-El informe no debe limitarse a describir resultados finales.  
-También debe documentar el proceso de decisión, los problemas, los cambios realizados y las razones técnicas detrás de cada ajuste.
-
----
-
-## 3. Estructura general del informe
-
-La estructura base del informe final será:
+La idea central es documentar:
 
 ```text
-1. Introducción general
-2. Análisis de requerimientos, restricciones y uso
-3. Diseño general del sistema
-4. Hardware
-5. SDR: adquisición y preprocesamiento de señales de radio en borde
-6. Plataforma web en la nube
-7. Análisis espectral y localización en la nube
-8. Protocolos de prueba en nube y borde
-9. Integración general del sistema
-10. Aprendizajes derivados de la práctica y transferencia de conocimiento
-11. Conclusiones generales
-12. Recomendaciones
-13. Referencias
-
-Anexos
-A. Técnica de desarrollo en grupo usando agentes IA
-B. Enlaces a repositorios de software
-C. Evidencias de pruebas
-D. Diagramas complementarios
-E. Glosario técnico
+Problema observado → Evidencia → Causa probable → Decisión → Ajuste → Resultado → Aprendizaje
 ```
 
 ---
 
-## 4. Estructura obligatoria para cada capítulo técnico
+## 3. Archivos y responsabilidades
 
-Cada capítulo técnico debe seguir esta estructura interna:
+### 3.1 Archivos que NO deben editar todos los autores
 
-```text
-X.1 Propósito del capítulo
-X.2 Contexto dentro del sistema general
-X.3 Desarrollo técnico
-X.4 Entradas, salidas e interfaces
-X.5 Decisiones de diseño o implementación
-X.6 Problemas presentados y ajustes realizados
-X.7 Validación, pruebas o evidencias
-X.8 Aprendizajes y transferencia de conocimiento
-X.9 Limitaciones
-X.10 Recomendaciones específicas
-```
+| Archivo | Responsable | Uso |
+|---|---|---|
+| `main.tex` | Integrador | Ensambla el informe, define formato y carga capítulos |
+| `README.md` | Integrador | Define reglas de trabajo, escritura y entrega |
 
-Esta estructura debe aplicarse especialmente a los capítulos:
+### 3.2 Archivos que sí edita cada autor
 
-- Análisis de requerimientos, restricciones y uso.
-- Diseño general del sistema.
-- Hardware.
-- SDR: adquisición y preprocesamiento en borde.
-- Plataforma web en la nube.
-- Análisis espectral y localización en la nube.
-- Protocolos de prueba en nube y borde.
-- Integración general del sistema.
-
----
-
-## 5. Apartado obligatorio: problemas presentados y ajustes realizados
-
-Cada capítulo debe incluir un apartado titulado:
-
-```text
-Problemas presentados y ajustes realizados
-```
-
-Este apartado debe documentar:
-
-- Problema identificado.
-- Evidencia del problema.
-- Causa probable.
-- Alternativas consideradas.
-- Criterio usado para tomar la decisión.
-- Ajuste o cambio realizado.
-- Resultado posterior al ajuste.
-- Aprendizaje obtenido.
-
-Formato sugerido:
-
-| Problema | Evidencia | Causa probable | Alternativas consideradas | Decisión tomada | Justificación | Resultado |
-|---|---|---|---|---|---|---|
-| Describir problema | Log, prueba, captura, error | Explicación técnica | Opciones evaluadas | Cambio aplicado | Razón de la decisión | Estado final |
-
-Ejemplo:
-
-| Problema | Evidencia | Causa probable | Alternativas consideradas | Decisión tomada | Justificación | Resultado |
-|---|---|---|---|---|---|---|
-| Pérdida de muestras durante adquisición SDR | Logs de captura incompleta | Bloques de adquisición demasiado grandes | Reducir sample rate, reducir bloque, cambiar buffer | Reducir tamaño de bloque y ajustar buffer | Disminuye carga de memoria sin perder resolución suficiente | Captura estable |
-
----
-
-## 6. Información que debe entregar cada autor
-
-Cada autor debe completar su capítulo con información suficiente para que el informe pueda compilarse de forma completa y coherente.
-
-Cada sección debe incluir, cuando aplique:
-
-### 6.1 Texto técnico
-
-- Descripción clara del tema.
-- Relación con el sistema general.
-- Decisiones tomadas.
-- Restricciones identificadas.
-- Problemas encontrados.
-- Ajustes realizados.
-- Resultados obtenidos.
-- Limitaciones.
-- Recomendaciones.
-
-### 6.2 Tablas
-
-Toda tabla debe tener:
-
-- Número.
-- Título.
-- Descripción.
-- Fuente.
-- Unidades, si aplica.
-- Variables claramente definidas.
+Cada autor edita únicamente el archivo de su capítulo dentro de `section/`.
 
 Ejemplo:
 
 ```text
-Tabla X. Parámetros de adquisición SDR.
-Fuente: elaboración propia.
+section/5_SDR-acquisition.tex
 ```
 
-### 6.3 Figuras y diagramas
+Cada autor debe evitar modificar:
 
-Toda figura debe tener:
-
-- Número.
-- Título.
-- Descripción.
-- Fuente.
-- Explicación dentro del texto.
-
-Ejemplo:
-
-```text
-Figura X. Arquitectura general del sistema.
-Fuente: elaboración propia.
-```
-
-Las figuras no deben aparecer aisladas.  
-Toda figura debe ser mencionada y explicada en el texto.
-
-### 6.4 Gráficas
-
-Toda gráfica debe indicar:
-
-- Variable del eje X.
-- Variable del eje Y.
-- Unidades.
-- Condiciones de la prueba.
-- Fecha o contexto de adquisición, si aplica.
-- Interpretación del resultado.
-
-Ejemplo:
-
-```text
-La Figura X muestra la PSD estimada para una captura en la banda FM. Se observa una emisión dominante alrededor de ___ MHz, con un ancho de banda aproximado de ___ kHz.
-```
-
-### 6.5 Evidencias
-
-Las evidencias pueden incluir:
-
-- Capturas de pantalla.
-- Logs.
-- Resultados de pruebas.
-- Tablas comparativas.
-- Diagramas de flujo.
-- Mediciones.
-- Reportes generados por la plataforma.
-
-Cada evidencia debe explicar:
-
-- Qué muestra.
-- Por qué es relevante.
-- Qué conclusión permite obtener.
-
-### 6.6 Referencias
-
-Toda fuente externa debe estar referenciada.
-
-Pueden citarse:
-
-- Manuales técnicos.
-- Datasheets.
-- Documentación oficial.
-- Artículos científicos.
-- Libros.
-- Repositorios.
-- Normas.
-- Documentación de librerías.
-- Documentación de APIs.
-
-Se recomienda usar estilo IEEE.
+- `main.tex`
+- `README.md`
+- capítulos de otros autores
+- carpetas de imágenes de otros capítulos
 
 ---
 
-## 7. Formación o preparación mínima sugerida para los autores
+## 4. Estructura recomendada del repositorio
 
-Para que el informe quede completo y técnicamente coherente, cada autor debe revisar previamente los conceptos mínimos asociados a su capítulo.
-
-### 7.1 Autor del capítulo de requerimientos, restricciones y uso
-
-Debe conocer o revisar:
-
-- Levantamiento de requerimientos.
-- Requerimientos funcionales y no funcionales.
-- Casos de uso.
-- Restricciones técnicas, económicas y operativas.
-- Criterios de aceptación.
-- Matriz de trazabilidad.
-- Riesgos del sistema.
-
-Debe entregar:
-
-- Tabla de requerimientos funcionales.
-- Tabla de requerimientos no funcionales.
-- Casos de uso principales.
-- Restricciones del sistema.
-- Supuestos.
-- Criterios de aceptación.
-
-### 7.2 Autor del capítulo de diseño general del sistema
-
-Debe conocer o revisar:
-
-- Arquitectura de sistemas.
-- Diseño modular.
-- Arquitecturas borde-nube.
-- Flujo de datos.
-- Interfaces entre módulos.
-- Diagramas de bloques.
-- Diagramas de despliegue.
-- Escalabilidad.
-- Seguridad básica.
-
-Debe entregar:
-
-- Diagrama general del sistema.
-- Diagrama de flujo de datos.
-- Descripción de módulos.
-- Interfaces entre módulos.
-- Justificación de la arquitectura.
-- Problemas de integración previstos o encontrados.
-
-### 7.3 Autor del capítulo de hardware
-
-Debe conocer o revisar:
-
-- Componentes RF básicos.
-- Antenas.
-- SDR.
-- Computadores de borde.
-- Alimentación eléctrica.
-- Consumo de corriente.
-- Conectividad.
-- Limitaciones físicas del montaje.
-- Ruido, saturación y rango dinámico.
-
-Debe entregar:
-
-- Tabla de componentes.
-- Diagrama de conexión.
-- Requisitos de alimentación.
-- Restricciones del hardware.
-- Limitaciones conocidas.
-- Recomendaciones de operación.
-
-### 7.4 Autor del capítulo SDR: adquisición y preprocesamiento en borde
-
-Debe conocer o revisar:
-
-- Señales IQ.
-- Frecuencia central.
-- Tasa de muestreo.
-- Ganancia.
-- FFT.
-- PSD.
-- Welch.
-- Preprocesamiento de señales.
-- Manejo de buffers.
-- Formatos de datos.
-- Envío de datos hacia la nube.
-- Limitaciones del SDR usado.
-
-Debe entregar:
-
-- Flujo de adquisición.
-- Parámetros de configuración.
-- Formato de datos generado.
-- Explicación del preprocesamiento.
-- Evidencias de captura.
-- Problemas encontrados.
-- Ajustes aplicados.
-- Enlace al repositorio real del software.
-
-### 7.5 Autor del capítulo de plataforma web en la nube
-
-Debe conocer o revisar:
-
-- Arquitectura web.
-- Frontend.
-- Backend.
-- APIs.
-- Bases de datos.
-- Usuarios y roles.
-- Seguridad básica.
-- Visualización de datos.
-- Despliegue en cloud.
-- Logs y monitoreo.
-
-Debe entregar:
-
-- Arquitectura de la plataforma.
-- Descripción de funcionalidades.
-- Modelo general de datos.
-- Capturas de la plataforma.
-- Flujo de usuario.
-- Restricciones.
-- Enlace al repositorio real del software.
-
-### 7.6 Autor del capítulo de análisis espectral y localización en la nube
-
-Debe conocer o revisar:
-
-- Procesamiento digital de señales.
-- Estimación espectral.
-- PSD.
-- Periodograma.
-- Welch.
-- Detección de emisiones.
-- Umbrales.
-- Estimación de frecuencia central.
-- Estimación de ancho de banda.
-- Geolocalización o localización, si aplica.
-- Métricas de desempeño.
-- Validación de resultados.
-
-Debe entregar:
-
-- Flujo de procesamiento.
-- Métodos usados.
-- Parámetros configurables.
-- Resultados generados.
-- Gráficas o tablas de validación.
-- Problemas encontrados.
-- Ajustes realizados.
-- Enlace al repositorio real del software.
-
-### 7.7 Autor del capítulo de protocolos de prueba en nube y borde
-
-Debe conocer o revisar:
-
-- Diseño de pruebas.
-- Pruebas unitarias.
-- Pruebas de integración.
-- Pruebas extremo a extremo.
-- Pruebas de hardware.
-- Pruebas de conectividad.
-- Métricas de validación.
-- Criterios de aceptación.
-- Registro de evidencias.
-
-Debe entregar:
-
-- Matriz de pruebas.
-- Protocolos paso a paso.
-- Criterios de aprobación.
-- Evidencias.
-- Resultados obtenidos.
-- Problemas encontrados.
-- Ajustes realizados.
-
-### 7.8 Autor del anexo sobre desarrollo en grupo usando agentes IA
-
-Debe conocer o revisar:
-
-- Uso responsable de herramientas de IA.
-- Ingeniería de prompts.
-- Revisión humana de contenido.
-- Control de calidad.
-- Trazabilidad de decisiones.
-- Riesgos de alucinación.
-- Validación técnica de salidas generadas por IA.
-- Buenas prácticas de documentación asistida por IA.
-
-Debe entregar:
-
-- Descripción del flujo de trabajo con IA.
-- Roles asignados a los agentes.
-- Ejemplos de uso.
-- Beneficios.
-- Riesgos.
-- Mecanismos de validación humana.
-- Buenas prácticas.
+```text
+/
+├── README.md
+├── main.tex
+└── section/
+    ├── 1_introduction.tex
+    ├── 2_requirements-restrictions.tex
+    ├── 3_general_design_system.tex
+    ├── 4_HW.tex
+    ├── 5_SDR-acquisition.tex
+    ├── 6_Platform_cloud.tex
+    ├── 7_Spectral-localization_cloud.tex
+    ├── 8_Test_protocols_edge-cloud.tex
+    ├── 9_System_integration.tex
+    ├── 10_General_conclusions.tex
+    ├── 11_Recommendations.tex
+    ├── 12_References.tex
+    ├── A_IA-collaboration-technique.tex
+    ├── B_Additional_diagrams.tex
+    ├── C_Relevant_code_fragments.tex
+    ├── D_Manuals_guides.tex
+    ├── E_Test_results.tex
+    └── img/
+        ├── cap01_introduction/
+        ├── cap02_requirements/
+        ├── cap03_design/
+        ├── cap04_hw/
+        ├── cap05_sdr/
+        ├── cap06_cloud_platform/
+        ├── cap07_spectral_localization/
+        ├── cap08_tests/
+        ├── cap09_integration/
+        └── annexes/
+```
 
 ---
 
-## 8. Regla sobre software y código
+## 5. Distribución sugerida de capítulos
 
-Si en el informe se menciona software, scripts, notebooks, aplicaciones, APIs, módulos, librerías propias o herramientas desarrolladas por el grupo, **no se debe incluir el código completo dentro del informe final**.
-
-En su lugar, se debe:
-
-1. Explicar qué hace el software.
-2. Explicar sus entradas y salidas.
-3. Explicar cómo se integra al sistema.
-4. Mostrar diagramas, flujos o pseudocódigo conceptual si es necesario.
-5. Incluir el enlace al repositorio real donde está alojado el código.
-6. Indicar versión, rama, commit o release cuando sea posible.
-
-Formato recomendado:
-
-```text
-Nombre del software:
-Repositorio:
-Rama o versión:
-Responsable:
-Función dentro del sistema:
-Entradas:
-Salidas:
-Dependencias principales:
-Estado actual:
-```
-
-Ejemplo:
-
-```text
-Nombre del software: Módulo de adquisición SDR en borde
-Repositorio: https://github.com/organizacion/repositorio-sdr-borde
-Rama o versión: main / v1.0
-Responsable: Nombre del autor
-Función dentro del sistema: adquisición IQ, preprocesamiento y envío de datos
-Entradas: señal RF recibida por SDR, parámetros de adquisición
-Salidas: archivos PSD, metadatos y paquetes enviados a la nube
-Dependencias principales: Python, NumPy, SciPy, librería SDR correspondiente
-Estado actual: funcional / en prueba / pendiente de integración
-```
-
-No incluir bloques largos de código en el informe.  
-Solo se permiten fragmentos muy breves si son necesarios para explicar una configuración o un comando, pero el código fuente completo debe permanecer en el repositorio correspondiente.
+| Archivo | Capítulo | Responsable sugerido |
+|---|---|---|
+| `section/1_introduction.tex` | Introducción general | Integrador |
+| `section/2_requirements-restrictions.tex` | Análisis de requerimientos, restricciones y uso | Autor de requerimientos |
+| `section/3_general_design_system.tex` | Diseño general del sistema | Autor de arquitectura |
+| `section/4_HW.tex` | Hardware | Autor de hardware |
+| `section/5_SDR-acquisition.tex` | SDR: adquisición y preprocesamiento en borde | Autor SDR/borde |
+| `section/6_Platform_cloud.tex` | Plataforma web en la nube | Autor plataforma web |
+| `section/7_Spectral-localization_cloud.tex` | Análisis espectral y localización en la nube | Autor análisis cloud |
+| `section/8_Test_protocols_edge-cloud.tex` | Protocolos de prueba en nube y borde | Autor de pruebas |
+| `section/9_System_integration.tex` | Integración general del sistema | Integrador técnico |
+| `section/10_General_conclusions.tex` | Conclusiones generales | Integrador |
+| `section/11_Recommendations.tex` | Recomendaciones | Integrador |
+| `section/12_References.tex` | Referencias | Integrador con insumos de todos |
+| `section/A_IA-collaboration-technique.tex` | Técnica de desarrollo en grupo usando agentes IA | Autor anexo IA |
+| `section/B_Additional_diagrams.tex` | Diagramas adicionales | Integrador |
+| `section/C_Relevant_code_fragments.tex` | Fragmentos conceptuales o referencias a código | Integrador |
+| `section/D_Manuals_guides.tex` | Manuales o guías de uso | Integrador / autor operativo |
+| `section/E_Test_results.tex` | Resultados de pruebas | Autor de pruebas / integrador |
 
 ---
 
-## 9. Sugerencias para fortalecer la transferencia de conocimiento
+## 6. Estructura obligatoria de cada capítulo técnico
 
-Además de documentar el sistema, se recomienda que cada capítulo incluya elementos que ayuden a otros a aprender desde la experiencia práctica.
+Cada archivo de capítulo debe iniciar con `\chapter{...}` y debe contener, como mínimo, las siguientes secciones:
 
-### 9.1 Lecciones aprendidas
+```latex
+\chapter{Título del capítulo}
 
-Cada capítulo debe incluir una subsección de aprendizaje práctico.
+\section{Propósito del capítulo}
+\section{Contexto dentro del sistema general}
+\section{Desarrollo técnico}
+\section{Entradas, salidas e interfaces}
+\section{Decisiones de diseño o implementación}
+\section{Problemas presentados y ajustes realizados}
+\section{Validación, pruebas o evidencias}
+\section{Aprendizajes y transferencia de conocimiento}
+\section{Limitaciones}
+\section{Recomendaciones específicas}
+```
 
-Debe responder:
+Los capítulos transversales como introducción, conclusiones, recomendaciones y referencias pueden tener una estructura diferente, pero deben conservar coherencia con el informe.
 
-- ¿Qué se aprendió durante el desarrollo?
-- ¿Qué error no era evidente al inicio?
-- ¿Qué decisión fue clave?
-- ¿Qué recomendación se daría a un nuevo integrante?
-- ¿Qué conceptos técnicos se entendieron mejor a partir de la práctica?
+---
 
-### 9.2 Buenas prácticas
+## 7. Plantilla mínima para un capítulo
 
-Cada autor debe documentar buenas prácticas relacionadas con su módulo.
+Cada autor puede usar esta plantilla dentro de su archivo `.tex`:
 
-Ejemplos:
+```latex
+\chapter{Título del capítulo}
 
-- Buenas prácticas de adquisición SDR.
-- Buenas prácticas de despliegue cloud.
-- Buenas prácticas de diseño de pruebas.
-- Buenas prácticas de documentación.
-- Buenas prácticas de integración borde-nube.
-- Buenas prácticas de uso de IA en desarrollo colaborativo.
+\section{Propósito del capítulo}
+Describir qué documenta el capítulo y por qué es importante para el informe final.
 
-### 9.3 Errores frecuentes
+\section{Contexto dentro del sistema general}
+Explicar cómo se conecta este tema con los demás módulos del sistema.
 
-Cada capítulo debe indicar errores frecuentes o fallas comunes.
+\section{Desarrollo técnico}
+Presentar arquitectura, metodología, componentes, parámetros, herramientas, modelos o criterios técnicos.
 
-Ejemplos:
+\section{Entradas, salidas e interfaces}
+Describir qué recibe, qué procesa, qué entrega y con qué otros módulos se comunica.
 
-- SDR no reconocido por el sistema operativo.
-- Saturación por exceso de ganancia.
-- Pérdida de muestras por buffers insuficientes.
-- Latencia elevada por envío excesivo de datos.
-- Gráficas mal interpretadas por falta de unidades.
-- Fallas de comunicación con la nube.
-- Falta de sincronización entre módulos.
+\section{Decisiones de diseño o implementación}
+Explicar decisiones tomadas, alternativas consideradas y justificación de la opción elegida.
 
-### 9.4 Guía de reproducción
+\section{Problemas presentados y ajustes realizados}
+Documentar problemas, evidencias, causas, decisiones, ajustes, resultados y aprendizajes.
 
-Cuando aplique, cada capítulo debe explicar cómo reproducir una prueba o resultado.
+\begin{longtable}{p{2.7cm} p{2.7cm} p{2.7cm} p{3cm} p{3cm}}
+\caption{Problemas presentados, decisiones y ajustes realizados.}\\
+\toprule
+\textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Decisión o ajuste} & \textbf{Resultado} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Decisión o ajuste} & \textbf{Resultado} \\
+\midrule
+\endhead
+Problema identificado & Log, captura, prueba o medición & Causa técnica probable & Cambio aplicado y justificación & Resultado posterior \\
+\bottomrule
+\end{longtable}
+
+\section{Validación, pruebas o evidencias}
+Describir pruebas realizadas, resultados esperados, resultados obtenidos y evidencias.
+
+\section{Aprendizajes y transferencia de conocimiento}
+Registrar aprendizajes prácticos, buenas prácticas y errores frecuentes.
+
+\section{Limitaciones}
+Indicar restricciones, condiciones de operación y problemas no resueltos.
+
+\section{Recomendaciones específicas}
+Proponer mejoras futuras o acciones recomendadas.
+```
+
+---
+
+## 8. Contenido esperado por capítulo
+
+### 8.1 Análisis de requerimientos, restricciones y uso
 
 Debe incluir:
 
-- Condiciones iniciales.
-- Parámetros usados.
-- Datos requeridos.
-- Pasos principales.
-- Resultado esperado.
-- Evidencia esperada.
-- Repositorio asociado.
+- Propósito del sistema.
+- Usuarios o actores principales.
+- Casos de uso.
+- Requerimientos funcionales.
+- Requerimientos no funcionales.
+- Restricciones técnicas, operativas y económicas.
+- Supuestos.
+- Criterios de aceptación.
+- Riesgos.
+- Problemas encontrados al definir requerimientos.
+- Ajustes realizados sobre el alcance.
+- Aprendizajes sobre el uso esperado del sistema.
 
-### 9.5 Glosario técnico
+### 8.2 Diseño general del sistema
 
-Se recomienda alimentar el glosario del informe con términos como:
+Debe incluir:
 
-- SDR.
-- IQ.
-- PSD.
-- FFT.
-- Welch.
+- Arquitectura general.
+- Diagrama de bloques.
+- Flujo de datos extremo a extremo.
+- Separación entre borde y nube.
+- Interfaces entre módulos.
+- Decisiones de diseño.
+- Alternativas consideradas.
+- Riesgos arquitectónicos.
+- Problemas de integración previstos o encontrados.
+- Aprendizajes sobre diseño modular.
+
+### 8.3 Hardware
+
+Debe incluir:
+
+- Lista de componentes.
+- Función de cada componente.
+- Diagrama de conexión.
+- Alimentación y consumo.
+- Conectividad.
+- Restricciones físicas.
+- Limitaciones de hardware.
+- Problemas presentados.
+- Ajustes realizados.
+- Recomendaciones de operación.
+
+### 8.4 SDR: adquisición y preprocesamiento en borde
+
+Debe incluir:
+
+- Función del módulo SDR.
+- Parámetros de adquisición.
 - Frecuencia central.
 - Sample rate.
 - Ganancia.
-- Borde.
-- Cloud.
-- API.
-- Backend.
+- Número de muestras.
+- NFFT, si aplica.
+- Flujo de adquisición.
+- Preprocesamiento aplicado.
+- Formato de salida.
+- Comunicación con la nube.
+- Problemas presentados.
+- Ajustes realizados.
+- Evidencias.
+- Enlace al repositorio real del software.
+
+### 8.5 Plataforma web en la nube
+
+Debe incluir:
+
+- Propósito de la plataforma.
+- Usuarios y roles.
+- Funcionalidades.
+- Arquitectura web.
 - Frontend.
-- Localización.
-- Latencia.
-- Protocolo de prueba.
-- Integración extremo a extremo.
+- Backend.
+- Base de datos.
+- APIs.
+- Visualizaciones.
+- Seguridad y control de acceso.
+- Despliegue cloud.
+- Problemas y ajustes.
+- Enlace al repositorio real del software.
 
-### 9.6 Matriz de trazabilidad
+### 8.6 Análisis espectral y localización en la nube
 
-Se recomienda relacionar:
+Debe incluir:
+
+- Datos de entrada.
+- Flujo de procesamiento.
+- Estimación espectral.
+- PSD, Welch, FFT u otros métodos si aplican.
+- Detección de emisiones o eventos.
+- Estimación de frecuencia central.
+- Estimación de ancho de banda.
+- Localización o estimación espacial.
+- Parámetros configurables.
+- Resultados generados.
+- Validación.
+- Problemas y ajustes.
+- Enlace al repositorio real del software.
+
+### 8.7 Protocolos de prueba en nube y borde
+
+Debe incluir:
+
+- Objetivo de las pruebas.
+- Alcance.
+- Ambiente de prueba.
+- Pruebas del módulo de borde.
+- Pruebas del módulo cloud.
+- Pruebas de la plataforma web.
+- Pruebas de integración extremo a extremo.
+- Métricas.
+- Criterios de aceptación.
+- Evidencias.
+- Problemas encontrados durante pruebas.
+- Ajustes derivados de pruebas.
+
+### 8.8 Integración general del sistema
+
+Debe incluir:
+
+- Flujo completo de operación.
+- Dependencias entre módulos.
+- Secuencia de ejecución.
+- Formatos de intercambio.
+- Estado actual de integración.
+- Problemas de integración.
+- Ajustes realizados.
+- Aprendizajes de coordinación técnica.
+
+### 8.9 Aprendizajes y transferencia de conocimiento
+
+Los aprendizajes deben aparecer en cada capítulo. Además, el integrador puede consolidarlos en un capítulo o anexo.
+
+Deben incluir:
+
+- Errores frecuentes.
+- Buenas prácticas.
+- Conocimiento reutilizable.
+- Recomendaciones para nuevos integrantes.
+- Reproducción de pruebas.
+- Matriz de transferencia de conocimiento.
+
+---
+
+## 9. Figuras, diagramas y gráficas
+
+Todas las figuras deben guardarse en:
 
 ```text
-Requerimiento → Módulo → Implementación → Prueba → Evidencia
+section/img/capXX_nombre/
 ```
 
 Ejemplo:
 
-| Requerimiento | Módulo | Implementación | Prueba | Evidencia |
-|---|---|---|---|---|
-| Capturar señales RF | SDR borde | Módulo de adquisición | PR-001 | Log y PSD generada |
-| Visualizar resultados | Plataforma web | Dashboard | PR-010 | Captura de pantalla |
-
----
-
-## 10. Criterios mínimos de calidad
-
-Antes de entregar una sección, cada autor debe verificar:
-
-- La sección está conectada con el sistema general.
-- Se explica claramente el propósito del módulo o tema.
-- Se describen entradas y salidas.
-- Se justifican las decisiones técnicas.
-- Se documentan problemas y ajustes.
-- Se incluyen evidencias o pruebas.
-- Se mencionan limitaciones.
-- Se registran aprendizajes prácticos.
-- Las tablas tienen título y descripción.
-- Las figuras tienen título, fuente y explicación.
-- Las gráficas tienen ejes, unidades e interpretación.
-- Las referencias están completas.
-- Si se menciona software, se enlaza al repositorio real.
-- No se incluye código fuente completo en el informe.
-
----
-
-## 11. Convenciones de escritura
-
-Usar redacción técnica clara.
-
-Evitar:
-
-- Texto genérico sin conexión con el sistema.
-- Afirmaciones sin evidencia.
-- Figuras sin explicación.
-- Tablas sin unidades.
-- Código largo dentro del informe.
-- Referencias incompletas.
-- Descripciones vagas como “se hicieron pruebas” sin indicar cuáles.
-
-Preferir:
-
-- “Se implementó...”
-- “Se observó...”
-- “El problema identificado fue...”
-- “La decisión se tomó porque...”
-- “La evidencia obtenida fue...”
-- “El ajuste permitió...”
-- “La principal limitación es...”
-- “El aprendizaje derivado fue...”
-
----
-
-## 12. Convenciones sobre repositorios de software
-
-Cuando se mencione un componente de software, usar enlaces reales.
-
-Formato recomendado en el texto:
-
 ```text
-El módulo de adquisición SDR se encuentra disponible en el repositorio:
-https://github.com/organizacion/nombre-repositorio
-
-La versión documentada corresponde a la rama `main`, commit `________`.
+section/img/cap05_sdr/flujo_adquisicion.png
 ```
 
-Si todavía no existe un repositorio real, escribir:
+Para insertar una figura:
+
+```latex
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{section/img/cap05_sdr/flujo_adquisicion.png}
+    \caption{Flujo de adquisición y preprocesamiento SDR en borde. Fuente: elaboración propia.}
+    \label{fig:flujo_adquisicion_sdr}
+\end{figure}
+```
+
+Toda figura debe:
+
+- Tener `\caption{...}`.
+- Tener `\label{...}`.
+- Ser mencionada en el texto.
+- Indicar fuente.
+- Ser explicada.
+
+Ejemplo de referencia en texto:
+
+```latex
+La Figura~\ref{fig:flujo_adquisicion_sdr} muestra el flujo de adquisición desde la configuración del SDR hasta el envío de datos hacia la nube.
+```
+
+---
+
+## 10. Tablas
+
+Las tablas deben estar escritas en LaTeX. No deben insertarse como imágenes.
+
+Ejemplo:
+
+```latex
+\begin{table}[H]
+\centering
+\caption{Parámetros principales de adquisición SDR.}
+\label{tab:parametros_sdr}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X X}
+\toprule
+Parámetro & Valor & Justificación \\
+\midrule
+Frecuencia central & 98 MHz & Banda de prueba inicial. \\
+Sample rate & 2.4 MS/s & Compatible con el receptor usado. \\
+Ganancia & 29.7 dB & Balance entre sensibilidad y saturación. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+```
+
+Toda tabla debe:
+
+- Tener título.
+- Tener `\label{...}`.
+- Tener unidades cuando aplique.
+- Ser mencionada en el texto.
+- Ser editable en LaTeX.
+
+---
+
+## 11. Software y repositorios
+
+Si se menciona software, scripts, notebooks, módulos, APIs, plataformas, librerías propias o herramientas desarrolladas por el grupo, **no se debe incluir código fuente completo dentro del informe final**.
+
+Debe incluirse:
+
+- Nombre del software.
+- Repositorio real.
+- Rama, versión o commit.
+- Responsable.
+- Función dentro del sistema.
+- Entradas.
+- Salidas.
+- Dependencias principales.
+- Estado actual.
+
+Formato recomendado:
+
+```latex
+\begin{table}[H]
+\centering
+\caption{Repositorio asociado al componente de software.}
+\label{tab:repo_nombre}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X}
+\toprule
+Nombre del software & Nombre del módulo \\
+Repositorio & \url{https://github.com/organizacion/repositorio-real} \\
+Rama, versión o commit & main / commit pendiente de especificar \\
+Responsable & Nombre del responsable \\
+Función dentro del sistema & Descripción breve \\
+Entradas & Datos o parámetros de entrada \\
+Salidas & Resultados o datos generados \\
+Estado actual & Funcional / en pruebas / pendiente de integración \\
+\bottomrule
+\end{tabularx}
+\end{table}
+```
+
+Si el repositorio todavía no existe, escribir:
 
 ```text
 Repositorio pendiente de publicación.
@@ -657,32 +490,209 @@ No inventar enlaces.
 
 ---
 
-## 13. Estado sugerido de cada sección
+## 12. Código fuente
 
-Cada capítulo puede tener uno de estos estados:
+Regla general:
 
-| Estado | Descripción |
-|---|---|
-| Pendiente | No se ha iniciado |
-| En desarrollo | El autor está escribiendo |
-| En revisión | Ya fue entregado para revisión |
-| Requiere ajustes | Tiene observaciones pendientes |
-| Aprobado | Está listo para integrarse |
-| Integrado | Ya fue incluido en el informe final |
+> El informe explica el software; el repositorio contiene el código.
+
+No se deben incluir bloques largos de código en el informe.
+
+Se permiten únicamente:
+
+- Comandos muy breves de instalación o ejecución.
+- Pseudocódigo conceptual corto.
+- Fragmentos mínimos necesarios para explicar una configuración.
+
+Todo código fuente completo debe estar en el repositorio real correspondiente.
 
 ---
 
-## 14. Recomendación final para los autores
+## 13. Referencias
 
-Cada autor debe escribir pensando en una persona que no participó directamente en el desarrollo, pero que necesita entender:
+Cada autor debe informar al integrador las fuentes usadas.
 
-- Qué se hizo.
-- Por qué se hizo así.
-- Qué problemas aparecieron.
-- Cómo se corrigieron.
-- Cómo se prueba.
-- Qué aprendió el grupo.
-- Dónde está el software real.
-- Qué queda pendiente.
+Pueden citarse:
 
-El informe final debe funcionar como documento técnico, memoria de decisiones y herramienta de transferencia de conocimiento.
+- Manuales técnicos.
+- Datasheets.
+- Documentación oficial.
+- Libros.
+- Artículos científicos.
+- Normas.
+- Repositorios.
+- Documentación de librerías.
+- Documentación de APIs.
+
+Las referencias se consolidarán en:
+
+```text
+section/12_References.tex
+```
+
+Se recomienda mantener un estilo único, preferiblemente IEEE.
+
+---
+
+## 14. Flujo de trabajo recomendado con GitHub
+
+### Opción recomendada: una rama por autor
+
+Cada autor crea una rama para su capítulo:
+
+```bash
+git checkout -b cap05-sdr-borde
+```
+
+Edita solo su archivo:
+
+```text
+section/5_SDR-acquisition.tex
+```
+
+Agrega imágenes solo en su carpeta:
+
+```text
+section/img/cap05_sdr/
+```
+
+Luego guarda cambios:
+
+```bash
+git add section/5_SDR-acquisition.tex section/img/cap05_sdr/
+git commit -m "Completa capítulo SDR adquisición en borde"
+git push origin cap05-sdr-borde
+```
+
+Después crea un Pull Request hacia `main`.
+
+---
+
+## 15. Flujo alternativo si los autores no usan Git
+
+1. El integrador entrega a cada autor su archivo `.tex`.
+2. El autor edita únicamente ese archivo.
+3. El autor devuelve el archivo y sus imágenes.
+4. El integrador reemplaza el archivo correspondiente en `section/`.
+5. El integrador compila el documento completo.
+
+---
+
+## 16. Cómo compilar
+
+Desde la raíz del repositorio:
+
+```bash
+pdflatex main.tex
+pdflatex main.tex
+```
+
+Se compila dos veces para actualizar:
+
+- tabla de contenido,
+- numeración de figuras,
+- numeración de tablas,
+- referencias cruzadas.
+
+En Overleaf:
+
+1. Subir el repositorio.
+2. Definir `main.tex` como archivo principal.
+3. Compilar.
+4. Corregir errores reportados.
+
+---
+
+## 17. Checklist para cada autor
+
+Antes de entregar, cada autor debe verificar:
+
+```text
+[ ] Leí este README.
+[ ] Edité únicamente mi archivo de capítulo.
+[ ] No modifiqué main.tex.
+[ ] No modifiqué capítulos ajenos.
+[ ] Eliminé los \pendiente{} de mi capítulo.
+[ ] Incluí propósito del capítulo.
+[ ] Expliqué contexto dentro del sistema general.
+[ ] Desarrollé el contenido técnico.
+[ ] Describí entradas, salidas e interfaces.
+[ ] Justifiqué decisiones técnicas.
+[ ] Documenté problemas, evidencias, causas, ajustes y resultados.
+[ ] Incluí pruebas o evidencias.
+[ ] Incluí aprendizajes y transferencia de conocimiento.
+[ ] Incluí limitaciones.
+[ ] Incluí recomendaciones.
+[ ] Las figuras tienen caption, label, fuente y explicación.
+[ ] Las tablas son editables en LaTeX.
+[ ] Las gráficas tienen ejes, unidades e interpretación.
+[ ] No incluí código fuente completo.
+[ ] Si mencioné software, agregué repositorio real o indiqué que está pendiente.
+[ ] Informé las referencias usadas.
+[ ] Mi capítulo compila o fue revisado con el integrador.
+```
+
+---
+
+## 18. Checklist para el integrador
+
+Antes de generar la versión final, el integrador debe verificar:
+
+```text
+[ ] main.tex compila correctamente.
+[ ] Todos los archivos incluidos en main.tex existen.
+[ ] No quedan \pendiente{} sin resolver.
+[ ] Todos los capítulos tienen estructura homogénea.
+[ ] No hay capítulos aislados sin conexión con el sistema.
+[ ] Las figuras existen en las rutas indicadas.
+[ ] Las tablas no se salen de página.
+[ ] Las referencias cruzadas funcionan.
+[ ] No hay código fuente largo dentro del informe.
+[ ] Los repositorios mencionados son reales o dicen “Repositorio pendiente de publicación”.
+[ ] Las referencias están consolidadas.
+[ ] El capítulo de integración conecta todos los módulos.
+[ ] Las conclusiones se derivan del contenido documentado.
+[ ] Las recomendaciones son coherentes con problemas y limitaciones.
+```
+
+---
+
+## 19. Convenciones de redacción
+
+Preferir frases como:
+
+- “El módulo cumple la función de...”
+- “La decisión se tomó debido a...”
+- “La evidencia observada fue...”
+- “El problema identificado corresponde a...”
+- “El ajuste realizado consistió en...”
+- “El resultado posterior fue...”
+- “El aprendizaje derivado de esta prueba fue...”
+
+Evitar:
+
+- “Se hicieron pruebas” sin explicar cuáles.
+- “El sistema funciona” sin evidencia.
+- Figuras sin descripción.
+- Tablas sin unidades.
+- Código largo dentro del informe.
+- Enlaces inventados.
+- Referencias incompletas.
+- Texto genérico sin relación con el sistema.
+
+---
+
+## 20. Criterio final de calidad
+
+Un capítulo está listo para integrarse si una persona externa al desarrollo puede leerlo y entender:
+
+1. Qué componente o tema se está documentando.
+2. Cómo se conecta con el sistema.
+3. Cómo funciona.
+4. Qué decisiones se tomaron.
+5. Qué problemas aparecieron.
+6. Qué ajustes se aplicaron.
+7. Qué evidencia respalda el resultado.
+8. Qué aprendió el equipo.
+9. Dónde consultar el software real.
+10. Qué queda pendiente o puede mejorarse.
