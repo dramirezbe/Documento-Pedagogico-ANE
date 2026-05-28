@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.22)  28 MAY 2026 05:50
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.5.22)  28 MAY 2026 06:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -502,26 +502,26 @@ Package babel Info: 'spanish' activates 'spanish' shorthands.
 )
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 177.
-LaTeX Font Info:    ... okay on input line 177.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 177.
-LaTeX Font Info:    ... okay on input line 177.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 177.
-LaTeX Font Info:    ... okay on input line 177.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 177.
-LaTeX Font Info:    ... okay on input line 177.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 177.
-LaTeX Font Info:    ... okay on input line 177.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 177.
-LaTeX Font Info:    ... okay on input line 177.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 177.
-LaTeX Font Info:    ... okay on input line 177.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 177.
-LaTeX Font Info:    ... okay on input line 177.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 177.
-LaTeX Font Info:    ... okay on input line 177.
-LaTeX Info: Redefining \. on input line 177.
-LaTeX Info: Redefining \% on input line 177.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 178.
+LaTeX Font Info:    ... okay on input line 178.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 178.
+LaTeX Font Info:    ... okay on input line 178.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 178.
+LaTeX Font Info:    ... okay on input line 178.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 178.
+LaTeX Font Info:    ... okay on input line 178.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 178.
+LaTeX Font Info:    ... okay on input line 178.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 178.
+LaTeX Font Info:    ... okay on input line 178.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 178.
+LaTeX Font Info:    ... okay on input line 178.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 178.
+LaTeX Font Info:    ... okay on input line 178.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 178.
+LaTeX Font Info:    ... okay on input line 178.
+LaTeX Info: Redefining \. on input line 178.
+LaTeX Info: Redefining \% on input line 178.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -578,7 +578,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 (D:\wnOs\prgs\developTools\mikTex\tex/latex/00miktex\epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 ))
-Package hyperref Info: Link coloring ON on input line 177.
+Package hyperref Info: Link coloring ON on input line 178.
 
 (main.out) (main.out)
 \@outlinefile=\write3
@@ -586,13 +586,13 @@ Package hyperref Info: Link coloring ON on input line 177.
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 180
+LaTeX Font Info:    Trying to load font information for U+msa on input line 181
 .
 
 (D:\wnOs\prgs\developTools\mikTex\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 180
+LaTeX Font Info:    Trying to load font information for U+msb on input line 181
 .
 
 (D:\wnOs\prgs\developTools\mikTex\tex/latex/amsfonts\umsb.fd
@@ -1223,8 +1223,23 @@ Package pdftex.def Info: section/img/annexes/ai_roles.png  used on input line 9
 0.
 (pdftex.def)             Requested size: 366.24527pt x 290.36829pt.
 [47]) (section/B_Additional_diagrams.tex [48 <./section/img/annexes/ai_roles.pn
-g>]) (section/C_Relevant_code_fragments.tex [49]) (section/D_Manuals_guides.tex
-) (section/E_Test_results.tex [50]) [51] (main.aux
+g>] [49]
+Ap\'{e}ndice B.
+) (section/C_Relevant_code_fragments.tex [50
+
+]
+Ap\'{e}ndice C.
+) (section/D_Manuals_guides.tex [51
+
+]
+Ap\'{e}ndice D.
+) (section/E_Test_results.tex [52
+
+]
+Ap\'{e}ndice E.
+) [53
+
+] (main.aux
 LaTeX Info: Redefining \. on input line 11.
 LaTeX Info: Redefining \% on input line 11.
 )
@@ -1233,12 +1248,12 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: DF696343E0F66328E78839DC3F150C4E;13562.
+(rerunfilecheck)             Checksum: A0B0C440E5C9580A26D67A3F414B3354;13499.
  ) 
 Here is how much of TeX's memory you used:
- 15693 strings out of 467871
+ 15695 strings out of 467871
  251971 string characters out of 5424148
- 700439 words of memory out of 5000000
+ 700459 words of memory out of 5000000
  44089 multiletter control sequences out of 15000+600000
  648449 words of font info for 90 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1264,9 +1279,9 @@ mmi12.pfb><D:/wnOs/prgs/developTools/mikTex/fonts/type1/public/amsfonts/cm/cmr1
 2.pfb><D:/wnOs/prgs/developTools/mikTex/fonts/type1/public/amsfonts/cm/cmsy10.p
 fb><D:/wnOs/prgs/developTools/mikTex/fonts/type1/public/amsfonts/cm/cmsy6.pfb><
 D:/wnOs/prgs/developTools/mikTex/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on main.pdf (52 pages, 939967 bytes).
+Output written on main.pdf (54 pages, 948370 bytes).
 PDF statistics:
- 1423 PDF objects out of 1440 (max. 8388607)
- 222 named destinations out of 1000 (max. 500000)
+ 1446 PDF objects out of 1728 (max. 8388607)
+ 224 named destinations out of 1000 (max. 500000)
  564 words of extra memory for PDF output out of 10000 (max. 10000000)
 

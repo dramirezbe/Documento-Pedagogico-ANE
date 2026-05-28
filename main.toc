@@ -83,7 +83,7 @@
 \contentsline {section}{\numberline {A.6}Validaci\'on y Evidencias}{47}{section.Alph1.6}%
 \contentsline {section}{\numberline {A.7}Aprendizajes y transferencia de conocimiento}{48}{section.Alph1.7}%
 \contentsline {section}{\numberline {A.8}Recomendaciones espec\'ificas}{48}{section.Alph1.8}%
-\contentsline {section}{\numberline {A.9}Diagramas adicionales}{49}{section.Alph1.9}%
-\contentsline {section}{\numberline {A.10}Fragmentos de c\'odigo relevantes}{49}{section.Alph1.10}%
-\contentsline {section}{\numberline {A.11}Manuales o gu\'ias de uso}{50}{section.Alph1.11}%
-\contentsline {section}{\numberline {A.12}Resultados de pruebas}{50}{section.Alph1.12}%
+\contentsline {chapter}{\numberline {B}Diagramas adicionales}{50}{appendix.Alph2}%
+\contentsline {chapter}{\numberline {C}Fragmentos de c\'odigo relevantes}{51}{appendix.Alph3}%
+\contentsline {chapter}{\numberline {D}Manuales o gu\'ias de uso}{52}{appendix.Alph4}%
+\contentsline {chapter}{\numberline {E}Resultados de pruebas}{53}{appendix.Alph5}%
