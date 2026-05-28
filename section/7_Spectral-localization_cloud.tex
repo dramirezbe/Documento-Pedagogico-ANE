@@ -1,291 +1,483 @@
+
 \chapter{An\'alisis espectral y localizaci\'on en la nube}
 
-\section{Prop\'osito del cap\'itulo}
 
-Esta secci\'on documenta el m\'odulo de postprocesamiento espectral desarrollado para analizar, en un entorno centralizado, las capturas generadas por el sistema de monitoreo. El objetivo de este avance es explicar c\'omo el software recibe una traza espectral, organiza la informaci\'on de frecuencia y amplitud, selecciona un modo de operaci\'on y obtiene los primeros par\'ametros t\'ecnicos de las emisiones detectadas.
+\section{\textbf{1. Propósito de la sección}}
 
-En esta etapa se describe el proceso hasta la estimaci\'on de la \textbf{frecuencia central}, el \textbf{ancho de banda}, la \textbf{potencia} y, cuando la captura corresponde a un caso aplicable, \textbf{MER/BER}. La verificaci\'on detallada de cumplimiento contra licencias, el uso formal de DANE/municipio, la localizaci\'on administrativa, las pruebas finales y las recomendaciones quedan como continuaci\'on de esta misma secci\'on.
+Esta sección documenta el módulo de post procesamiento espectral desarrollado para analizar, en un entorno centralizado, las capturas generadas por el sistema de monitoreo. El objetivo de este avance es explicar cómo el software recibe una traza espectral, organiza la información de frecuencia y amplitud, selecciona un modo de operación y obtiene los primeros parámetros técnicos de las emisiones detectadas.
 
-El prop\'osito del m\'odulo no es reemplazar la adquisici\'on SDR realizada en el borde, sino convertir las capturas recibidas en resultados interpretables para la plataforma. Por esta raz\'on, el cap\'itulo se enfoca en la funci\'on del software dentro del flujo general del sistema, en sus entradas y salidas principales, y en las decisiones iniciales usadas para diferenciar ruido, picos solicitados y emisiones candidatas.
+En esta etapa se正式 describe el proceso hasta la estimación de la \textbf{frecuencia central}, el \textbf{ancho de banda}, la \textbf{potencia} y, cuando la captura corresponde a un caso aplicable, \textbf{MER/BER}. La verificación detallada de cumplimiento contra licencias, el uso formal de DANE/municipio, la localización administrativa, las pruebas finales y las recomendaciones quedan como continuación de esta misma sección.
 
-\section{Contexto dentro del sistema general}
+El propósito del módulo no es reemplazar la adquisición SDR realizada en el borde, sino convertir las capturas recibidas en resultados interpretables para la plataforma. Por esta razón, el capítulo se enfoca en la función del software dentro del flujo general del sistema, en sus entradas y salidas principales, y en las decisiones iniciales usadas para diferenciar ruido, picos solicitados y emisiones candidatas.
 
-El sistema completo puede entenderse como una cadena de sensado, transmisi\'on, procesamiento y visualizaci\'on. En el borde, el nodo de monitoreo recibe se\~nales de radiofrecuencia mediante el hardware SDR y genera una captura espectral. Posteriormente, esa captura se env\'ia hacia la plataforma central o se analiza de forma local mediante archivos de entrada. El m\'odulo descrito en esta secci\'on se ubica despu\'es de la adquisici\'on y antes de la presentaci\'on de resultados al usuario.
+\section{\textbf{2. Contexto del módulo dentro del sistema ANE}}
 
-La informaci\'on que llega al m\'odulo corresponde principalmente a una serie de muestras espectrales asociadas a un rango de frecuencias. Con esos datos, el software reconstruye el eje de frecuencia, identifica regiones de inter\'es y entrega resultados estructurados. Estos resultados pueden ser usados por una interfaz web, por un servicio de consulta o por un proceso posterior de validaci\'on.
+El sistema completo puede entenderse como una cadena de sensado, transmisión, procesamiento y visualización. En el borde, el nodo de monitoreo recibe señales de radiofrecuencia mediante el hardware SDR y genera una captura espectral. Posteriormente, esa captura se envía hacia la plataforma central o se analiza de forma local mediante archivos de entrada. El módulo descrito en esta sección se ubica justamente después de la adquisición y antes de la presentación de resultados al usuario.
 
-En este punto del desarrollo, la palabra localizaci\'on se interpreta de forma limitada. El m\'odulo no calcula una posici\'on geogr\'afica exacta de la emisi\'on ni realiza triangulaci\'on con varios nodos. La relaci\'on espacial disponible se maneja a trav\'es de filtros administrativos, como c\'odigo DANE, lista de DANEs o municipio, los cuales permiten contextualizar una medici\'on dentro de una zona de an\'alisis. El desarrollo detallado de esta parte queda para la continuaci\'on de la secci\'on.
+La información que llega al módulo corresponde principalmente a una serie de muestras espectrales asociadas a un rango de frecuencias. Con esos datos, el software reconstruye el eje de frecuencia, identifica regiones de interés y entrega resultados estructurados que pueden ser usados por una interfaz web, por un servicio de consulta o por un proceso posterior de validación.
 
-\section{Arquitectura del m\'odulo de postprocesamiento}
+\textbf{Nota sobre el alcance actual:} En este punto del desarrollo, la palabra localización se interpreta de forma limitada. El módulo no calcula una posición geográfica exacta de la emisión ni realiza triangulación con varios nodos. La relación espacial disponible se maneja a través de filtros administrativos, como código DANE, lista de DANEs o municipio, los cuales permiten contextualizar una medición dentro de una zona de análisis. El desarrollo detallado de esta parte queda para la continuación de la sección.
 
-El desarrollo se organiza como un m\'odulo de Python separado en archivos con responsabilidades espec\'ificas. Esta divisi\'on facilita el mantenimiento, la prueba por componentes y la integraci\'on posterior con una plataforma web o con una API.
+\section{\textbf{3. Arquitectura del módulo de postprocesamiento}}
 
-\begin{table}[H]
-\centering
-\caption{Archivos principales del m\'odulo de postprocesamiento espectral.}
-\begin{tabularx}{\textwidth}{p{4.2cm} X}
+El desarrollo se organiza como un módulo de Python separado en archivos con responsabilidades específicas. Esta división facilita el mantenimiento, la prueba por componentes y la integración posterior con una plataforma web o con una API.
+
+La arquitectura permite ejecutar el mismo procesamiento desde dos frentes: por consola, usando main.py, o como servicio, usando server\_flask.py. En ambos casos, la función central es process\_input, definida en src/processor.py, porque allí se decide el modo de análisis y se construye la respuesta final.
+
+A continuación se detallan los componentes y archivos principales del módulo:
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule
-\textbf{Archivo} & \textbf{Funci\'on dentro del m\'odulo} \\
+Archivo & Función dentro del módulo \
 \midrule
-\path{main.py} & Permite ejecutar el procesamiento desde consola. Lee un archivo JSON o una trama en l\'inea, interpreta argumentos como picos, cumplimiento, DANE, umbral y rutas auxiliares, y entrega una respuesta estructurada. \\
-\path{server_flask.py} & Expone el procesamiento mediante una API basada en Flask. Permite recibir solicitudes HTTP con una captura espectral y par\'ametros de an\'alisis. \\
-\path{src/payload_parser.py} & Convierte el contenido del JSON de entrada en un objeto espectral interno. Valida que existan las muestras y los l\'imites de frecuencia necesarios. \\
-\path{src/spectrum_frame.py} & Define la estructura \texttt{SpectrumFrame}, que contiene amplitudes, frecuencia inicial, frecuencia final, eje de frecuencias y resoluci\'on espectral. \\
-\path{src/processor.py} & Orquesta el flujo principal. Normaliza la entrada, selecciona el modo de operaci\'on, aplica correcci\'on si existe, llama a los algoritmos de detecci\'on y arma la salida final. \\
-\path{src/spectral_analysis.py} & Contiene las funciones de an\'alisis espectral, detecci\'on de picos, segmentaci\'on de emisiones y estimaci\'on de par\'ametros como frecuencia central, ancho de banda, potencia, MER y BER cuando aplica. \\
-\path{src/calibration_io.py} & Contiene utilidades para trabajar con archivos auxiliares, como bases de licencias o informaci\'on de comparaci\'on. En este avance solo se menciona su papel dentro de la arquitectura. \\
-\path{src/power_utils.py} & Contiene funciones asociadas al c\'alculo robusto de potencia. Integra la energ\'ia de la emisi\'on en dominio lineal y evita reportar valores no finitos cuando la captura no permite una estimaci\'on confiable. \\
+main.py & Permite ejecutar el procesamiento desde consola. Lee un archivo JSON o una trama en línea, interpreta argumentos como picos, cumplimiento, DANE, umbral y rutas auxiliares, y entrega una respuesta estructurada. \
+server\_flask.py & Expone el procesamiento mediante una API basada en Flask. Permite recibir solicitudes HTTP con una captura espectral y parámetros de análisis. \
+src/payload\_parser.py & Convierte el contenido del JSON de entrada en un objeto espectral interno. Valida que existan las muestras y los límites de frecuencia necesarios. \
+src/spectrum\_frame.py & Define la estructura SpectrumFrame, que contiene amplitudes, frecuencia inicial, frecuencia final, eje de frecuencias y resolución espectral. \
+src/processor.py & Orquesta el flujo principal. Normaliza la entrada, selecciona el modo de operación, aplica corrección si existe, llama a los algoritmos de detección y arma la salida final. \
+src/spectral\_analysis.py & Contiene las funciones de análisis espectral, detección de picos, segmentación de emisiones y estimación de parámetros como frecuencia central, ancho de banda, potencia, MER y BER cuando aplica. \
+src/calibration\_io.py & Contiene utilidades para trabajar con archivos auxiliares, como bases de licencias o información de comparación. En este avance solo se menciona su papel dentro de la arquitectura. \
+src/power\_utils.py & Contiene funciones asociadas al cálculo robusto de potencia. Integra la energía de la emisión en dominio lineal y evita reportar valores no finitos cuando la captura no permite una estimación confiable. \
 \bottomrule
 \end{tabularx}
-\end{table}
 
-La arquitectura permite ejecutar el mismo procesamiento desde dos frentes: por consola, usando \path{main.py}, o como servicio, usando \path{server_flask.py}. En ambos casos, la funci\'on central es \texttt{process\_input}, definida en \path{src/processor.py}, porque all\'i se decide el modo de an\'alisis y se construye la respuesta final.
+\section{\textbf{4. Flujo general de procesamiento}}
 
-\section{Flujo general de procesamiento}
+El flujo de trabajo inicia con una captura espectral en formato JSON. El sistema espera una lista de valores espectrales y dos frecuencias límite que definan el intervalo analizado. A partir de esa información, se construye una representación interna de la traza y se ejecuta el modo de operación correspondiente.
 
-El flujo de trabajo inicia con una captura espectral en formato JSON. El sistema espera una lista de valores espectrales y dos frecuencias l\'imite que definan el intervalo analizado. A partir de esa informaci\'on, se construye una representaci\'on interna de la traza y se ejecuta el modo de operaci\'on correspondiente.
+De forma resumida, el algoritmo ejecuta los siguientes pasos secuenciales:
 
-De forma resumida, el flujo es el siguiente:
-
-\begin{enumerate}[leftmargin=*]
-    \item Recepci\'on del JSON espectral o de una trama equivalente.
-    \item Lectura de los campos principales de frecuencia y amplitud.
-    \item Construcci\'on del objeto \texttt{SpectrumFrame}.
-    \item Aplicaci\'on opcional de correcci\'on de ganancia, si se entrega un archivo de correcci\'on.
-    \item Selecci\'on del modo de operaci\'on seg\'un los picos recibidos y el valor de cumplimiento.
-    \item C\'alculo del umbral de detecci\'on o uso del umbral configurado por el usuario.
-    \item B\'usqueda de picos o regiones candidatas de emisi\'on.
-    \item Estimaci\'on de la frecuencia central de cada emisi\'on candidata.
-    \item Estimaci\'on del ancho de banda mediante ancho a \(-x\) dB u OBW cuando est\'a disponible.
-    \item Estimaci\'on de potencia integrada de la emisi\'on en la regi\'on medida.
-    \item Estimaci\'on opcional de MER/BER cuando la se\~nal analizada corresponde a un caso TDT compatible.
-    \item Generaci\'on de una salida estructurada con el modo usado y los resultados medidos.
-\end{enumerate}
-
-Este flujo conserva una separaci\'on clara entre los datos de entrada, la representaci\'on interna y los resultados. Esa decisi\'on es importante porque evita que cada parte del sistema tenga que interpretar directamente el JSON original.
-
-\section{Entradas del sistema}
-
-Las entradas principales del m\'odulo son la captura espectral y algunos par\'ametros de control. No todos los campos son obligatorios en todos los modos; algunos se usan solo cuando se quiere hacer an\'alisis por picos o preparar una validaci\'on posterior de cumplimiento.
-
-\begin{table}[H]
-\centering
-\caption{Entradas principales consideradas en este avance del m\'odulo.}
-\begin{tabularx}{\textwidth}{p{3.5cm} p{3cm} X}
-\toprule
-\textbf{Entrada} & \textbf{Tipo esperado} & \textbf{Descripci\'on} \\
-\midrule
-\texttt{Pxx} & Lista num\'erica & Vector de amplitudes o potencias espectrales de la captura. Es la se\~nal base que se analiza. \\
-\texttt{start\_freq\_hz} & Num\'erico & Frecuencia inicial de la captura, expresada en Hz. \\
-\texttt{end\_freq\_hz} & Num\'erico & Frecuencia final de la captura, expresada en Hz. \\
-\texttt{picos} & Lista num\'erica & Frecuencias espec\'ificas solicitadas por el usuario. Si se entregan, el sistema entra al modo de an\'alisis por picos. \\
-\texttt{cumplimiento} & Entero 0/1 & Bandera que indica si se desea ejecutar el modo de cumplimiento cuando no se entregan picos. \\
-\texttt{corr} & Ruta de archivo & Archivo opcional de correcci\'on de ganancia. Permite ajustar la traza antes del an\'alisis. \\
-\texttt{lic} & Ruta de archivo & Archivo opcional de licencias. En este avance solo se registra como dependencia del modo de cumplimiento. \\
-\texttt{dane}, \texttt{danes}, \texttt{municipio} & Texto o lista & Filtros administrativos que permiten contextualizar la captura en una zona de an\'alisis. \\
-\texttt{umbral\_db} & Num\'erico opcional & Umbral en dB sobre el piso de ruido usado para decidir si una regi\'on puede considerarse candidata de emisi\'on. \\
-\texttt{delta\_fc\_khz} & Num\'erico opcional & Tolerancia de frecuencia central, en kHz, usada para comparar o emparejar frecuencias cercanas. \\
-\texttt{delta\_bw\_khz} & Num\'erico opcional & Tolerancia de ancho de banda, en kHz. En este avance se menciona como par\'ametro disponible, pero no se desarrolla la evaluaci\'on normativa completa. \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-El parser de entrada tambi\'en acepta algunos alias de nombres para los campos principales, como \texttt{pxx}, \texttt{PSD}, \texttt{f\_start\_hz} o \texttt{f\_stop\_hz}. Esta flexibilidad permite integrar capturas provenientes de fuentes distintas sin cambiar la estructura general del procesamiento.
-
-\section{Salidas del sistema}
-
-La salida del m\'odulo se entrega como una estructura de datos con informaci\'on general del procesamiento y una lista de resultados. En este avance se documentan las salidas relacionadas con modo, picos, estado de detecci\'on, frecuencia central, ancho de banda, potencia y MER/BER cuando el caso aplica.
-
-
-\begin{longtable}{p{3.5cm} p{3cm} p{7.1cm}}
-\caption{Salidas generales del procesamiento.}\\
-\toprule
-\textbf{Salida} & \textbf{Tipo esperado} & \textbf{Descripci\'on} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Salida} & \textbf{Tipo esperado} & \textbf{Descripci\'on} \\
-\midrule
-\endhead
-\texttt{mode} & Texto & Modo de operaci\'on seleccionado: \texttt{all\_emissions}, \texttt{peaks} o \texttt{compliance}. \\
-\texttt{cumplimiento} & Entero 0/1 & Valor de cumplimiento recibido en la entrada. \\
-\texttt{picos\_count} & Entero & Cantidad de picos entregados por el usuario. \\
-\texttt{picos} & Lista num\'erica & Picos solicitados originalmente, cuando existen. \\
-\texttt{umbral} & Num\'erico & Umbral absoluto usado para apoyar la detecci\'on. \\
-\texttt{num\_emissions} & Entero & Cantidad de emisiones o candidatos encontrados. \\
-\texttt{results} & Lista de objetos & Resultados individuales de cada emisi\'on, pico solicitado o candidato analizado. \\
-\bottomrule
-\end{longtable}
-
-\begin{longtable}{p{3.5cm} p{3cm} p{7.1cm}}
-\caption{Campos principales dentro de cada resultado.}\\
-\toprule
-\textbf{Campo} & \textbf{Tipo esperado} & \textbf{Descripci\'on} \\
-\midrule
-\endfirsthead
-\toprule
-\textbf{Campo} & \textbf{Tipo esperado} & \textbf{Descripci\'on} \\
-\midrule
-\endhead
-\texttt{status} & Texto & Indica si se encontr\'o una emisi\'on o si el punto analizado se consider\'o ruido. \\
-\texttt{reason} & Texto & Explicaci\'on breve cuando no se detecta una emisi\'on v\'alida. \\
-\texttt{requested\_pico} & Num\'erico & Pico solicitado por el usuario en modo de an\'alisis por picos. \\
-\texttt{matched\_peak\_hz} & Num\'erico & Pico detectado m\'as cercano al pico solicitado. \\
-\texttt{delta\_match\_hz} & Num\'erico & Diferencia entre el pico solicitado y el pico detectado asociado. \\
-\texttt{fc\_hz} & Num\'erico & Frecuencia central estimada de la emisi\'on, expresada en Hz. \\
-\texttt{fc\_mhz} & Num\'erico & Frecuencia central estimada de la emisi\'on, expresada en MHz. \\
-\texttt{bw\_hz} & Num\'erico & Ancho de banda reportado para la emisi\'on, expresado en Hz. \\
-\texttt{bw\_khz} & Num\'erico & Ancho de banda reportado para la emisi\'on, expresado en kHz. \\
-\texttt{power\_dbm} & Num\'erico o nulo & Potencia estimada de la emisi\'on. Si el c\'alculo no es finito, no se fuerza un valor artificial. \\
-\texttt{snr\_db} & Num\'erico opcional & Relaci\'on se\~nal a ruido estimada cuando la funci\'on de medici\'on la entrega. \\
-\texttt{mer\_db} & Num\'erico opcional & MER estimado para se\~nales compatibles, especialmente TDT. Solo aparece si el c\'alculo aplica. \\
-\texttt{ber\_est} & Num\'erico opcional & BER estimado para se\~nales compatibles, especialmente TDT. Solo aparece si el c\'alculo aplica. \\
-\bottomrule
-\end{longtable}
-
-
-La estructura de salida permite que otro m\'odulo consuma los resultados sin depender de mensajes impresos en consola. Esto es necesario para integrarlo con una plataforma web, una base de datos o una capa de visualizaci\'on.
-
-\section{Modos de operaci\'on}
-
-El m\'odulo selecciona autom\'aticamente el modo de operaci\'on usando dos elementos de entrada: la lista de picos y la bandera de cumplimiento. La regla implementada es simple: si hay picos, se prioriza el an\'alisis por picos; si no hay picos y cumplimiento vale uno, se activa el modo de cumplimiento; si no hay picos y cumplimiento vale cero, se detectan todas las emisiones candidatas.
-
-\begin{table}[H]
-\centering
-\caption{Modos de operaci\'on del m\'odulo de postprocesamiento.}
-\begin{tabularx}{\textwidth}{p{3.5cm} p{4cm} X}
-\toprule
-\textbf{Modo} & \textbf{Condici\'on de entrada} & \textbf{Uso principal} \\
-\midrule
-\texttt{all\_emissions} & No se entregan picos y \texttt{cumplimiento = 0}. & Detectar autom\'aticamente emisiones candidatas dentro de toda la captura espectral y reportar sus primeros par\'ametros t\'ecnicos. \\
-\texttt{peaks} & Se entrega una lista de picos, sin importar el valor de cumplimiento. & Analizar frecuencias espec\'ificas solicitadas por el usuario y determinar si cerca de ellas existe una emisi\'on o si el punto se comporta como ruido. \\
-\texttt{compliance} & No se entregan picos y \texttt{cumplimiento = 1}. & Preparar el procesamiento para comparar emisiones medidas contra informaci\'on de referencia. En este avance se llega hasta la medici\'on t\'ecnica de la emisi\'on y la estimaci\'on MER/BER si aplica, sin desarrollar todav\'ia el an\'alisis completo de licencias. \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\subsection{Detecci\'on autom\'atica de emisiones}
-
-En el modo \texttt{all\_emissions}, el sistema analiza toda la traza espectral. Primero estima un umbral de detecci\'on a partir del piso de ruido o del valor indicado por el usuario mediante \texttt{umbral\_db}. Despu\'es busca picos o regiones candidatas y, para cada una, mide frecuencia central, ancho de banda y potencia. Si la emisi\'on corresponde a un caso TDT compatible, tambi\'en puede estimar MER y BER.
-
-Este modo es \'util cuando el usuario no sabe previamente en qu\'e frecuencias existen emisiones de inter\'es. La salida principal de esta etapa es una lista de candidatos con su estado y sus par\'ametros espectrales iniciales.
-
-\subsection{An\'alisis por picos solicitados}
-
-En el modo \texttt{peaks}, el usuario entrega una o varias frecuencias de inter\'es. El sistema ubica la frecuencia solicitada dentro del eje de la captura y busca un pico cercano que pueda representar una emisi\'on real. Si encuentra una regi\'on suficientemente consistente, reporta los par\'ametros medidos de la emisi\'on. Si no encuentra evidencia suficiente, el resultado se marca como ruido o como pico no asociado a una emisi\'on clara.
-
-Este modo es conveniente cuando se desea comprobar una frecuencia puntual, por ejemplo una frecuencia observada visualmente en una gr\'afica o una frecuencia que se sospecha activa.
-
-\subsection{Modo de cumplimiento}
-
-En el modo \texttt{compliance}, el sistema queda preparado para relacionar las emisiones detectadas con una base de referencia, normalmente una base de licencias. Para entrar en este modo no deben entregarse picos y la bandera \texttt{cumplimiento} debe estar activa.
-
-En este avance no se desarrolla la comparaci\'on completa de cumplimiento. Solo se documenta que el modo existe dentro del enrutamiento del software y que utiliza la misma base inicial de detecci\'on espectral para obtener los par\'ametros medidos que luego pueden ser comparados con valores nominales.
-
-\section{An\'alisis espectral realizado: frecuencia central, ancho de banda, potencia y MER/BER}
-
-El an\'alisis espectral del m\'odulo se centra en convertir una regi\'on detectada de la traza en par\'ametros t\'ecnicos que puedan ser interpretados por la plataforma. En este avance se documentan cuatro salidas principales: frecuencia central, ancho de banda, potencia y, solo cuando la captura lo permite, MER/BER. Estos valores no se escriben de forma manual, sino que se derivan de la regi\'on espectral detectada por el algoritmo.
-
-\subsection{Frecuencia central}
-
-La frecuencia central representa la frecuencia principal o representativa de una emisi\'on detectada dentro de la captura. En el m\'odulo, esta frecuencia se entrega principalmente en dos unidades: Hz mediante \texttt{fc\_hz} y MHz mediante \texttt{fc\_mhz}.
-
-El proceso inicia con el eje de frecuencias generado por \texttt{SpectrumFrame}. Si la captura contiene \(N\) muestras, el objeto construye un vector de frecuencias entre \texttt{start\_freq\_hz} y \texttt{end\_freq\_hz}. Con ese eje, cada muestra de amplitud queda asociada a una frecuencia espec\'ifica.
-
-Cuando el sistema detecta un pico candidato, se toma una frecuencia inicial de referencia desde el eje de frecuencias. Luego se delimita una regi\'on de an\'alisis alrededor del candidato y se llama a las funciones de medici\'on espectral. El resultado final de esa medici\'on se almacena como frecuencia central de la emisi\'on.
-
-En t\'erminos operativos, la frecuencia central puede provenir de tres situaciones:
-
-\begin{itemize}[leftmargin=*]
-    \item En detecci\'on autom\'atica, se obtiene a partir del pico o segmento candidato encontrado por el algoritmo.
-    \item En an\'alisis por picos, se calcula a partir de la emisi\'on real encontrada cerca de la frecuencia solicitada.
-    \item En modo de cumplimiento, se conserva como frecuencia central medida para que posteriormente pueda compararse con una frecuencia nominal.
+\begin{itemize}
+  \item \textbf{Recepción:} Obtención del JSON espectral o de una trama equivalente.
+  \item \textbf{Lectura:} Extracción de los campos principales de frecuencia y amplitud.
+  \item \textbf{Construcción:} Instanciación interna del objeto SpectrumFrame.
+  \item \textbf{Corrección:} Aplicación opcional de corrección de ganancia mediante archivos auxiliares, si se suministran.
+  \item \textbf{Selección de Modo:} Elección del modo de operación según los picos recibidos y la bandera de cumplimiento.
+  \item \textbf{Umbralización:} Cálculo adaptativo del umbral de detección o uso del umbral fijo configurado por el usuario.
+  \item \textbf{Búsqueda:} Localización de picos o regiones candidatas de emisión.
+  \item \textbf{Estimación de $F_c$:} Cálculo de la frecuencia central de cada emisión candidata.
+  \item \textbf{Estimación de BW:} Estimación del ancho de banda mediante el criterio de $-x$ dB u OBW (cuando está disponible).
+  \item \textbf{Estimación de Potencia:} Integración de la potencia de la emisión en la región medida.
+  \item \textbf{Estimación de Calidad:} Estimación opcional de MER/BER si la señal corresponde a un caso de Televisión Digital Terrestre (TDT) compatible.
+  \item \textbf{Salida:} Generación de una estructura final formateada con el modo empleado y los resultados métricos.
 \end{itemize}
 
-La frecuencia central no debe interpretarse simplemente como el punto m\'as alto de la traza. En algunas capturas, especialmente cuando hay se\~nales anchas o regiones con ruido, el punto de mayor amplitud puede no representar de forma adecuada el centro de la emisi\'on. Por eso el m\'odulo no solo toma un valor visual, sino que usa la regi\'on detectada para estimar una frecuencia m\'as representativa.
+Este flujo conserva una separación clara entre los datos de entrada, la representación interna y los resultados. Esa decisión es importante porque evita que cada componente del sistema tenga que interpretar directamente el JSON original.
 
-\begin{table}[H]
-\centering
-\caption{Campos asociados a la frecuencia central.}
-\begin{tabularx}{\textwidth}{p{3.5cm} p{3cm} X}
+\section{\textbf{5. Entradas del sistema}}
+
+Las entradas principales del módulo son la captura espectral y algunos parámetros de control. No todos los campos son obligatorios en todos los modos; algunos se usan solo cuando se quiere hacer análisis por picos o preparar una validación posterior de cumplimiento.
+
+El parser de entrada también acepta algunos alias de nombres para los campos principales, como pxx, PSD, f\_start\_hz o f\_stop\_hz. Esta flexibilidad permite integrar capturas provenientes de fuentes distintas sin cambiar la estructura general del procesamiento.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule
-\textbf{Campo} & \textbf{Unidad} & \textbf{Interpretaci\'on} \\
+Entrada & Tipo esperado & Descripción \
 \midrule
-\texttt{fc\_hz} & Hz & Frecuencia central estimada en la unidad base usada internamente por el procesamiento. \\
-\texttt{fc\_mhz} & MHz & Versi\'on escalada de \texttt{fc\_hz}, m\'as c\'omoda para reportes y lectura humana. \\
-\texttt{matched\_peak\_hz} & Hz & Frecuencia de pico asociada a una solicitud del usuario en modo \texttt{peaks}. Puede servir como referencia inicial, pero no siempre reemplaza la frecuencia central estimada. \\
-\texttt{delta\_match\_hz} & Hz & Diferencia entre la frecuencia solicitada y el pico asociado. Ayuda a evaluar si el emparejamiento fue cercano. \\
+Pxx & Lista numérica & Vector de amplitudes o potencias espectrales de la captura. Es la señal base que se analiza. \
+start\_freq\_hz & Numérico & Frecuencia inicial de la captura, expresada en Hz. \
+end\_freq\_hz & Numérico & Frecuencia final de la captura, expresada en Hz. \
+picos & Lista numérica & Frecuencias específicas solicitadas por el usuario. Si se entregan, el sistema entra automáticamente al modo de análisis por picos. \
+cumplimiento & Entero (0/1) & Bandera que indica si se desea ejecutar el modo de cumplimiento normativo cuando no se especifican picos. \
+corr & Ruta de archivo & Archivo opcional de corrección de ganancia. Permite ajustar la traza antes del análisis. \
+lic & Ruta de archivo & Archivo opcional de licencias (en este avance solo se registra como dependencia para el modo de cumplimiento). \
+dane, danes, municipio & Texto o lista & Filtros administrativos que permiten contextualizar la captura dentro de una zona geográfica de análisis. \
+umbral\_db & Numérico opcional & Umbral en dB sobre el piso de ruido usado para decidir si una región puede considerarse candidata de emisión. \
+delta\_fc\_khz & Numérico opcional & Tolerancia de frecuencia central, en kHz, usada para comparar o emparejar frecuencias cercanas. \
+delta\_bw\_khz & Numérico opcional & Tolerancia de ancho de banda, en kHz (se menciona como parámetro disponible, pero no se desarrolla la evaluación normativa completa en este avance). \
 \bottomrule
 \end{tabularx}
-\end{table}
 
-\subsection{Ancho de banda}
+\section{\textbf{6. Salidas del sistema}}
 
-El ancho de banda describe la extensi\'on espectral ocupada por una emisi\'on. En el software, este valor se obtiene despu\'es de delimitar la regi\'on asociada al pico o segmento candidato. La funci\'on de medici\'on calcula dos referencias: un ancho a \(-x\) dB respecto al pico y un ancho de banda ocupado u OBW, que representa el intervalo que contiene un porcentaje definido de la potencia de la emisi\'on.
+La salida del módulo se entrega como una estructura de datos limpia con información general del procesamiento y una lista de resultados empacados. En este avance se documentan las salidas relacionadas con el modo, picos, estado de detección, frecuencia central, ancho de banda, potencia y MER/BER cuando el caso aplica.
 
-Para el reporte final, el procesador selecciona el ancho de banda m\'as conveniente mediante una regla conservadora: si existe OBW v\'alido, se prefiere este valor porque suele ser m\'as estable en se\~nales con mesetas, varios picos o modulaciones anchas. Si el OBW no est\'a disponible, el sistema usa el ancho a \(-x\) dB. Esta decisi\'on evita depender de un solo bin o de una lectura visual de la gr\'afica.
+Esta estructura desacoplada permite que otros módulos consuman los resultados sin depender de logs o mensajes impresos en consola, facilitando su integración con una plataforma web, una base de datos o una capa de visualización.
 
-El resultado se reporta como \texttt{bw\_hz} y \texttt{bw\_khz}. El primer campo mantiene la unidad interna del procesamiento y el segundo facilita la lectura del reporte. En modo de cumplimiento, el mismo valor medido se conserva como \texttt{bw\_medido\_kHz}, pero la comparaci\'on normativa completa queda para una etapa posterior de la secci\'on.
+Tabla 6.1: Salidas generales del procesamiento
 
-\begin{table}[H]
-\centering
-\caption{Campos asociados al ancho de banda.}
-\begin{tabularx}{\textwidth}{p{3.8cm} p{3cm} X}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule
-\textbf{Campo} & \textbf{Unidad} & \textbf{Interpretaci\'on} \\
+Salida & Tipo esperado & Descripción \
 \midrule
-\texttt{bandwidth\_xdb\_hz} & Hz & Ancho calculado a \(-x\) dB respecto al pico de la emisi\'on. \\
-\texttt{obw\_hz} & Hz & Ancho de banda ocupado, calculado a partir de la potencia acumulada de la regi\'on. \\
-\texttt{bw\_hz} & Hz & Ancho de banda seleccionado para reportar la emisi\'on. \\
-\texttt{bw\_khz} & kHz & Versi\'on del ancho de banda reportado en una unidad m\'as c\'omoda para lectura humana. \\
-\texttt{bw\_medido\_kHz} & kHz & Nombre usado en modo de cumplimiento para conservar el ancho de banda medido. \\
+mode & Texto & Modo de operación seleccionado: all\_emissions, peaks o compliance. \
+cumplimiento & Entero (0/1) & Valor de la bandera de cumplimiento recibido en la entrada. \
+picos\_count & Entero & Cantidad de picos específicos entregados por el usuario. \
+picos & Lista numérica & Copia de los picos solicitados originalmente, si existen. \
+umbral & Numérico & Umbral absoluto calculado o configurado que sirvió de apoyo para la detección. \
+num\_emissions & Entero & Cantidad total de emisiones o candidatos válidos encontrados. \
+results & Lista de objetos & Lista con los resultados individuales de cada emisión, pico solicitado o candidato analizado. \
 \bottomrule
 \end{tabularx}
-\end{table}
 
-\subsection{Potencia de la emisi\'on}
+Tabla 6.2: Campos principales dentro de cada resultado (results)
 
-La potencia se estima a partir de la regi\'on espectral asociada a la emisi\'on. Para evitar errores de interpretaci\'on, el c\'alculo no se realiza directamente en dBm como si fuera una suma lineal. El procedimiento convierte las muestras al dominio lineal, integra o suma la contribuci\'on de los bins dentro de la regi\'on seleccionada y finalmente devuelve el resultado en dBm.
-
-El m\'odulo usa funciones de apoyo para hacer el c\'alculo m\'as robusto. Por ejemplo, la funci\'on de potencia robusta permite integrar usando el ancho de bin del \texttt{SpectrumFrame} o una estimaci\'on basada en el eje de frecuencias. Si la captura no permite calcular una potencia finita, el procesador evita reportar \texttt{-inf}, \texttt{NaN} o valores artificiales, y conserva el resultado como nulo. Esto es importante porque una potencia no finita no debe interpretarse como una medici\'on real.
-
-En los modos \texttt{all\_emissions} y \texttt{peaks}, la salida principal se reporta como \texttt{power\_dbm}. En modo de cumplimiento, la misma magnitud se puede conservar como \texttt{p\_medida\_dBm}. En este avance se documenta la medici\'on de potencia, pero no se desarrolla todav\'ia la evaluaci\'on frente a potencia nominal de una licencia.
-
-\begin{table}[H]
-\centering
-\caption{Campos asociados a potencia.}
-\begin{tabularx}{\textwidth}{p{3.8cm} p{3cm} X}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule
-\textbf{Campo} & \textbf{Unidad} & \textbf{Interpretaci\'on} \\
+Campo & Tipo esperado & Descripción \
 \midrule
-\texttt{power\_dbm} & dBm & Potencia estimada de la emisi\'on en los modos de detecci\'on general y an\'alisis por picos. \\
-\texttt{p\_medida\_dBm} & dBm & Nombre usado en modo de cumplimiento para conservar la potencia medida. \\
-\texttt{channel\_power\_dbm} & dBm & Potencia de canal calculada durante la medici\'on de par\'ametros de la emisi\'on. \\
-\texttt{snr\_db} & dB & Relaci\'on se\~nal a ruido estimada cuando la funci\'on de an\'alisis la entrega. \\
+status & Texto & Indica si se encontró una emisión real o si el punto analizado se consideró ruido de fondo. \
+reason & Texto & Explicación breve cuando no se logra detectar una emisión válida en la región. \
+requested\_pico & Numérico & Pico exacto solicitado por el usuario (aplica solo para el modo de análisis por picos). \
+matched\_peak\_hz & Numérico & Frecuencia del pico real detectado más cercano al punto solicitado. \
+delta\_match\_hz & Numérico & Diferencia en Hz entre el pico solicitado y el pico detectado asociado. \
+fc\_hz & Numérico & Frecuencia central estimada de la emisión, expresada en Hz. \
+fc\_mhz & Numérico & Frecuencia central estimada de la emisión, expresada en MHz. \
+bw\_hz & Numérico & Ancho de banda reportado para la emisión, expresado en Hz. \
+bw\_khz & Numérico & Ancho de banda reportado para la emisión, expresado en kHz. \
+power\_dbm & Numérico o nulo & Potencia estimada de la emisión. Si el cálculo matemático no es finito, se conserva como nulo para no forzar valores artificiales. \
+snr\_db & Numérico opcional & Relación señal a ruido (SNR) estimada cuando la función interna la provee. \
+mer\_db & Numérico opcional & MER estimado para señales compatibles, especialmente TDT. Solo aparece si aplica. \
+ber\_est & Numérico opcional & BER estimado para señales compatibles, especialmente TDT. Solo aparece si aplica. \
 \bottomrule
 \end{tabularx}
-\end{table}
 
-\subsection{MER y BER cuando aplica}
+\section{\textbf{7. Modos de operación}}
 
-El m\'odulo tambi\'en incluye una estimaci\'on opcional de MER y BER para se\~nales compatibles con el caso TDT. Este c\'alculo no se aplica a todas las emisiones detectadas. La funci\'on primero verifica si la frecuencia central de la regi\'on cae dentro del rango TDT definido en el c\'odigo y si el ancho de la banda es plausible para ese tipo de se\~nal. Si esas condiciones no se cumplen, la funci\'on retorna un resultado vac\'io y el reporte no incluye campos de MER/BER.
+El módulo selecciona automáticamente el modo de operación usando dos elementos de entrada: la lista de picos y la bandera de cumplimiento. La regla implementada en el enrutador es simple:
 
-Cuando el caso s\'i aplica, el sistema toma la banda medida como regi\'on de se\~nal y usa regiones laterales o informaci\'on fuera de banda como referencia de ruido. Con esa relaci\'on se estima una magnitud de calidad equivalente a MER en dB y luego se calcula un BER estimado para una modulaci\'on M-QAM, usando \(M=64\) en el flujo implementado para TDT.
+1. Si hay picos en la lista, se prioriza el \textbf{Análisis por picos}.  
+2. Si no hay picos y cumplimiento \= 1, se activa el modo de \textbf{Cumplimiento contra licencias}.  
+3. Si no hay picos y cumplimiento \= 0, se activa la \textbf{Detección automática} de emisiones.
 
-Estos valores deben interpretarse como estimaciones de calidad obtenidas desde la traza espectral disponible, no como una demodulaci\'on completa de la se\~nal. Por lo tanto, son \'utiles para orientar el diagn\'ostico de una captura TDT, pero deben validarse con mediciones especializadas si se requiere una certificaci\'on formal.
-
-\begin{table}[H]
-\centering
-\caption{Campos asociados a MER/BER cuando la estimaci\'on aplica.}
-\begin{tabularx}{\textwidth}{p{3.8cm} p{3cm} X}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule
-\textbf{Campo} & \textbf{Unidad} & \textbf{Interpretaci\'on} \\
+Modo & Condición de entrada & Uso principal \
 \midrule
-\texttt{mer\_db} & dB & MER estimado de la se\~nal compatible. Se reporta solo si la funci\'on encuentra condiciones v\'alidas para el c\'alculo. \\
-\texttt{ber\_est} & Adimensional & BER estimado a partir de la relaci\'on de calidad calculada para la se\~nal. \\
-\texttt{f\_center\_hz} & Hz & Frecuencia central de la banda usada internamente para el c\'alculo de MER/BER. \\
-\texttt{band\_start\_hz} & Hz & L\'imite inferior de la banda evaluada. \\
-\texttt{band\_stop\_hz} & Hz & L\'imite superior de la banda evaluada. \\
+all\_emissions & Lista de picos vacía y cumplimiento \= 0. & Detectar automáticamente emisiones candidatas dentro de toda la captura espectral y reportar sus primeros parámetros técnicos. \
+peaks & Se entrega una lista con picos, sin importar el valor de cumplimiento. & Analizar frecuencias específicas solicitadas por el usuario y determinar si cerca de ellas existe una emisión o si el punto se comporta como ruido. \
+compliance & Lista de picos vacía y cumplimiento \= 1. & Preparar el procesamiento para comparar emisiones medidas contra información de referencia. En este avance se llega hasta la medición técnica de la emisión y la estimación MER/BER si aplica, sin desarrollar todavía el análisis completo de licencias. \
 \bottomrule
 \end{tabularx}
-\end{table}
+
+\subsection{\textbf{Detección automática}}
+
+En el modo all\_emissions, el sistema analiza toda la traza espectral. Primero estima un umbral de detección a partir del piso de ruido o del valor indicado por el usuario mediante umbral\_db. Después busca picos o regiones candidatas y, para cada una, mide frecuencia central, ancho de banda y potencia. Si la emisión corresponde a un caso TDT compatible, también puede estimar MER y BER. Este modo es útil cuando el usuario no sabe previamente en qué frecuencias existen emisiones de interés. La salida principal de esta etapa es una lista de candidatos con su estado y sus parámetros espectrales iniciales.
+
+\subsection{\textbf{Análisis por picos}}
+
+En el modo peaks, el usuario entrega una o varias frecuencias de interés. El sistema ubica la frecuencia solicitada dentro del eje de la captura y busca un pico cercano que pueda representar una emisión real. Si encuentra una región suficientemente consistente, reporta los parámetros medidos de la emisión. Si no encuentra evidencia suficiente, el resultado se marca como ruido o como pico no asociado a una emisión clara. Este modo es conveniente cuando se desea comprobar una frecuencia puntual, por ejemplo una frecuencia observada visualmente en una gráfica o una frecuencia que se sospecha activa.
+
+\subsection{\textbf{Cumplimiento contra licencias}}
+
+En el modo compliance, el sistema queda preparado para relacionar las emisiones detectadas con una base de referencia, normalmente una base de licencias. Para entrar en este modo no deben entregarse picos y la bandera cumplimiento debe estar activa. En este avance no se desarrolla la comparación completa de cumplimiento. Solo se documenta que el modo existe dentro del enrutamiento del software y que utiliza la misma base inicial de detección espectral para obtener los parámetros medidos que luego pueden ser comparados con valores nominales.
+
+\section{\textbf{8. Análisis espectral realizado}}
+
+El análisis espectral del módulo se centra en convertir una región detectada de la traza en parámetros técnicos que puedan ser interpretados por la plataforma. En este avance se documentan cuatro salidas principales: frecuencia central, ancho de banda, potencia y, solo cuando la captura lo permite, MER/BER. Estos valores no se escriben de forma manual, sino que se derivan de la región espectral detectada por el algoritmo.
+
+\subsection{\textbf{Frecuencia central}}
+
+La frecuencia central representa la frecuencia principal o representativa de una emisión detectada dentro de la captura. En el módulo, esta frecuencia se entrega principalmente en dos unidades: Hz mediante fc\_hz y MHz mediante fc\_mhz. El proceso inicia con el eje de frecuencias generado por SpectrumFrame. Si la captura contiene $N$ muestras, el objeto construye un vector de frecuencias entre start\_freq\_hz y end\_freq\_hz. Con ese eje, cada muestra de amplitud queda asociada a una frecuencia específica.
+
+Cuando el sistema detecta un pico candidato, se toma una frecuencia inicial de referencia desde el eje de frecuencias. Luego se delimita una región de análisis alrededor del candidato y se llama a las funciones de medición espectral. El resultado final de esa medición se almacena como frecuencia central de la emisión.
+
+En términos operativos, la frecuencia central puede provenir de tres situaciones:
+
+\begin{itemize}
+  \item En detección automática, se obtiene a partir del pico o segmento candidato encontrado por el algoritmo.
+  \item En análisis por picos, se calcula a partir de la emisión real encontrada cerca de la frecuencia solicitada.
+  \item En modo de cumplimiento, se conserva como frecuencia central medida para que posteriormente pueda compararse con una frecuencia nominal.
+\end{itemize}
+
+La frecuencia central no debe interpretarse simplemente como el punto más alto de la traza. En algunas capturas, especialmente cuando hay señales anchas o regiones con ruido, el punto de mayor amplitud puede no representar de forma adecuada el centro de la emisión. Por eso el módulo no solo toma un valor visual, sino que usa la región detectada para estimar una frecuencia más representativa.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule
+Campo & Unidad & Interpretación \
+\midrule
+fc\_hz & Hz & Frecuencia central estimada en la unidad base usada internamente por el procesamiento. \
+fc\_mhz & MHz & Versión escalada de fc\_hz, más cómoda para reportes y lectura humana. \
+matched\_peak\_hz & Hz & Frecuencia de pico asociada a una solicitud del usuario en modo peaks. Puede servir como referencia inicial, pero no siempre reemplaza la frecuencia central estimada. \
+delta\_match\_hz & Hz & Diferencia entre la frecuencia solicitada y el pico asociado para evaluar la cercanía. \
+\bottomrule
+\end{tabularx}
+
+\subsection{\textbf{Ancho de banda}}
+
+El ancho de banda describe la extensión espectral ocupada por una emisión. En el software, este valor se obtiene después de delimitar la región asociada al pico o segmento candidato. La función de medición calcula dos referencias: un ancho a $-x$ dB respecto al pico y un ancho de banda ocupado u OBW, que representa el intervalo que contiene un porcentaje definido de la potencia de la emisión.
+
+Para el reporte final, el procesador selecciona el ancho de banda más conveniente mediante una regla conservadora: si existe OBW válido, se prefiere este valor porque suele ser más estable en señales con mesetas, varios picos o modulaciones anchas. Si el OBW no está disponible, el sistema usa el ancho a $-x$ dB. Esta decisión evita depender de un solo bin o de una lectura visual de la gráfica.
+
+El resultado se reporta como bw\_hz y bw\_khz. El primer campo mantiene la unidad interna del procesamiento y el segundo facilita la lectura del reporte. En modo de cumplimiento, el mismo valor medido se conserva como bw\_medido\_kHz, pero la comparación normativa completa queda para una etapa posterior de la sección.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule
+Campo & Unidad & Interpretación \
+\midrule
+bandwidth\_xdb\_hz & Hz & Ancho calculado a $-x$ dB respecto al pico de la emisión. \
+obw\_hz & Hz & Ancho de banda ocupado, calculado a partir de la potencia acumulada de la región. \
+bw\_hz & Hz & Ancho de banda seleccionado para reportar la emisión. \
+bw\_khz & kHz & Versión del ancho de banda reportado en una unidad más cómoda para lectura humana. \
+bw\_medido\_kHz & kHz & Nombre usado en modo de cumplimiento para conservar el ancho de banda medido. \
+\bottomrule
+\end{tabularx}
+
+\subsection{\textbf{Potencia}}
+
+La potencia se estima a partir de la región espectral asociada a la emisión. Para evitar errores de interpretación, el cálculo no se realiza directamente en dBm como si fuera una suma lineal. El procedimiento convierte las muestras al dominio lineal, integra o suma la contribución de los bins dentro de la región seleccionada y finalmente devuelve el resultado en dBm. El módulo usa funciones de apoyo para hacer el cálculo más robusto. Por ejemplo, la función de potencia robusta permite integrar usando el ancho de bin del SpectrumFrame o una estimación basada en el eje de frecuencias.
+
+Si la captura no permite calcular una potencia finita, el procesador evita reportar -inf, NaN o valores artificiales, y conserva el resultado como nulo. Esto es importante porque una potencia no finita no debe interpretarse como una medición real.
+
+En los modos all\_emissions y peaks, la salida principal se reporta como power\_dbm. En modo de cumplimiento, la misma magnitud se puede conservar como p\_medida\_dBm. En este avance se documenta la medición de potencia, pero no se desarrolla todavía la evaluación frente a potencia nominal de una licencia.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule
+Campo & Unidad & Interpretación \
+\midrule
+power\_dbm & dBm & Potencia estimada de la emisión en los modos de detección general y análisis por picos. \
+p\_medida\_dBm & dBm & Nombre usado en modo de cumplimiento para conservar la potencia medida. \
+channel\_power\_dbm & dBm & Potencia de canal calculada durante la medición de parámetros de la emisión. \
+snr\_db & dB & Relación señal a ruido estimada cuando la función de análisis la entrega. \
+\bottomrule
+\end{tabularx}
+
+\subsection{\textbf{MER/BER si aplica}}
+
+El módulo también incluye una estimación opcional de MER y BER para señales compatibles con el caso TDT. Este cálculo no se aplica a todas las emisiones detectadas. La función primero verifica si la frecuencia central de la región cae dentro del rango TDT definido en el código y si el ancho de la banda es plausible para ese tipo de señal. Si esas condiciones no se cumplen, la función retorna un resultado vacío y el reporte no incluye campos de MER/BER.
+
+Cuando el caso sí aplica, el sistema toma la banda medida como región de señal y usa regiones laterales o información fuera de banda como referencia de ruido. Con esa relación se estima una magnitud de calidad equivalente a MER en dB y luego se calcula un BER estimado para una modulación M-QAM, usando $M=64$ en el flujo implementado para TDT.
+
+Estos valores deben interpretarse como estimaciones de calidad obtenidas desde la traza espectral disponible, no como una demodulación completa de la señal. Por lo tanto, son útiles para orientar el diagnóstico de una captura TDT, pero deben validarse con mediciones especializadas si se requiere una certificación formal.
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule
+Campo & Unidad & Interpretación \
+\midrule
+mer\_db & dB & MER estimado de la señal compatible. Solo aparece si se encuentran condiciones válidas para el cálculo. \
+ber\_est & Adimensional & BER estimado a partir de la relación de calidad calculada para la señal. \
+f\_center\_hz & Hz & Frecuencia central de la banda usada internamente para el cálculo de MER/BER. \
+band\_start\_hz & Hz & Límite inferior de la banda evaluada. \
+band\_stop\_hz & Hz & Límite superior de la banda evaluada. \
+\bottomrule
+\end{tabularx}
+
+\section{\textbf{9. Comparación contra licencias y uso de DANE/municipio}}
+
+\emph{El proceso de validación normativa vincula las mediciones espectrales obtenidas por el módulo con la base de datos oficial. Este procedimiento permite determinar si una emisión detectada cuenta con permiso para operar en la zona y si respeta los parámetros técnicos asignados.}
+
+\emph{El emparejamiento y la evaluación se dividen en los siguientes pasos:}
+
+\subsection{\emph{\textbf{1. Filtrado geográfico y asociación de licencia}}}
+
+\emph{Para optimizar el proceso y evitar falsos positivos con estaciones de otras regiones, la función \_match\_licencia ejecuta primero un filtro sobre el archivo CSV de licencias utilizando los parámetros dane\_filtro y municipio\_filtro. Esto reduce drásticamente el espacio de búsqueda al área geográfica de interés.}
+
+\emph{Una vez filtrada la base de datos, el algoritmo busca la licencia cuya frecuencia nominal (fc\_nominal) sea la más cercana a la frecuencia central medida (fc\_medida). Esta búsqueda está limitada por una ventana de tolerancia máxima definida por la constante FC\_MARGIN\_MHZ. Si ninguna licencia registrada cae dentro de esta ventana, la emisión se marca automáticamente en los resultados como \textbf{Licencia: NO}.}
+
+\subsection{\emph{\textbf{2. Criterios de cumplimiento técnico}}}
+
+\emph{Cuando el sistema encuentra un match válido (una licencia asociada a la emisión), procede a evaluar tres criterios de cumplimiento de forma completamente independiente.}
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule
+\emph{Criterio evaluado} & \emph{Regla de cumplimiento} & \emph{Comportamiento y consideraciones} \
+\midrule
+\emph{\textbf{Frecuencia Central}  (Cumple\_FC)} & \emph{`} & \emph{fc\_medida − fc\_nominal} \
+\emph{\textbf{Ancho de Banda}  (Cumple\_BW)} & \emph{BW\_medido ≤ BW\_nominal + BW\_MARGIN\_KHZ} & \emph{Implementa una asimetría intencional mediante la función \_bw\_compliance\_status. Si el ancho de banda medido es menor al nominal, siempre cumple (emitir con menos ancho de banda no es una infracción). Solo falla si el exceso supera la tolerancia BW\_MARGIN\_KHZ.} \
+\emph{\textbf{Potencia}  (Cumple\_P)} & \emph{P\_medida ≤ P\_nominal} & \emph{Es la comparación más estricta, sin margen de tolerancia; cualquier exceso de potencia se considera un incumplimiento. Si la potencia medida no está disponible (por ejemplo, en un frame sin suficiente SNR), este campo se reporta como None.} \
+\bottomrule
+\end{tabularx}
+
+\subsection{\emph{\textbf{3. Manejo de múltiples jurisdicciones (Múltiples DANE)}}}
+
+\emph{El módulo está diseñado para soportar análisis en fronteras municipales o zonas extensas. Cuando se envían múltiples códigos DANE en la solicitud, el procesador no vuelve a calcular el espectro; en su lugar, repite el proceso de matching completo para cada jurisdicción de forma iterativa.}
+
+\emph{La salida de este proceso genera una estructura llamada results\_by\_dane, que es un diccionario que contiene una tabla de resultados independiente por cada DANE evaluado. Por compatibilidad de lectura, la clave principal results del JSON de salida siempre apunta a los resultados del primer DANE de la lista. Esto permite que una única captura espectral se valide simultáneamente contra los registros de licencias de varios municipios con alta eficiencia computacional.}
+
+\section{\textbf{10. Localización administrativa}}
+
+\emph{Para realizar una evaluación normativa precisa, el módulo requiere delimitar geográficamente la búsqueda de licencias. Esto evita falsos positivos cruzados con emisiones legítimas de otras regiones. El sistema está diseñado para capturar la ubicación administrativa desde diferentes interfaces, aplicar una estricta jerarquía de prioridades y normalizar los textos antes de efectuar cualquier comparación.}
+
+\emph{A continuación, se detallan el origen de estos parámetros, sus reglas de interpretación y el proceso de normalización en el backend.}
+
+\subsection{\emph{\textbf{1. Origen del parámetro territorial}}}
+
+\emph{El sistema puede recibir la información geográfica desde tres frentes operativos distintos, adaptándose tanto a ejecuciones en caliente de la API como a pruebas locales por consola o reportes programados:}
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule
+\emph{Interfaz / Origen} & \emph{Mecanismo de captura} & \emph{Referencia en Código} \
+\midrule
+\emph{\textbf{Cliente / Petición HTTP}} & \emph{Se envía como el campo municipio dentro del cuerpo (body/meta) de la petición HTTP, o bien como un parámetro de consulta (query param) si únicamente se transmite la traza espectral.} & \emph{server\_flask.py  (Líneas 308-336)} \
+\emph{\textbf{Consola (CLI) / Local}} & \emph{Se especifica de manera explícita en la terminal de comandos mediante el argumento formal --municipio.} & \emph{main.py  (Líneas 150-235)} \
+\emph{\textbf{Backend de Reportes}} & \emph{El backend centralizado construye un objeto consolidado de ubicacion (que empaqueta tanto el nombre del municipio como el código DANE) y lo inyecta al módulo de postprocesamiento al invocar el servicio.} & \emph{reports.ts  (Líneas 253-271)} \
+\bottomrule
+\end{tabularx}
+
+\subsection{\emph{\textbf{2. Reglas de interpretación y jerarquía de prioridad}}}
+
+\emph{Debido a la diversidad de formatos en las entradas, el servicio implementa un flujo lógico interno para resolver ambigüedades. Las reglas de prioridad se aplican de forma secuencial en el enrutamiento de main.py (Líneas 206-225) y server\_flask.py (Líneas 344-376) bajo el siguiente criterio:}
+
+1. \emph{\textbf{Prioridad Absoluta (danes):} Si la entrada contiene una lista explícita de códigos (danes), el procesador ignora los demás campos territoriales y la toma como la referencia definitiva para el análisis multijurisdiccional.}  
+2. \emph{\textbf{Segunda Prioridad (dane):} En ausencia de una lista, el sistema evalúa si se suministró un único código identificador bajo el campo dane.}  
+3. \emph{\textbf{Mecanismo de Compatibilidad:} Si no se detecta el parámetro dane, pero el campo municipio recibido es de tipo puramente numérico, el software lo interpreta automáticamente como un código DANE para mantener compatibilidad con lecturas indexadas.}
+
+\emph{\textbf{Mecanismo de protección contra falsos positivos:} Si el usuario no especifica ningún filtro territorial en la solicitud (dejando vacíos tanto los campos de dane como de municipio), el procesador aborta preventivamente el matching con el archivo CSV de licencias. Esta restricción técnica —implementada en el wrapper de processor.py (Líneas 696-716)— impide realizar comparaciones globales ciegas que generarían reportes de cumplimiento erróneos.}
+
+\subsection{\emph{\textbf{3. Normalización de texto y emparejamiento (Matching)}}}
+
+\emph{Dado que los nombres de los municipios pueden presentar variaciones de digitación (tildes, mayúsculas erróneas o espacios dobles), el módulo realiza un preprocesamiento higiénico del texto antes de consultar el archivo de licencias:}
+
+\begin{itemize}
+  \item \emph{\textbf{Filtro de Texto:} El nombre del municipio se convierte a mayúsculas sostenidas, se eliminan los caracteres con acentuación (tildes) y se colapsan los espacios en blanco sobrantes. Este texto limpio se contrasta contra la columna indexada \_mun\_norm en la base de datos, garantizando una coincidencia exacta sin importar errores de formato en origen. Las funciones encargadas de este saneamiento residen en calibration\_io.py (Líneas 72-90) y el filtrado por municipio en la subrutina comparar\_parametros (Líneas 492-508).}
+  \item \emph{\textbf{Resolución de Deltas:} El emparejamiento final lo ejecuta la función medular comparar\_parametros(...) (Líneas 406-420). Al recibir el parámetro sanitizado municipio\_filtro, extrae la licencia correspondiente del registro y calcula en el acto las desviaciones o deltas técnicos reales medidos en la traza (desviación de frecuencia central $\Delta F_c$, exceso de ancho de banda $\Delta BW$ y diferencia de potencia $\Delta P$).}
+\end{itemize}
+
+\section{\textbf{11. Interfaces del módulo}}
+
+\emph{(Nota: La distribución funcional inicial se describe en la sección de Arquitectura. En fases posteriores se añadirá el detalle técnico de operación para cada interfaz de usuario).}
+
+\begin{itemize}
+  \item \textbf{Consola con main.py}
+  \item \textbf{API con server\_flask.py}
+\end{itemize}
+
+\section{\textbf{12. Decisiones de diseño}}
+
+\emph{El desarrollo del módulo de postprocesamiento requirió tomar decisiones algorítmicas específicas para garantizar que la caracterización de las emisiones fuera robusta frente a diferentes tipos de modulaciones y escenarios espectrales. Las principales decisiones de diseño radican en los métodos seleccionados para calcular la frecuencia central, el ancho de banda, la potencia y los indicadores de calidad.}
+
+\subsection{\emph{\textbf{Estimación de Frecuencia Central ($F_c$)}}}
+
+\emph{Se decidió no utilizar el punto medio geométrico del span (ancho) detectado, ya que esto induce a errores en señales que no son perfectamente simétricas. En su lugar, el algoritmo calcula la frecuencia central como el centroide de potencia (baricentro energético) dentro de los límites de la emisión. Esta decisión garantiza que, en señales asimétricas como la FM comercial con piloto estéreo de 19 kHz, la medición refleje con precisión el verdadero centro de energía de la transmisión.}
+
+\subsection{\emph{\textbf{Estimación de Ancho de Banda (BW)}}}
+
+\emph{Dado que las formas espectrales varían drásticamente entre tecnologías, se optó por medir dos métricas de ancho de banda de forma paralela: Ancho de Banda Ocupado (OBW) y Ancho de Banda a $-x$ dB.}
+
+\begin{itemize}
+  \item \emph{\textbf{Regla de selección:} El sistema prefiere siempre reportar el OBW (que integra el 99\% de la energía de la emisión) porque es mucho más estable frente a señales con múltiples picos o mesetas planas, como OFDM (TDT) o FM estéreo.}
+  \item \emph{Solo se utiliza el criterio de $-x$ dB como método de respaldo si el cálculo del OBW no arroja un resultado válido.}
+\end{itemize}
+
+\subsection{\emph{\textbf{Estimación de Potencia}}}
+
+\emph{Para evitar los errores matemáticos de sumar valores logarítmicos, el diseño establece que las amplitudes deben convertirse estrictamente de dBm a dominio lineal (W/Hz) antes de procesarse.}
+
+\begin{itemize}
+  \item \emph{Se implementaron mecanismos de robustez (fallbacks): si la suma directa produce un valor no finito (por ejemplo, debido a artefactos en la captura), el sistema intenta realizar una integración trapezoidal como segundo recurso.}
+  \item \emph{Adicionalmente, para la banda TDT de Colombia (cuyas capturas tienen un span muy ancho), se decidió utilizar la media del espectro en lugar de la suma directa para calcular la potencia integrada, logrando así mayor estabilidad numérica.}
+\end{itemize}
+
+\subsection{\emph{\textbf{Estimación de MER y BER}}}
+
+\emph{Para las señales de televisión digital (TDT), se diseñó un flujo que estima la Tasa de Error de Bit (BER) asumiendo una modulación M-QAM (con $M=64$), partiendo de la relación señal a ruido (SNR) medida en banda. El diseño maneja este cálculo de forma estrictamente opcional; si la captura no ofrece un nivel de SNR suficiente para realizar una estimación matemática confiable, el campo simplemente se omite sin forzar resultados inválidos.}
+
+\section{\textbf{13. Problemas encontrados y ajustes realizados}}
+
+\emph{Durante la fase de desarrollo y despliegue del módulo, el principal reto técnico estuvo relacionado con la etapa de detección de emisiones y el control de falsas alarmas derivadas de la variabilidad del piso de ruido. La evolución del algoritmo pasó por varias iteraciones hasta llegar a la solución definitiva que balancea precisión y consumo de recursos.}
+
+\subsection{\emph{\textbf{Evolución de la detección del piso de ruido}}}
+
+\emph{Para minimizar los falsos positivos (ruido interpretado como señal), se exploraron metodologías documentadas en la literatura como detectores CFAR (Tasa de Falsa Alarma Constante), pero la implementación atravesó los siguientes ajustes:}
+
+1. \emph{\textbf{Piso de ruido fijo basado en histograma (Iteración inicial):} Inicialmente, se planteó utilizar un umbral fijo calculado a partir de la moda del histograma de amplitudes del espectro.}  
+   \emph{ }\textbf{Problema:} Se evidenció una fuerte no linealidad en el piso de ruido capturado por el hardware (curvaturas espectrales naturales del receptor). Un umbral fijo y completamente plano provocaba que regiones con ruido curvo cruzaran el límite, generando un alto índice de falsas alarmas, mientras que otras emisiones reales quedaban enmascaradas.*  
+2. \emph{\textbf{Umbral adaptativo por ventanas (Segunda iteración):} Para compensar la curvatura, se exploró un enfoque dinámico empleando ventanas deslizantes que estimaban el ruido de forma local.}  
+   \emph{ }\textbf{Problema:} Aunque este enfoque funcionó excepcionalmente bien para aislar portadoras de banda angosta, fracasó al procesar señales de banda ancha (como los canales OFDM de la TDT). Debido al comportamiento extendido y plano de estas señales, la ventana deslizante terminaba asimilando la propia señal ancha como si fuera el nuevo piso de ruido, "tragándose" la emisión y abortando la detección.*  
+3. \emph{\textbf{Mínimo relativo + Umbral de separación (Tercera iteración):} Para solucionar los problemas mixtos entre banda angosta y ancha, se desarrolló un método intermedio que buscaba un nivel mínimo basal en el espectro y le sumaba un umbral de seguridad, lo cual estabilizó la detección combinada.}
+
+\subsection{\emph{\textbf{Ajuste final por restricciones de Hardware (Raspberry Pi 5)}}}
+
+\emph{A pesar de haber logrado una detección algorítmicamente robusta, las pruebas de integración revelaron un cuello de botella crítico: los limitados recursos de procesamiento del nodo en el borde (Raspberry Pi 5). El cálculo constante de pisos de ruido adaptativos mediante ventaneos y búsquedas locales resultaba demasiado costoso en CPU para procesar tramas espectrales en tiempo real de forma sostenida.}
+
+\emph{\textbf{Solución definitiva:} Se descartó el análisis por ventanas complejas. En su lugar, se implementó un algoritmo de \textbf{corrección de linealidad del sistema} (aplicado globalmente a la traza) seguido de la aplicación de un \textbf{umbral fijo de detección}. Al corregir matemáticamente las curvaturas o defectos de ganancia del hardware antes del análisis, el piso de ruido queda lo suficientemente aplanado (linealizado) como para que un umbral fijo funcione de manera confiable. Esta decisión sacrificó un leve porcentaje de sensibilidad teórica a cambio de liberar drásticamente los recursos computacionales de la Raspberry Pi 5, garantizando la estabilidad operativa del módulo continuo.}
+
+\section{\textbf{14. Pruebas o validaciones sugeridas}}
+
+\emph{Durante las fases iniciales de desarrollo y sintonización del algoritmo, la validación del módulo dependió principalmente de inspecciones visuales. Este enfoque consistió en graficar las trazas espectrales en crudo y superponer las regiones detectadas, los umbrales calculados y los centros energéticos ($F_c$). Aunque la inspección visual es fundamental para confirmar cualitativamente el comportamiento del software frente al ruido y las curvaturas del espectro, un despliegue en producción requiere transicionar hacia un marco de validación cuantitativo y automatizado.}
+
+\emph{Para garantizar la estabilidad del sistema a largo plazo, se recomienda implementar la siguiente estrategia de pruebas y métricas de evaluación:}
+
+\subsection{\emph{\textbf{1. Estrategia de pruebas automatizadas}}}
+
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule
+\emph{Tipo de Prueba} & \emph{Descripción y Objetivo} \
+\midrule
+\emph{\textbf{Pruebas con Señales Sintéticas}} & \emph{Inyectar al procesador archivos JSON generados matemáticamente (con portadoras, anchos de banda, potencias y ruido blanco gaussiano conocidos o ground truth). Esto permite evaluar si el módulo mide exactamente lo que se inyectó.} \
+\emph{\textbf{Pruebas Unitarias}} & \emph{Validar de forma aislada las funciones matemáticas críticas (como la conversión de dominio logarítmico a lineal en to\_power\_w(), o los cálculos del channel\_power\_dbm\_uniform\_bins) para asegurar que no existan desbordamientos o valores NaN.} \
+\emph{\textbf{Pruebas de Casos Frontera (Edge Cases)}} & \emph{Procesar capturas con condiciones extremas: espectros completamente vacíos (solo ruido), espectros saturados, JSONs incompletos y escenarios con múltiples códigos DANE para comprobar la respuesta del enrutador y del bloque de cumplimiento.} \
+\emph{\textbf{Pruebas de Estrés (Carga)}} & \emph{Simular la llegada concurrente de cientos de capturas por minuto a la API (server\_flask.py) para evaluar cómo maneja el sistema la memoria y el procesamiento sin encolarse.} \
+\bottomrule
+\end{tabularx}
+
+\subsection{\emph{\textbf{2. Métricas de evaluación recomendadas}}}
+
+\emph{Para sustituir la evaluación netamente visual, se recomienda incorporar métricas estadísticas que califiquen el desempeño de la detección y la precisión de la medición:}
+
+\subsubsection{\emph{\textbf{Métricas de Detección (Clasificación)}}}
+
+\emph{Para medir qué tan bien el algoritmo diferencia una emisión real del piso de ruido:}
+
+\begin{itemize}
+  \item \emph{\textbf{Tasa de Falsos Positivos (FPR):} Porcentaje de veces que el algoritmo detecta un pico de ruido y lo clasifica erróneamente como una emisión candidata.}
+  \item \emph{\textbf{Tasa de Falsos Negativos (FNR):} Porcentaje de emisiones reales y presentes en el espectro que el algoritmo ignoró o fusionó incorrectamente.}
+  \item \emph{\textbf{F1-Score:} Media armónica entre la precisión y la exhaustividad (recall) de las detecciones. Un F1-Score cercano a 1 indicará un balance óptimo entre sensibilidad y robustez al ruido.}
+\end{itemize}
+
+\subsubsection{\emph{\textbf{Métricas de Precisión de Medida (Regresión)}}}
+
+\emph{Para medir qué tan exactos son los parámetros técnicos extraídos, utilizando el Error Absoluto Medio (MAE) respecto a señales de referencia controladas:}
+
+\begin{itemize}
+  \item \emph{\textbf{Error en Frecuencia Central ($\Delta F_c$ MAE):} Promedio de la desviación absoluta en Hz entre la frecuencia detectada y el valor nominal de la portadora de prueba.}
+  \item \emph{\textbf{Error en Ancho de Banda ($\Delta BW$ MAE):} Diferencia promedio en kHz entre el OBW estimado por el módulo y el ancho de banda real ocupado por la señal sintética.}
+  \item \emph{\textbf{Error en Potencia ($\Delta P$ MAE):} Diferencia absoluta promedio en dBm entre la potencia calculada por integración y la energía real inyectada. Debe mantenerse idealmente por debajo de $\pm 1$ dB.}
+\end{itemize}
+
+\subsubsection{\emph{\textbf{Métricas de Rendimiento del Sistema}}}
+
+\begin{itemize}
+  \item \emph{\textbf{Latencia de Procesamiento:} Tiempo promedio (en milisegundos) que transcurre desde que la función process\_input recibe la traza hasta que retorna el diccionario de results.}
+  \item \emph{\textbf{Consumo Pico de CPU/RAM:} Fundamental para asegurar que el procesamiento cruzado multijurisdicción (múltiples DANE) no provoque caídas por falta de memoria o bloquee la ejecución de otros servicios.}
+\end{itemize}
+
+\section{\textbf{15. Limitaciones actuales}}
+
+\emph{A pesar de las optimizaciones implementadas en el algoritmo de detección y medición, el módulo de postprocesamiento enfrenta actualmente limitaciones operativas derivadas de la arquitectura de hardware, la infraestructura de red y la naturaleza del análisis espectral clásico.}
+
+\emph{A continuación, se detallan las principales barreras identificadas en esta fase del proyecto:}
+
+\subsection{\emph{\textbf{1. Restricciones de capacidad de procesamiento}}}
+
+\emph{El diseño actual delega el postprocesamiento a la nube, lo que impone una restricción directa ligada a la capacidad y los costos de cómputo del servidor centralizado. Aunque una solución lógica sería migrar este procesamiento al borde (Edge Computing) ejecutando el algoritmo directamente en la Raspberry Pi de cada nodo, esta alternativa se encuentra fuertemente limitada por la disponibilidad de recursos (CPU y RAM) en el hardware remoto, lo que podría comprometer la estabilidad del nodo al competir con los procesos de adquisición SDR.}
+
+\subsection{\emph{\textbf{2. Saturación del canal de transmisión (Ancho de Banda)}}}
+
+\emph{Incluso si se lograran liberar los recursos en la Raspberry Pi para procesar o preprocesar la información localmente, el sistema se enfrenta a un cuello de botella en la red. El canal de comunicación por el que se envían los datos espectrales a la nube se encuentra actualmente saturado. Esta limitación restringe la resolución, la tasa de refresco y el volumen de capturas que pueden ser transmitidas y procesadas en tiempo real.}
+
+\subsection{\emph{\textbf{3. Estimación del umbral en entornos con baja SNR}}}
+
+\emph{En entornos altamente ruidosos, la estimación del piso de ruido —y por consiguiente, el umbral de detección— se ve significativamente afectada por la distribución de la energía en el espectro. Aunque el software incluye un algoritmo adaptativo que toma en cuenta la Relación Señal a Ruido (SNR) para ajustar los márgenes de detección, este modelo sigue siendo susceptible a errores de estimación de SNR cuando las emisiones legítimas quedan enmascaradas por el ruido de fondo, provocando fluctuaciones en la tasa de detección.}
+
+\section{\textbf{16. Recomendaciones de mejora}}
+
+\emph{Para superar las limitaciones actuales y escalar la capacidad del sistema de monitoreo, se plantean las siguientes directrices de evolución tecnológica y algorítmica:}
+
+\subsection{\emph{\textbf{Mejora de la infraestructura de comunicaciones}}}
+
+\emph{La optimización del ancho de banda del canal de subida desde los nodos hacia la nube es prioritaria. Aumentar esta capacidad no solo permitiría transmitir espectrogramas de mayor resolución al módulo de procesamiento central, sino que resolvería un problema estructural que beneficiaría el flujo de datos general del sistema, habilitando diagnósticos más precisos.}
+
+\subsection{\emph{\textbf{Exploración de algoritmos basados en Inteligencia Artificial (IA)}}}
+
+\emph{Para resolver la susceptibilidad algorítmica frente a entornos ruidosos y variaciones de SNR, el estado del arte sugiere abandonar las técnicas de estimación estadística clásica en favor de modelos de \textbf{Machine Learning} y \textbf{Deep Learning}. El entrenamiento de redes neuronales convolucionales (CNN) o autoencoders para la supresión de ruido y la identificación de patrones espectrales permitiría una detección de emisiones altamente robusta y una estimación de parámetros independiente de las curvaturas del receptor. Hasta el punto actual del proyecto, estas metodologías no se han explorado.}
+
+\subsection{\emph{\textbf{Actualización del hardware de procesamiento (Hardware Upgrade)}}}
+
+\emph{La transición hacia técnicas de Deep Learning, e incluso la mitigación de los cuellos de botella en la nube mediante Edge Computing, introduce una nueva dependencia. Para que estas estrategias sean viables, se requerirá dotar a la arquitectura (ya sea en los servidores o en los nodos de monitoreo) de hardware lo suficientemente potente, como aceleradores tensoriales (TPUs) o unidades de procesamiento neuronal (NPUs), que soporten la carga de inferencia en tiempo real sin comprometer el flujo del sistema.}
+
+\section{\textbf{17. Cierre técnico de la sección}}
+
+\emph{El desarrollo e implementación del módulo de postprocesamiento espectral representa un avance fundamental en la arquitectura del sistema de monitoreo. A lo largo de esta sección, se ha documentado cómo el software logra cerrar la brecha entre la adquisición cruda de radiofrecuencia en el borde y la toma de decisiones en la plataforma central.}
+
+\emph{Al transformar matrices de amplitudes y frecuencias en parámetros estructurados (frecuencia central, ancho de banda, potencia y estimaciones de calidad como MER/BER), el módulo dota de significado analítico a las trazas espectrales. Entre los hitos técnicos más relevantes de esta etapa del proyecto, destacan:}
+
+1. \emph{\textbf{Flexibilidad operativa:} La implementación de un enrutador inteligente que permite conmutar entre modos de análisis (exploración libre, búsqueda de picos específicos o validación normativa) utilizando un mismo núcleo algorítmico, evitando la duplicidad de código.}  
+2. \emph{\textbf{Rigor matemático:} La decisión de forzar conversiones al dominio lineal para las integraciones de potencia y la priorización del Ancho de Banda Ocupado (OBW), lo cual garantiza métricas confiables incluso ante señales asimétricas o de banda ancha como la TDT.}  
+3. \emph{\textbf{Adaptabilidad geográfica:} La integración de un sistema robusto de emparejamiento con bases de licencias oficiales, capaz de resolver ambigüedades administrativas y procesar validaciones multijurisdiccionales (múltiples códigos DANE) con alta eficiencia computacional.}  
+4. \emph{\textbf{Pragmatismo frente al hardware:} La adopción de un algoritmo de linealización y umbral fijo que, si bien es más tradicional, logró resolver el cuello de botella crítico de procesamiento en la Raspberry Pi 5, garantizando la estabilidad operativa continua del sistema actual.}
+
+\emph{\textbf{Perspectiva a futuro} El diseño modular implementado (separando el parser, la representación interna en el \texttt{SpectrumFrame} y el motor de análisis) asegura que el código actual no sea un producto estático, sino una base escalable. Como se expuso en las limitaciones y recomendaciones, el sistema ha llegado al tope de las capacidades de las técnicas estadísticas clásicas dadas las restricciones de red y de hardware actuales.}
+
+\emph{El siguiente paso evolutivo para este componente será la transición hacia modelos de Inteligencia Artificial (Deep Learning) orientados a la clasificación y supresión de ruido en entornos de baja SNR, así como la posible migración de la carga de inferencia parcial hacia el borde (Edge Computing). Con la estructura actual, estos nuevos motores podrán integrarse o sustituir a los actuales sin alterar el flujo de las interfaces de consumo (API o Consola), asegurando que el sistema de monitoreo mantenga su operatividad mientras se actualiza hacia tecnologías de nueva generación.}
+\end{document}
