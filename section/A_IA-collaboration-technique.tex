@@ -1,18 +1,103 @@
-\section{T\'ecnica de desarrollo en grupo usando agentes IA}
+\chapter{T\'ecnica de desarrollo en grupo usando agentes IA}
+\label{annex:ia_collaboration}
 
-Este anexo debe documentar la metodolog\'ia de trabajo colaborativo utilizada por el equipo
-cuando se apoya en agentes de inteligencia artificial para redactar, programar, organizar
-informaci\'on o revisar resultados parciales.
+\section{Prop\'osito del cap\'itulo}
+Este anexo tiene como objetivo documentar la metodolog\'ia de trabajo colaborativo y la infraestructura t\'ecnica utilizada por el equipo de desarrollo al integrarse con agentes de Inteligencia Artificial (IA). Se busca proporcionar una gu\'ia clara sobre la instalaci\'on, configuraci\'on y mejores pr\'acticas de \textit{prompting} para asegurar que el uso de estas herramientas sea trazable, repetible y de alta calidad dentro del ciclo de vida del proyecto.
 
-El placeholder actual deja listo un espacio para explicar roles, flujos de validaci\'on,
-criterios de supervisi\'on humana y buenas pr\'acticas para asegurar trazabilidad, calidad
-y uso responsable de herramientas de IA dentro del proyecto.
+\section{Contexto dentro del sistema general}
+En el desarrollo de sistemas complejos como el de adquisici\'on SDR y plataformas \textit{cloud}, el uso de agentes IA (como Gemini CLI y Copilot CLI) permite acelerar la automatizaci\'on de flujos de trabajo, la revisi\'on de c\'odigo y la generaci\'on de documentaci\'on t\'ecnica. Esta t\'ecnica no reemplaza la supervisi\'on humana, sino que act\'ua como un multiplicador de capacidades, integrando razonamiento multi-agente para la toma de decisiones t\'ecnicas y el an\'alisis de contexto.
 
-\subsection*{Puntos sugeridos para completar}
-\begin{itemize}[leftmargin=*]
-  \item Flujo de trabajo colaborativo entre personas y agentes IA.
-  \item Tareas en las que se utiliz\'o apoyo automatizado.
-  \item Mecanismos de revisi\'on, verificaci\'on y control de calidad.
-  \item Riesgos de uso y estrategias de mitigaci\'on.
-  \item Lecciones aprendidas para futuras iteraciones.
+\section{Desarrollo t\'ecnico: Ecosistema de Agentes CLI}
+El equipo utiliza una combinaci\'on de herramientas de terminal que permiten una interacci\'on directa con modelos de lenguaje avanzados.
+
+\subsection{Instalaci\'on y Configuraci\'on}
+A continuaci\'on se detallan los comandos principales para habilitar el entorno de agentes:
+
+\begin{itemize}
+    \item \textbf{GitHub Copilot CLI}: Utilizado principalmente para asistencia en codificaci\'on y automatizaci\'on de tareas de repositorio.
+    \begin{itemize}
+        \item Instalaci\'on: \texttt{npm install -g @github/copilot}
+        \item Autenticaci\'on: \texttt{copilot /login}
+    \end{itemize}
+    \item \textbf{Gemini CLI}: Utilizado para tareas multimodales, gesti\'on de habilidades (\textit{skills}) y an\'alisis de arquitectura.
+    \begin{itemize}
+        \item Instalaci\'on: \texttt{npm install -g @google/gemini-cli}
+        \item Inicio: \texttt{gemini}
+    \end{itemize}
 \end{itemize}
+
+\subsection{Arquitectura Multi-Agente}
+El sistema se dise\~na bajo un esquema de roles especializados que colaboran para resolver tareas complejas:
+
+\begin{itemize}
+    \item \textbf{Agente Coordinador}: Asigna roles y selecciona el modelo m\'as apto.
+    \item \textbf{Agente de Interpretaci\'on}: Analiza el contexto de la petici\'on.
+    \item \textbf{Agente de Backend}: Gestiona el almacenamiento y la comunicaci\'on con APIs.
+    \item \textbf{Agente de Procesamiento}: Maneja tareas espec\'ificas de se\~nales (audio/espectro).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{section/img/annexes/ai_structure.png}
+    \caption{Dise\~no conceptual del sistema multi-agente: Relaci\'on entre agentes y el flujo de decisi\'on. Fuente: Elaboraci\'on propia.}
+    \label{fig:ai_conceptual_structure}
+\end{figure}
+
+\section{Decisiones de dise\~no: Metodolog\'ia de Prompting}
+Para minimizar alucinaciones y maximizar la coherencia de las respuestas, se ha adoptado una estructura obligatoria para cada interacci\'on con los agentes, basada en el modelo \textbf{ROLE \(\rightarrow\) OBJECTIVE \(\rightarrow\) CONTEXT \(\rightarrow\) REASONING}.
+
+\begin{table}[H]
+\centering
+\caption{Componentes de un Prompt de alta calidad.}
+\label{tab:prompt_components}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X}
+\toprule
+Componente & Descripci\'on \\
+\midrule
+Role & Define qui\'en debe responder (e.g., "Senior Software Developer"). \\
+Objective & Define qu\'e se quiere lograr de forma clara y concisa. \\
+Context & Proporciona archivos relevantes, restricciones y entorno. \\
+Reasoning & Solicita al agente explicar su l\'ogica antes de entregar el resultado. \\
+Output Format & Especifica el formato deseado (JSON, LaTeX, C code, etc.). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Problemas presentados y ajustes realizados}
+Durante la implementaci\'on de esta metodolog\'ia, se identificaron los siguientes desaf\'ios:
+
+\begin{longtable}{p{2.6cm} p{2.6cm} p{2.6cm} p{3cm} p{3cm}}
+\caption{Problemas en la colaboraci\'on con IA y ajustes aplicados.}\\
+\toprule
+\textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Decis\'on o ajuste} & \textbf{Resultado} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Decis\'on o ajuste} & \textbf{Resultado} \\
+\midrule
+\endhead
+Alucinaciones t\'ecnicas & C\'odigo que usa librer\'ias inexistentes. & Contexto insuficiente en el prompt inicial. & Implementar el patr\'on ROLE-CONTEXT. & Mayor precisi\'on en el c\'odigo generado. \\
+\midrule
+P\'erdida de hilo conductor & El agente olvida restricciones previas. & Ventana de contexto saturada. & Uso de comandos \texttt{/compact} y archivos \texttt{.geminiignore}. & Sesiones m\'as largas y eficientes. \\
+\bottomrule
+\end{longtable}
+
+\section{Validaci\'on y Evidencias}
+La metodolog\'ia se valida mediante la revisi\'on humana de cada entrega. El flujo de trabajo colaborativo asegura que ning\'un cambio se integre sin pasar por un ciclo de validaci\'on cruzada entre agentes y desarrolladores.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{section/img/annexes/ai_roles.png}
+    \caption{Roles asignados y estados de dise\~no en el flujo de trabajo IA. Fuente: Elaboraci\'on propia.}
+    \label{fig:ai_roles_workflow}
+\end{figure}
+
+\section{Aprendizajes y transferencia de conocimiento}
+\begin{itemize}
+    \item \textbf{Criterio de Realidad}: La IA es un asistente, no un ejecutor aut\'onomo sin supervisi\'on. La validaci\'on humana es mandatoria.
+    \item \textbf{Modulariad}: Es preferible pedir tareas peque\~nas y espec\'ificas que una soluci\'on completa y compleja en un solo prompt.
+    \item \textbf{Documentaci\'on}: Mantener archivos \texttt{GEMINI.md} o \texttt{AGENTS\_CLI.md} en la ra\'iz del proyecto ayuda a los agentes a entender r\'apidamente las convenciones del equipo.
+\end{itemize}
+
+\section{Recomendaciones espec\'ificas}
+Se recomienda la rotaci\'on de roles entre los desarrolladores para familiarizarse con las capacidades de diferentes \textit{backends} (GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro) seg\'un la naturaleza de la tarea.
