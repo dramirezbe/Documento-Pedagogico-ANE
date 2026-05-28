@@ -1,62 +1,62 @@
 \chapter{Hardware}
 
-\section{Prop\'osito del cap\'itulo}
+\section{Propósito del capítulo}
 
-Esta secci\'on documenta el hardware del nodo de sensado espectral ANE2 con un
-criterio de transferencia de conocimiento. La intenci\'on no es solamente listar
-piezas, sino explicar c\'omo se organiza el montaje f\'isico, qu\'e funci\'on cumple
-cada m\'odulo, cu\'ales interfaces deben respetarse y qu\'e decisiones deben
-mantenerse en una nueva versi\'on del producto.
+Esta sección documenta el hardware del nodo de sensado espectral ANE2 con un
+criterio de transferencia de conocimiento. La intención no es solamente listar
+piezas, sino explicar cómo se organiza el montaje físico, qué función cumple
+cada módulo, cuáles interfaces deben respetarse y qué decisiones deben
+mantenerse en una nueva versión del producto.
 
-La idea t\'ecnica central es la alimentaci\'on. La experiencia de integraci\'on
-mostr\'o que concentrar la entrega de energ\'ia de los perif\'ericos en la
-Raspberry Pi 5 reduce el margen operativo del nodo. Un dise\~no derivado o una
-versi\'on posterior debe incluir un \textbf{\'arbol de potencia externo,
-sobredimensionado y medible}, capaz de alimentar c\'omputo, SDR, LTE/GNSS, mux
+La idea técnica central es la alimentación. La experiencia de integración
+mostró que concentrar la entrega de energía de los periféricos en la
+Raspberry Pi 5 reduce el margen operativo del nodo. Un diseño derivado o una
+versión posterior debe incluir un \textbf{árbol de potencia externo,
+sobredimensionado y medible}, capaz de alimentar cómputo, SDR, LTE/GNSS, mux
 RF y futuras extensiones sin depender del margen de los puertos de la Raspberry
 Pi.
 
 \section{Contexto dentro del sistema general}
 
 ANE2 es un nodo de borde para monitoreo espectral. En campo, el hardware debe
-recibir se\~nales RF, seleccionar o enrutar la entrada de antena, digitalizar la
-se\~nal mediante SDR, ejecutar procesamiento local, obtener ubicaci\'on y
+recibir señales RF, seleccionar o enrutar la entrada de antena, digitalizar la
+señal mediante SDR, ejecutar procesamiento local, obtener ubicación y
 mantener conectividad con la plataforma. Por tanto, el hardware cumple cuatro
 responsabilidades:
 
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Entrada y selecci\'on RF}: las antenas llegan a la tarjeta
+    \item \textbf{Entrada y selección RF}: las antenas llegan a la tarjeta
     MonRaF2, donde se concentran rutas RF, filtros y una etapa tipo mux/switch
     controlada por GPIO.
-    \item \textbf{Adquisici\'on SDR}: el HackRF One opera como receptor y entrega
+    \item \textbf{Adquisición SDR}: el HackRF One opera como receptor y entrega
     muestras IQ al computador de borde.
-    \item \textbf{C\'omputo de borde}: la Raspberry Pi 5 ejecuta control,
-    telemetr\'ia, adquisici\'on, procesamiento y comunicaci\'on con servicios
+    \item \textbf{Cómputo de borde}: la Raspberry Pi 5 ejecuta control,
+    telemetría, adquisición, procesamiento y comunicación con servicios
     superiores.
-    \item \textbf{Conectividad y ubicaci\'on}: el m\'odulo SIM7600G-H aporta LTE
-    y GNSS/GPS para comunicaci\'on y georreferenciaci\'on.
+    \item \textbf{Conectividad y ubicación}: el módulo SIM7600G-H aporta LTE
+    y GNSS/GPS para comunicación y georreferenciación.
 \end{itemize}
 
-La Figura~\ref{fig:hw_producto_ane2} presenta el conjunto f\'isico del nodo. La
-lectura correcta del montaje es: antenas hacia MonRaF2, selecci\'on o
-acondicionamiento RF en MonRaF2, adquisici\'on con HackRF One, procesamiento en
-Raspberry Pi 5 y comunicaci\'on por LTE/GNSS.
+La Figura~\ref{fig:hw_producto_ane2} presenta el conjunto físico del nodo. La
+lectura correcta del montaje es: antenas hacia MonRaF2, selección o
+acondicionamiento RF en MonRaF2, adquisición con HackRF One, procesamiento en
+Raspberry Pi 5 y comunicación por LTE/GNSS.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.55\textwidth]{section/img/cap04_hw/product.jpeg}
-    \caption{Vista del conjunto f\'isico del nodo ANE2. Fuente: elaboraci\'on propia.}
+    \caption{Vista del conjunto físico del nodo ANE2. Fuente: elaboración propia.}
     \label{fig:hw_producto_ane2}
 \end{figure}
 
-\section{Desarrollo t\'ecnico}
+\section{Desarrollo técnico}
 
-\subsection{Arquitectura f\'isica del nodo}
+\subsection{Arquitectura física del nodo}
 
 El nodo se compone de una Raspberry Pi 5, una tarjeta HackRF One y una PCB
-MonRaF2. La Raspberry Pi 5 coordina la ejecuci\'on de software, el HackRF One
-realiza la recepci\'on SDR y MonRaF2 concentra conectividad, geolocalizaci\'on,
-se\~nales de control, protecciones y rutas RF.
+MonRaF2. La Raspberry Pi 5 coordina la ejecución de software, el HackRF One
+realiza la recepción SDR y MonRaF2 concentra conectividad, geolocalización,
+señales de control, protecciones y rutas RF.
 
 \begin{table}[H]
 \centering
@@ -64,21 +64,21 @@ se\~nales de control, protecciones y rutas RF.
 \label{tab:hw_inventario}
 \begin{tabularx}{\textwidth}{>{\bfseries}p{3.1cm} p{3.1cm} X}
 \toprule
-Componente & Funci\'on principal & Criterio de integraci\'on \\
+Componente & Función principal & Criterio de integración \\
 \midrule
-Raspberry Pi 5 & Computador de borde & Ejecuta control, telemetr\'ia, adquisici\'on, procesamiento y comunicaci\'on. No debe tratarse como fuente principal para todos los perif\'ericos en una versi\'on robusta. \\
-HackRF One & Receptor SDR & Digitaliza se\~nales RF como muestras IQ. Debe recibir la ruta RF ya seleccionada/acondicionada y requiere una alimentaci\'on estable para evitar fallas bajo carga. \\
-MonRaF2 & Tarjeta de integraci\'on & Integra LTE/GNSS, UART/USB/GPIO, protecciones, filtros y una ruta RF con funci\'on tipo mux/switch. Es el punto de terminaci\'on de antenas y control de rutas RF. \\
-SIM7600G-H & LTE/GNSS & Proporciona datos celulares y ubicaci\'on. Su consumo y transitorios deben considerarse dentro del \'arbol de potencia. \\
-Antenas RF, LTE y GNSS & Interfaz electromagn\'etica & Se conectan al subsistema de MonRaF2. La conexi\'on no debe documentarse como antena directa al HackRF, porque el dise\~no incluye una etapa de selecci\'on/acondicionamiento RF. \\
-\'Arbol de potencia externo & Distribuci\'on de energ\'ia & Debe proveer rieles y margen para Raspberry Pi 5, HackRF, MonRaF2, LTE/GNSS y extensiones futuras. Es un requisito de dise\~no, no una mejora opcional. \\
+Raspberry Pi 5 & Computador de borde & Ejecuta control, telemetría, adquisición, procesamiento y comunicación. No debe tratarse como fuente principal para todos los periféricos en una versión robusta. \\
+HackRF One & Receptor SDR & Digitaliza señales RF como muestras IQ. Debe recibir la ruta RF ya seleccionada/acondicionada y requiere una alimentación estable para evitar fallas bajo carga. \\
+MonRaF2 & Tarjeta de integración & Integra LTE/GNSS, UART/USB/GPIO, protecciones, filtros y una ruta RF con función tipo mux/switch. Es el punto de terminación de antenas y control de rutas RF. \\
+SIM7600G-H & LTE/GNSS & Proporciona datos celulares y ubicación. Su consumo y transitorios deben considerarse dentro del árbol de potencia. \\
+Antenas RF, LTE y GNSS & Interfaz electromagnética & Se conectan al subsistema de MonRaF2. La conexión no debe documentarse como antena directa al HackRF, porque el diseño incluye una etapa de selección/acondicionamiento RF. \\
+Árbol de potencia externo & Distribución de energía & Debe proveer rieles y margen para Raspberry Pi 5, HackRF, MonRaF2, LTE/GNSS y extensiones futuras. Es un requisito de diseño, no una mejora opcional. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-La Figura~\ref{fig:hw_modulos_principales} muestra los tres m\'odulos principales
-del nodo. Su separaci\'on ayuda a diagnosticar fallas: no es lo mismo un problema
-de ruta RF, de alimentaci\'on, de procesamiento, de enlace celular o de ubicaci\'on.
+La Figura~\ref{fig:hw_modulos_principales} muestra los tres módulos principales
+del nodo. Su separación ayuda a diagnosticar fallas: no es lo mismo un problema
+de ruta RF, de alimentación, de procesamiento, de enlace celular o de ubicación.
 
 \begin{figure}[H]
     \centering
@@ -99,80 +99,80 @@ de ruta RF, de alimentaci\'on, de procesamiento, de enlace celular o de ubicaci\
         \includegraphics[width=\textwidth]{section/img/cap04_hw/monraf2-default.jpeg}
         \caption{MonRaF2.}
     \end{subfigure}
-    \caption{M\'odulos principales del hardware ANE2. Fuente: elaboraci\'on propia.}
+    \caption{Módulos principales del hardware ANE2. Fuente: elaboración propia.}
     \label{fig:hw_modulos_principales}
 \end{figure}
 
 \subsection{Ruta RF y mux de antenas}
 
 La ruta RF no debe describirse como una antena conectada directamente al HackRF.
-El esquem\'atico de MonRaF2 muestra redes de antena como \texttt{MAIN\_ANT},
-\texttt{GNSS\_ANT} y \texttt{AUX\_ANT}, adem\'as de conectores RF, filtros LPF y
-una etapa de conmutaci\'on/mux RF controlada por se\~nales GPIO. En t\'erminos
-operativos, MonRaF2 act\'ua como la tarjeta que recibe y ordena las rutas de
-antena antes de que la se\~nal sea usada por el subsistema de adquisici\'on o por
-el m\'odulo celular/GNSS.
+El esquemático de MonRaF2 muestra redes de antena como \texttt{MAIN\_ANT},
+\texttt{GNSS\_ANT} y \texttt{AUX\_ANT}, además de conectores RF, filtros LPF y
+una etapa de conmutación/mux RF controlada por señales GPIO. En términos
+operativos, MonRaF2 actúa como la tarjeta que recibe y ordena las rutas de
+antena antes de que la señal sea usada por el subsistema de adquisición o por
+el módulo celular/GNSS.
 
-El flujo f\'isico recomendado queda entonces:
+El flujo físico recomendado queda entonces:
 
 \begin{enumerate}[leftmargin=*]
     \item Las antenas externas se conectan a MonRaF2.
     \item MonRaF2 selecciona, protege o acondiciona rutas RF mediante su red de
     filtros, conectores y mux/switch RF.
     \item La ruta RF seleccionada alimenta el subsistema correspondiente:
-    adquisici\'on SDR, LTE o GNSS, seg\'un el modo de operaci\'on.
-    \item La Raspberry Pi 5 controla la operaci\'on y recibe los datos del HackRF
-    por USB, pero no debe asumirse como concentrador f\'isico de antenas.
+    adquisición SDR, LTE o GNSS, según el modo de operación.
+    \item La Raspberry Pi 5 controla la operación y recibe los datos del HackRF
+    por USB, pero no debe asumirse como concentrador físico de antenas.
 \end{enumerate}
 
 \begin{figure}[H]
     \centering
     \includegraphics[page=3,width=0.92\textwidth,height=0.72\textheight,keepaspectratio]{section/img/cap04_hw/monraf2-schematics.pdf}
-    \caption{Detalle esquem\'atico de rutas RF, filtros y etapa tipo mux/switch en MonRaF2. Fuente: elaboraci\'on propia.}
+    \caption{Detalle esquemático de rutas RF, filtros y etapa tipo mux/switch en MonRaF2. Fuente: elaboración propia.}
     \label{fig:hw_monraf2_rf}
 \end{figure}
 
-\subsection{\'Arbol de potencia}
+\subsection{Árbol de potencia}
 
-El principal aprendizaje del hardware es que el dise\~no de potencia debe
-preceder al dise\~no mec\'anico y de software. En las primeras integraciones, gran
-parte de la energ\'ia de perif\'ericos se entregaba desde la Raspberry Pi 5. Ese
-enfoque funciona para pruebas de bajo alcance, pero se vuelve fr\'agil cuando se
-combinan SDR, LTE, GNSS, procesamiento sostenido y tr\'afico de red.
+El principal aprendizaje del hardware es que el diseño de potencia debe
+preceder al diseño mecánico y de software. En las primeras integraciones, gran
+parte de la energía de periféricos se entregaba desde la Raspberry Pi 5. Ese
+enfoque funciona para pruebas de bajo alcance, pero se vuelve frágil cuando se
+combinan SDR, LTE, GNSS, procesamiento sostenido y tráfico de red.
 
-La evidencia de telemetr\'ia muestra tres hechos pr\'acticos:
+La evidencia de telemetría muestra tres hechos prácticos:
 
 \begin{itemize}[leftmargin=*]
     \item Las pruebas con HackRF y peticiones desde servidor elevaron la
     temperatura del procesador hasta el orden de 75 $^\circ$C.
-    \item El riel EXT5V present\'o ca\'idas bajo cargas pesadas, aun cuando no
+    \item El riel EXT5V presentó caídas bajo cargas pesadas, aun cuando no
     todas las corridas terminaron marcando una bandera persistente de
-    subtensi\'on.
-    \item Las pruebas con alimentaci\'on externa para perif\'ericos tuvieron mejor
+    subtensión.
+    \item Las pruebas con alimentación externa para periféricos tuvieron mejor
     margen para sostener carga combinada.
 \end{itemize}
 
-Por ello, el criterio para un nuevo producto o una siguiente versi\'on debe ser:
+Por ello, el criterio para un nuevo producto o una siguiente versión debe ser:
 
 \begin{quote}
-El nodo debe tener un \'arbol de potencia externo y generoso, con capacidad para
+El nodo debe tener un árbol de potencia externo y generoso, con capacidad para
 la carga actual y para extensiones futuras. La Raspberry Pi 5 debe ser tratada
 como carga y controlador, no como fuente primaria para el resto del sistema.
 \end{quote}
 
 \begin{table}[H]
 \centering
-\caption{Criterios m\'inimos para una versi\'on robusta del \'arbol de potencia.}
+\caption{Criterios mínimos para una versión robusta del árbol de potencia.}
 \label{tab:hw_power_tree}
 \begin{tabularx}{\textwidth}{>{\bfseries}p{3.4cm} X}
 \toprule
-Criterio & Implicaci\'on de dise\~no \\
+Criterio & Implicación de diseño \\
 \midrule
-Fuente principal sobredimensionada & Debe alimentar simult\'aneamente Raspberry Pi 5, HackRF, MonRaF2, LTE/GNSS y perif\'ericos futuros sin operar en el l\'imite. \\
+Fuente principal sobredimensionada & Debe alimentar simultáneamente Raspberry Pi 5, HackRF, MonRaF2, LTE/GNSS y periféricos futuros sin operar en el límite. \\
 Rieles distribuidos & Las cargas de alto consumo o con transitorios, como SDR y LTE, deben alimentarse desde rieles dedicados o reguladores con margen, no desde el puerto de la Raspberry Pi. \\
-Medici\'on de rieles & El sistema debe conservar telemetr\'ia de voltaje, corriente, temperatura y eventos de subtensi\'on para diagn\'ostico. \\
-Protecci\'on y desacople & Se deben incluir protecciones, filtrado y capacitancia local cerca de cargas ruidosas o pulsantes. \\
-Reserva para extensiones & El dise\~no debe contemplar nuevos servicios, antenas, sensores, almacenamiento o comunicaciones sin redise\~nar la alimentaci\'on desde cero. \\
+Medición de rieles & El sistema debe conservar telemetría de voltaje, corriente, temperatura y eventos de subtensión para diagnóstico. \\
+Protección y desacople & Se deben incluir protecciones, filtrado y capacitancia local cerca de cargas ruidosas o pulsantes. \\
+Reserva para extensiones & El diseño debe contemplar nuevos servicios, antenas, sensores, almacenamiento o comunicaciones sin rediseñar la alimentación desde cero. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -187,36 +187,36 @@ Reserva para extensiones & El dise\~no debe contemplar nuevos servicios, antenas
 \toprule
 Interfaz & Tipo & Contrato operacional \\
 \midrule
-Antenas a MonRaF2 & RF coaxial & Las antenas se conectan a MonRaF2. La etapa RF de la tarjeta selecciona o acondiciona rutas antes de la adquisici\'on o uso LTE/GNSS. \\
-MonRaF2 a HackRF & RF seleccionado & El HackRF debe recibir una ruta RF controlada, no una conexi\'on de antena asumida como directa. \\
-HackRF a Raspberry Pi 5 & USB & Transporta muestras IQ y comandos de configuraci\'on. El \textit{sample rate} aumenta simult\'aneamente el ancho instant\'aneo y la presi\'on sobre USB/CPU. \\
-Raspberry Pi 5 a MonRaF2 & GPIO, UART, USB & Permite control auxiliar, comunicaci\'on con LTE/GNSS y se\~nales de estado. \\
-MonRaF2 a red celular & LTE & Provee conectividad de datos para estado, mediciones, campa\~nas y reintentos. \\
-MonRaF2 a GNSS & GNSS/GPS & Entrega ubicaci\'on del nodo para reportes y trazabilidad de mediciones. \\
+Antenas a MonRaF2 & RF coaxial & Las antenas se conectan a MonRaF2. La etapa RF de la tarjeta selecciona o acondiciona rutas antes de la adquisición o uso LTE/GNSS. \\
+MonRaF2 a HackRF & RF seleccionado & El HackRF debe recibir una ruta RF controlada, no una conexión de antena asumida como directa. \\
+HackRF a Raspberry Pi 5 & USB & Transporta muestras IQ y comandos de configuración. El \textit{sample rate} aumenta simultáneamente el ancho instantáneo y la presión sobre USB/CPU. \\
+Raspberry Pi 5 a MonRaF2 & GPIO, UART, USB & Permite control auxiliar, comunicación con LTE/GNSS y señales de estado. \\
+MonRaF2 a red celular & LTE & Provee conectividad de datos para estado, mediciones, campañas y reintentos. \\
+MonRaF2 a GNSS & GNSS/GPS & Entrega ubicación del nodo para reportes y trazabilidad de mediciones. \\
 Fuente externa a cargas & DC regulado & Debe distribuir potencia a Raspberry Pi 5, HackRF, MonRaF2 y expansiones con margen suficiente. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\section{Decisiones de dise\~no o implementaci\'on}
+\section{Decisiones de diseño o implementación}
 
 \small
 \begin{longtable}{p{3cm} p{4cm} p{5.2cm}}
-\caption{Decisiones de dise\~no de hardware y justificaci\'on.}
+\caption{Decisiones de diseño de hardware y justificación.}
 \label{tab:hw_decisiones}\\
 \toprule
-\textbf{Decisi\'on} & \textbf{Justificaci\'on} & \textbf{Implicaci\'on pr\'actica} \\
+\textbf{Decisión} & \textbf{Justificación} & \textbf{Implicación práctica} \\
 \midrule
 \endfirsthead
 \toprule
-\textbf{Decisi\'on} & \textbf{Justificaci\'on} & \textbf{Implicaci\'on pr\'actica} \\
+\textbf{Decisión} & \textbf{Justificación} & \textbf{Implicación práctica} \\
 \midrule
 \endhead
-Usar MonRaF2 como concentrador RF y de conectividad & La tarjeta contiene rutas de antena, filtros, mux/switch RF, LTE/GNSS y se\~nales de control. & Las antenas se documentan y cablean hacia MonRaF2; el HackRF queda como receptor SDR dentro de la cadena, no como punto directo de antena. \\
-Usar Raspberry Pi 5 como computador de borde & Tiene capacidad suficiente para orquestaci\'on, telemetr\'ia y control del SDR. & Debe protegerse de sobrecarga el\'ectrica; no debe alimentar todos los perif\'ericos en una versi\'on robusta. \\
-Usar HackRF One como receptor SDR & Permite recepci\'on flexible por software y adquisici\'on IQ. & Requiere ganancia configurada con criterio y alimentaci\'on estable. \\
-Separar potencia de control & Los problemas de subtensi\'on aparecen cuando la distribuci\'on de energ\'ia queda demasiado acoplada a la Raspberry Pi. & El \'arbol de potencia externo pasa a ser requisito de producto. \\
-Mantener telemetr\'ia de salud & Temperatura, voltajes, corrientes y banderas de \textit{throttling} permiten diagnosticar fallas reales. & Cada prueba de RF o conectividad debe acompa\~narse de telemetr\'ia el\'ectrica. \\
+Usar MonRaF2 como concentrador RF y de conectividad & La tarjeta contiene rutas de antena, filtros, mux/switch RF, LTE/GNSS y señales de control. & Las antenas se documentan y cablean hacia MonRaF2; el HackRF queda como receptor SDR dentro de la cadena, no como punto directo de antena. \\
+Usar Raspberry Pi 5 como computador de borde & Tiene capacidad suficiente para orquestación, telemetría y control del SDR. & Debe protegerse de sobrecarga eléctrica; no debe alimentar todos los periféricos en una versión robusta. \\
+Usar HackRF One como receptor SDR & Permite recepción flexible por software y adquisición IQ. & Requiere ganancia configurada con criterio y alimentación estable. \\
+Separar potencia de control & Los problemas de subtensión aparecen cuando la distribución de energía queda demasiado acoplada a la Raspberry Pi. & El árbol de potencia externo pasa a ser requisito de producto. \\
+Mantener telemetría de salud & Temperatura, voltajes, corrientes y banderas de \textit{throttling} permiten diagnosticar fallas reales. & Cada prueba de RF o conectividad debe acompañarse de telemetría eléctrica. \\
 \bottomrule
 \end{longtable}
 \normalsize
@@ -228,43 +228,43 @@ Mantener telemetr\'ia de salud & Temperatura, voltajes, corrientes y banderas de
 \caption{Problemas presentados, decisiones y ajustes realizados en hardware.}
 \label{tab:hw_problemas}\\
 \toprule
-\textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Decisi\'on o ajuste} & \textbf{Resultado} \\
+\textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Decisión o ajuste} & \textbf{Resultado} \\
 \midrule
 \endfirsthead
 \toprule
-\textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Decisi\'on o ajuste} & \textbf{Resultado} \\
+\textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Decisión o ajuste} & \textbf{Resultado} \\
 \midrule
 \endhead
-Subtensi\'on y bajo margen de potencia & Ca\'idas de EXT5V bajo cargas SDR/LTE y escenarios con eventos de alimentaci\'on insuficiente. & Demasiadas cargas alimentadas o condicionadas desde la Raspberry Pi 5. & Dise\~nar un \'arbol de potencia externo, generoso y medible. & Requisito obligatorio para una versi\'on robusta. \\
-Aumento de temperatura bajo carga & Pruebas con HackRF y peticiones desde servidor alcanzaron temperaturas cercanas a 75 $^\circ$C. & Procesamiento sostenido, actividad USB y carga RF/LTE simult\'anea. & Mantener disipaci\'on, ventilaci\'on y telemetr\'ia de temperatura. & La temperatura queda como restricci\'on operativa. \\
-Ambig\"uedad en ruta de antenas & El dise\~no incluye redes MAIN/GNSS/AUX, filtros y mux/switch RF en MonRaF2. & Interpretar la antena como conexi\'on directa al HackRF simplifica de forma incorrecta la cadena RF. & Documentar MonRaF2 como entrada y selecci\'on RF. & La conexi\'on f\'isica queda alineada con el esquem\'atico. \\
-Dependencia del enlace LTE & Las pruebas de campo usan conectividad celular para operaci\'on y env\'io de datos. & La red celular puede variar por cobertura, antena, SIM y ubicaci\'on. & Separar diagn\'ostico de RF, c\'omputo, potencia y LTE. & Las fallas se pueden atribuir con mejor evidencia. \\
-Riesgo de saturaci\'on RF & HackRF no usa AGC de hardware en esta cadena de operaci\'on. & Ganancia excesiva o emisores fuertes pueden saturar el ADC de 8 bits. & Ajustar ganancia por escenario y conservar configuraciones durante comparaciones. & Menor riesgo de confundir artefactos con emisiones reales. \\
+Subtensión y bajo margen de potencia & Caídas de EXT5V bajo cargas SDR/LTE y escenarios con eventos de alimentación insuficiente. & Demasiadas cargas alimentadas o condicionadas desde la Raspberry Pi 5. & Diseñar un árbol de potencia externo, generoso y medible. & Requisito obligatorio para una versión robusta. \\
+Aumento de temperatura bajo carga & Pruebas con HackRF y peticiones desde servidor alcanzaron temperaturas cercanas a 75 $^\circ$C. & Procesamiento sostenido, actividad USB y carga RF/LTE simultánea. & Mantener disipación, ventilación y telemetría de temperatura. & La temperatura queda como restricción operativa. \\
+Ambig\"uedad en ruta de antenas & El diseño incluye redes MAIN/GNSS/AUX, filtros y mux/switch RF en MonRaF2. & Interpretar la antena como conexión directa al HackRF simplifica de forma incorrecta la cadena RF. & Documentar MonRaF2 como entrada y selección RF. & La conexión física queda alineada con el esquemático. \\
+Dependencia del enlace LTE & Las pruebas de campo usan conectividad celular para operación y envío de datos. & La red celular puede variar por cobertura, antena, SIM y ubicación. & Separar diagnóstico de RF, cómputo, potencia y LTE. & Las fallas se pueden atribuir con mejor evidencia. \\
+Riesgo de saturación RF & HackRF no usa AGC de hardware en esta cadena de operación. & Ganancia excesiva o emisores fuertes pueden saturar el ADC de 8 bits. & Ajustar ganancia por escenario y conservar configuraciones durante comparaciones. & Menor riesgo de confundir artefactos con emisiones reales. \\
 \bottomrule
 \end{longtable}
 \normalsize
 
-\section{Validaci\'on, pruebas o evidencias}
+\section{Validación, pruebas o evidencias}
 
-La validaci\'on usada para esta secci\'on combina inspecci\'on de esquem\'atico,
-fotograf\'ias del montaje y telemetr\'ia de nodos bajo reposo, carga SDR, carga LTE
-y carga combinada. Los indicadores m\'as \'utiles fueron temperatura ARM, EXT5V,
-corrientes de rieles, banderas de subtensi\'on, frecuencia de CPU y estados de
+La validación usada para esta sección combina inspección de esquemático,
+fotografías del montaje y telemetría de nodos bajo reposo, carga SDR, carga LTE
+y carga combinada. Los indicadores más útiles fueron temperatura ARM, EXT5V,
+corrientes de rieles, banderas de subtensión, frecuencia de CPU y estados de
 \textit{throttling}.
 
 \begin{table}[H]
 \centering
-\caption{Resumen de telemetr\'ia el\'ectrica y t\'ermica inspeccionada.}
+\caption{Resumen de telemetría eléctrica y térmica inspeccionada.}
 \label{tab:hw_telemetria}
 \begin{tabularx}{\textwidth}{>{\bfseries}p{3cm} p{2.4cm} p{2.1cm} p{1.4cm} X}
 \toprule
-Escenario & Temperatura ARM & EXT5V & UV & Lectura para operaci\'on \\
+Escenario & Temperatura ARM & EXT5V & UV & Lectura para operación \\
 \midrule
-Nodo en reposo & 54.3--57.6 $^\circ$C & 5.006--5.041 V & No & Referencia base con sistema operativo y telemetr\'ia. \\
+Nodo en reposo & 54.3--57.6 $^\circ$C & 5.006--5.041 V & No & Referencia base con sistema operativo y telemetría. \\
 HackRF en carga alta & 54.9--74.7 $^\circ$C & 4.748--4.965 V & No & La carga SDR aumenta demanda y temperatura. \\
-Perif\'ericos conectados en reposo & 45.0--52.1 $^\circ$C & 4.903--4.963 V & No & El margen mejora cuando no hay procesamiento pesado. \\
-Petici\'on media con perif\'ericos & 61.5--75.7 $^\circ$C & 4.721--5.083 V & No & El sistema se acerca a l\'imites t\'ermicos y de alimentaci\'on. \\
-Carga alta con perif\'ericos externos & 49.4--75.2 $^\circ$C & 4.904--5.122 V & No & La alimentaci\'on externa mejora el margen frente a carga combinada. \\
+Periféricos conectados en reposo & 45.0--52.1 $^\circ$C & 4.903--4.963 V & No & El margen mejora cuando no hay procesamiento pesado. \\
+Petición media con periféricos & 61.5--75.7 $^\circ$C & 4.721--5.083 V & No & El sistema se acerca a límites térmicos y de alimentación. \\
+Carga alta con periféricos externos & 49.4--75.2 $^\circ$C & 4.904--5.122 V & No & La alimentación externa mejora el margen frente a carga combinada. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -272,43 +272,43 @@ Carga alta con perif\'ericos externos & 49.4--75.2 $^\circ$C & 4.904--5.122 V & 
 \section{Aprendizajes y transferencia de conocimiento}
 
 \begin{itemize}[leftmargin=*]
-    \item El \'arbol de potencia define la robustez del nodo. Si se alimentan
-    perif\'ericos exigentes desde la Raspberry Pi, el dise\~no queda sin margen.
+    \item El árbol de potencia define la robustez del nodo. Si se alimentan
+    periféricos exigentes desde la Raspberry Pi, el diseño queda sin margen.
     \item Las antenas pertenecen a la cadena de MonRaF2 y su etapa RF. El HackRF
     debe verse como receptor dentro de una ruta seleccionada, no como destino
     directo de todas las antenas.
-    \item La telemetr\'ia el\'ectrica debe acompa\~nar cualquier prueba RF. Sin
-    voltajes, corrientes y temperatura es f\'acil confundir fallas de potencia con
+    \item La telemetría eléctrica debe acompañar cualquier prueba RF. Sin
+    voltajes, corrientes y temperatura es fácil confundir fallas de potencia con
     fallas de software.
-    \item El dise\~no debe reservar margen para servicios futuros. Cada extensi\'on
-    de software o hardware aumenta demanda de energ\'ia, temperatura y tr\'afico.
+    \item El diseño debe reservar margen para servicios futuros. Cada extensión
+    de software o hardware aumenta demanda de energía, temperatura y tráfico.
 \end{itemize}
 
 \section{Limitaciones}
 
 \begin{itemize}[leftmargin=*]
-    \item Las cifras de telemetr\'ia resumen pruebas disponibles; no reemplazan una
-    caracterizaci\'on el\'ectrica completa con instrumentos de laboratorio.
+    \item Las cifras de telemetría resumen pruebas disponibles; no reemplazan una
+    caracterización eléctrica completa con instrumentos de laboratorio.
     \item No se presentan curvas completas de consumo por banda, ganancia,
-    temperatura ambiente, antena o ubicaci\'on.
-    \item El dise\~no RF requiere validar p\'erdidas, aislamiento, adaptaci\'on de
-    impedancias y compatibilidad electromagn\'etica antes de una versi\'on final de
+    temperatura ambiente, antena o ubicación.
+    \item El diseño RF requiere validar pérdidas, aislamiento, adaptación de
+    impedancias y compatibilidad electromagnética antes de una versión final de
     campo.
-    \item La estabilidad LTE/GNSS depende de cobertura, antenas, SIM, ubicaci\'on y
-    configuraci\'on del operador.
+    \item La estabilidad LTE/GNSS depende de cobertura, antenas, SIM, ubicación y
+    configuración del operador.
 \end{itemize}
 
-\section{Recomendaciones espec\'ificas}
+\section{Recomendaciones específicas}
 
 \begin{enumerate}[leftmargin=*]
-    \item Dise\~nar una fuente principal externa con margen amplio para carga
-    simult\'anea y extensiones futuras.
+    \item Diseñar una fuente principal externa con margen amplio para carga
+    simultánea y extensiones futuras.
     \item Alimentar HackRF, LTE/GNSS y cargas auxiliares desde rieles dedicados o
     reguladores adecuados, no desde el margen de la Raspberry Pi 5.
-    \item Mantener medici\'on de voltaje, corriente, temperatura y banderas de
-    subtensi\'on como parte del producto.
+    \item Mantener medición de voltaje, corriente, temperatura y banderas de
+    subtensión como parte del producto.
     \item Conectar y documentar antenas desde MonRaF2 y su ruta tipo mux/switch RF.
-    \item Revisar disipaci\'on t\'ermica para escenarios con SDR y LTE activos al
+    \item Revisar disipación térmica para escenarios con SDR y LTE activos al
     mismo tiempo.
     \item Separar pruebas de reposo, SDR, LTE/GNSS y carga combinada para poder
     atribuir fallas con evidencia.
