@@ -1,6 +1,6 @@
-\section{Hardware}
+\chapter{Hardware}
 
-\subsection{Prop\'osito de la secci\'on}
+\section{Prop\'osito del cap\'itulo}
 
 Esta secci\'on documenta el hardware del nodo de sensado espectral ANE2 con un
 criterio de transferencia de conocimiento. La intenci\'on no es solamente listar
@@ -16,7 +16,7 @@ sobredimensionado y medible}, capaz de alimentar c\'omputo, SDR, LTE/GNSS, mux
 RF y futuras extensiones sin depender del margen de los puertos de la Raspberry
 Pi.
 
-\subsection{Contexto dentro del sistema general}
+\section{Contexto dentro del sistema general}
 
 ANE2 es un nodo de borde para monitoreo espectral. En campo, el hardware debe
 recibir se\~nales RF, seleccionar o enrutar la entrada de antena, digitalizar la
@@ -49,9 +49,9 @@ Raspberry Pi 5 y comunicaci\'on por LTE/GNSS.
     \label{fig:hw_producto_ane2}
 \end{figure}
 
-\subsection{Desarrollo t\'ecnico}
+\section{Desarrollo t\'ecnico}
 
-\subsubsection{Arquitectura f\'isica del nodo}
+\subsection{Arquitectura f\'isica del nodo}
 
 El nodo se compone de una Raspberry Pi 5, una tarjeta HackRF One y una PCB
 MonRaF2. La Raspberry Pi 5 coordina la ejecuci\'on de software, el HackRF One
@@ -103,7 +103,7 @@ de ruta RF, de alimentaci\'on, de procesamiento, de enlace celular o de ubicaci\
     \label{fig:hw_modulos_principales}
 \end{figure}
 
-\subsubsection{Ruta RF y mux de antenas}
+\subsection{Ruta RF y mux de antenas}
 
 La ruta RF no debe describirse como una antena conectada directamente al HackRF.
 El esquem\'atico de MonRaF2 muestra redes de antena como \texttt{MAIN\_ANT},
@@ -132,7 +132,7 @@ El flujo f\'isico recomendado queda entonces:
     \label{fig:hw_monraf2_rf}
 \end{figure}
 
-\subsubsection{\'Arbol de potencia}
+\subsection{\'Arbol de potencia}
 
 El principal aprendizaje del hardware es que el dise\~no de potencia debe
 preceder al dise\~no mec\'anico y de software. En las primeras integraciones, gran
@@ -177,7 +177,7 @@ Reserva para extensiones & El dise\~no debe contemplar nuevos servicios, antenas
 \end{tabularx}
 \end{table}
 
-\subsection{Entradas, salidas e interfaces}
+\section{Entradas, salidas e interfaces}
 
 \begin{table}[H]
 \centering
@@ -198,7 +198,7 @@ Fuente externa a cargas & DC regulado & Debe distribuir potencia a Raspberry Pi 
 \end{tabularx}
 \end{table}
 
-\subsection{Decisiones de dise\~no o implementaci\'on}
+\section{Decisiones de dise\~no o implementaci\'on}
 
 \small
 \begin{longtable}{p{3cm} p{4cm} p{5.2cm}}
@@ -221,7 +221,7 @@ Mantener telemetr\'ia de salud & Temperatura, voltajes, corrientes y banderas de
 \end{longtable}
 \normalsize
 
-\subsection{Problemas presentados y ajustes realizados}
+\section{Problemas presentados y ajustes realizados}
 
 \scriptsize
 \begin{longtable}{p{2.1cm} p{2.7cm} p{2.6cm} p{2.8cm} p{2.3cm}}
@@ -244,7 +244,7 @@ Riesgo de saturaci\'on RF & HackRF no usa AGC de hardware en esta cadena de oper
 \end{longtable}
 \normalsize
 
-\subsection{Validaci\'on, pruebas o evidencias}
+\section{Validaci\'on, pruebas o evidencias}
 
 La validaci\'on usada para esta secci\'on combina inspecci\'on de esquem\'atico,
 fotograf\'ias del montaje y telemetr\'ia de nodos bajo reposo, carga SDR, carga LTE
@@ -269,7 +269,7 @@ Carga alta con perif\'ericos externos & 49.4--75.2 $^\circ$C & 4.904--5.122 V & 
 \end{tabularx}
 \end{table}
 
-\subsection{Aprendizajes y transferencia de conocimiento}
+\section{Aprendizajes y transferencia de conocimiento}
 
 \begin{itemize}[leftmargin=*]
     \item El \'arbol de potencia define la robustez del nodo. Si se alimentan
@@ -284,7 +284,7 @@ Carga alta con perif\'ericos externos & 49.4--75.2 $^\circ$C & 4.904--5.122 V & 
     de software o hardware aumenta demanda de energ\'ia, temperatura y tr\'afico.
 \end{itemize}
 
-\subsection{Limitaciones}
+\section{Limitaciones}
 
 \begin{itemize}[leftmargin=*]
     \item Las cifras de telemetr\'ia resumen pruebas disponibles; no reemplazan una
@@ -298,7 +298,7 @@ Carga alta con perif\'ericos externos & 49.4--75.2 $^\circ$C & 4.904--5.122 V & 
     configuraci\'on del operador.
 \end{itemize}
 
-\subsection{Recomendaciones espec\'ificas}
+\section{Recomendaciones espec\'ificas}
 
 \begin{enumerate}[leftmargin=*]
     \item Dise\~nar una fuente principal externa con margen amplio para carga

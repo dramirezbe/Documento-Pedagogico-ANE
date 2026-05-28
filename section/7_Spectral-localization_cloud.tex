@@ -1,6 +1,6 @@
-\section{An\'alisis espectral y localizaci\'on en la nube}
+\chapter{An\'alisis espectral y localizaci\'on en la nube}
 
-\subsection{Prop\'osito de la secci\'on}
+\section{Prop\'osito del cap\'itulo}
 
 Esta secci\'on documenta el m\'odulo de postprocesamiento espectral desarrollado para analizar, en un entorno centralizado, las capturas generadas por el sistema de monitoreo. El objetivo de este avance es explicar c\'omo el software recibe una traza espectral, organiza la informaci\'on de frecuencia y amplitud, selecciona un modo de operaci\'on y obtiene los primeros par\'ametros t\'ecnicos de las emisiones detectadas.
 
@@ -8,7 +8,7 @@ En esta etapa se describe el proceso hasta la estimaci\'on de la \textbf{frecuen
 
 El prop\'osito del m\'odulo no es reemplazar la adquisici\'on SDR realizada en el borde, sino convertir las capturas recibidas en resultados interpretables para la plataforma. Por esta raz\'on, el cap\'itulo se enfoca en la funci\'on del software dentro del flujo general del sistema, en sus entradas y salidas principales, y en las decisiones iniciales usadas para diferenciar ruido, picos solicitados y emisiones candidatas.
 
-\subsection{Contexto dentro del sistema general}
+\section{Contexto dentro del sistema general}
 
 El sistema completo puede entenderse como una cadena de sensado, transmisi\'on, procesamiento y visualizaci\'on. En el borde, el nodo de monitoreo recibe se\~nales de radiofrecuencia mediante el hardware SDR y genera una captura espectral. Posteriormente, esa captura se env\'ia hacia la plataforma central o se analiza de forma local mediante archivos de entrada. El m\'odulo descrito en esta secci\'on se ubica despu\'es de la adquisici\'on y antes de la presentaci\'on de resultados al usuario.
 
@@ -16,7 +16,7 @@ La informaci\'on que llega al m\'odulo corresponde principalmente a una serie de
 
 En este punto del desarrollo, la palabra localizaci\'on se interpreta de forma limitada. El m\'odulo no calcula una posici\'on geogr\'afica exacta de la emisi\'on ni realiza triangulaci\'on con varios nodos. La relaci\'on espacial disponible se maneja a trav\'es de filtros administrativos, como c\'odigo DANE, lista de DANEs o municipio, los cuales permiten contextualizar una medici\'on dentro de una zona de an\'alisis. El desarrollo detallado de esta parte queda para la continuaci\'on de la secci\'on.
 
-\subsection{Arquitectura del m\'odulo de postprocesamiento}
+\section{Arquitectura del m\'odulo de postprocesamiento}
 
 El desarrollo se organiza como un m\'odulo de Python separado en archivos con responsabilidades espec\'ificas. Esta divisi\'on facilita el mantenimiento, la prueba por componentes y la integraci\'on posterior con una plataforma web o con una API.
 
@@ -41,7 +41,7 @@ El desarrollo se organiza como un m\'odulo de Python separado en archivos con re
 
 La arquitectura permite ejecutar el mismo procesamiento desde dos frentes: por consola, usando \path{main.py}, o como servicio, usando \path{server_flask.py}. En ambos casos, la funci\'on central es \texttt{process\_input}, definida en \path{src/processor.py}, porque all\'i se decide el modo de an\'alisis y se construye la respuesta final.
 
-\subsection{Flujo general de procesamiento}
+\section{Flujo general de procesamiento}
 
 El flujo de trabajo inicia con una captura espectral en formato JSON. El sistema espera una lista de valores espectrales y dos frecuencias l\'imite que definan el intervalo analizado. A partir de esa informaci\'on, se construye una representaci\'on interna de la traza y se ejecuta el modo de operaci\'on correspondiente.
 
@@ -64,7 +64,7 @@ De forma resumida, el flujo es el siguiente:
 
 Este flujo conserva una separaci\'on clara entre los datos de entrada, la representaci\'on interna y los resultados. Esa decisi\'on es importante porque evita que cada parte del sistema tenga que interpretar directamente el JSON original.
 
-\subsection{Entradas del sistema}
+\section{Entradas del sistema}
 
 Las entradas principales del m\'odulo son la captura espectral y algunos par\'ametros de control. No todos los campos son obligatorios en todos los modos; algunos se usan solo cuando se quiere hacer an\'alisis por picos o preparar una validaci\'on posterior de cumplimiento.
 
@@ -92,7 +92,7 @@ Las entradas principales del m\'odulo son la captura espectral y algunos par\'am
 
 El parser de entrada tambi\'en acepta algunos alias de nombres para los campos principales, como \texttt{pxx}, \texttt{PSD}, \texttt{f\_start\_hz} o \texttt{f\_stop\_hz}. Esta flexibilidad permite integrar capturas provenientes de fuentes distintas sin cambiar la estructura general del procesamiento.
 
-\subsection{Salidas del sistema}
+\section{Salidas del sistema}
 
 La salida del m\'odulo se entrega como una estructura de datos con informaci\'on general del procesamiento y una lista de resultados. En este avance se documentan las salidas relacionadas con modo, picos, estado de detecci\'on, frecuencia central, ancho de banda, potencia y MER/BER cuando el caso aplica.
 
@@ -146,7 +146,7 @@ La salida del m\'odulo se entrega como una estructura de datos con informaci\'on
 
 La estructura de salida permite que otro m\'odulo consuma los resultados sin depender de mensajes impresos en consola. Esto es necesario para integrarlo con una plataforma web, una base de datos o una capa de visualizaci\'on.
 
-\subsection{Modos de operaci\'on}
+\section{Modos de operaci\'on}
 
 El m\'odulo selecciona autom\'aticamente el modo de operaci\'on usando dos elementos de entrada: la lista de picos y la bandera de cumplimiento. La regla implementada es simple: si hay picos, se prioriza el an\'alisis por picos; si no hay picos y cumplimiento vale uno, se activa el modo de cumplimiento; si no hay picos y cumplimiento vale cero, se detectan todas las emisiones candidatas.
 
@@ -164,29 +164,29 @@ El m\'odulo selecciona autom\'aticamente el modo de operaci\'on usando dos eleme
 \end{tabularx}
 \end{table}
 
-\subsubsection{Detecci\'on autom\'atica de emisiones}
+\subsection{Detecci\'on autom\'atica de emisiones}
 
 En el modo \texttt{all\_emissions}, el sistema analiza toda la traza espectral. Primero estima un umbral de detecci\'on a partir del piso de ruido o del valor indicado por el usuario mediante \texttt{umbral\_db}. Despu\'es busca picos o regiones candidatas y, para cada una, mide frecuencia central, ancho de banda y potencia. Si la emisi\'on corresponde a un caso TDT compatible, tambi\'en puede estimar MER y BER.
 
 Este modo es \'util cuando el usuario no sabe previamente en qu\'e frecuencias existen emisiones de inter\'es. La salida principal de esta etapa es una lista de candidatos con su estado y sus par\'ametros espectrales iniciales.
 
-\subsubsection{An\'alisis por picos solicitados}
+\subsection{An\'alisis por picos solicitados}
 
 En el modo \texttt{peaks}, el usuario entrega una o varias frecuencias de inter\'es. El sistema ubica la frecuencia solicitada dentro del eje de la captura y busca un pico cercano que pueda representar una emisi\'on real. Si encuentra una regi\'on suficientemente consistente, reporta los par\'ametros medidos de la emisi\'on. Si no encuentra evidencia suficiente, el resultado se marca como ruido o como pico no asociado a una emisi\'on clara.
 
 Este modo es conveniente cuando se desea comprobar una frecuencia puntual, por ejemplo una frecuencia observada visualmente en una gr\'afica o una frecuencia que se sospecha activa.
 
-\subsubsection{Modo de cumplimiento}
+\subsection{Modo de cumplimiento}
 
 En el modo \texttt{compliance}, el sistema queda preparado para relacionar las emisiones detectadas con una base de referencia, normalmente una base de licencias. Para entrar en este modo no deben entregarse picos y la bandera \texttt{cumplimiento} debe estar activa.
 
 En este avance no se desarrolla la comparaci\'on completa de cumplimiento. Solo se documenta que el modo existe dentro del enrutamiento del software y que utiliza la misma base inicial de detecci\'on espectral para obtener los par\'ametros medidos que luego pueden ser comparados con valores nominales.
 
-\subsection{An\'alisis espectral realizado: frecuencia central, ancho de banda, potencia y MER/BER}
+\section{An\'alisis espectral realizado: frecuencia central, ancho de banda, potencia y MER/BER}
 
 El an\'alisis espectral del m\'odulo se centra en convertir una regi\'on detectada de la traza en par\'ametros t\'ecnicos que puedan ser interpretados por la plataforma. En este avance se documentan cuatro salidas principales: frecuencia central, ancho de banda, potencia y, solo cuando la captura lo permite, MER/BER. Estos valores no se escriben de forma manual, sino que se derivan de la regi\'on espectral detectada por el algoritmo.
 
-\subsubsection{Frecuencia central}
+\subsection{Frecuencia central}
 
 La frecuencia central representa la frecuencia principal o representativa de una emisi\'on detectada dentro de la captura. En el m\'odulo, esta frecuencia se entrega principalmente en dos unidades: Hz mediante \texttt{fc\_hz} y MHz mediante \texttt{fc\_mhz}.
 
@@ -219,7 +219,7 @@ La frecuencia central no debe interpretarse simplemente como el punto m\'as alto
 \end{tabularx}
 \end{table}
 
-\subsubsection{Ancho de banda}
+\subsection{Ancho de banda}
 
 El ancho de banda describe la extensi\'on espectral ocupada por una emisi\'on. En el software, este valor se obtiene despu\'es de delimitar la regi\'on asociada al pico o segmento candidato. La funci\'on de medici\'on calcula dos referencias: un ancho a \(-x\) dB respecto al pico y un ancho de banda ocupado u OBW, que representa el intervalo que contiene un porcentaje definido de la potencia de la emisi\'on.
 
@@ -243,7 +243,7 @@ El resultado se reporta como \texttt{bw\_hz} y \texttt{bw\_khz}. El primer campo
 \end{tabularx}
 \end{table}
 
-\subsubsection{Potencia de la emisi\'on}
+\subsection{Potencia de la emisi\'on}
 
 La potencia se estima a partir de la regi\'on espectral asociada a la emisi\'on. Para evitar errores de interpretaci\'on, el c\'alculo no se realiza directamente en dBm como si fuera una suma lineal. El procedimiento convierte las muestras al dominio lineal, integra o suma la contribuci\'on de los bins dentro de la regi\'on seleccionada y finalmente devuelve el resultado en dBm.
 
@@ -266,7 +266,7 @@ En los modos \texttt{all\_emissions} y \texttt{peaks}, la salida principal se re
 \end{tabularx}
 \end{table}
 
-\subsubsection{MER y BER cuando aplica}
+\subsection{MER y BER cuando aplica}
 
 El m\'odulo tambi\'en incluye una estimaci\'on opcional de MER y BER para se\~nales compatibles con el caso TDT. Este c\'alculo no se aplica a todas las emisiones detectadas. La funci\'on primero verifica si la frecuencia central de la regi\'on cae dentro del rango TDT definido en el c\'odigo y si el ancho de la banda es plausible para ese tipo de se\~nal. Si esas condiciones no se cumplen, la funci\'on retorna un resultado vac\'io y el reporte no incluye campos de MER/BER.
 
