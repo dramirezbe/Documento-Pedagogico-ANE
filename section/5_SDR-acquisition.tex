@@ -1,18 +1,444 @@
-\section{SDR: adquisici\'on y preprocesamiento de se\~nales de radio en borde}
+\section{Software del sensor}
 
-Esta secci\'on debe explicar c\'omo se capturan las se\~nales usando SDR, qu\'e etapas de
-preprocesamiento se ejecutan en el borde y cu\'ales son las salidas intermedias que luego
-se env\'ian o publican para an\'alisis posterior.
+\subsection{Resumen}
 
-Como placeholder, el texto actual define una estructura inicial para documentar pipelines
-de captura, filtrado, segmentaci\'on, almacenamiento temporal y optimizaciones para trabajo
-en tiempo real o cuasi-tiempo real.
+Este documento describe, de forma pedagogica y conceptual, la arquitectura del
+codigo que corre directamente en el sensor de monitoreo espectral. El sensor esta
+compuesto por una Raspberry Pi 5, una HackRF One y una tarjeta auxiliar que integra
+comunicacion LTE, receptor GPS y un multiplexor para seleccion de antena.
 
-\subsection*{Puntos sugeridos para completar}
-\begin{itemize}[leftmargin=*]
-  \item Configuraci\'on del SDR y par\'ametros de adquisici\'on.
-  \item Flujo de preprocesamiento en borde.
-  \item Estrategias de limpieza, filtrado o reducci\'on de ruido.
-  \item Formato de salida de datos y m\'etodos de transmisi\'on.
-  \item Limitaciones operativas y oportunidades de mejora.
+La seccion del proyecto descrita aqui no corresponde a toda la plataforma. El
+sistema completo tambien incluye componentes externos, como backend, frontend,
+bases de datos y servicios de visualizacion. Este repositorio se concentra en el
+codigo embebido del sensor: la parte que recibe instrucciones de la plataforma,
+controla el hardware de radiofrecuencia, adquiere muestras, procesa senales y
+devuelve resultados.
+
+\subsubsection{Proposito general}
+
+El proposito general del codigo es convertir al sensor fisico en un nodo autonomo
+de medicion espectral. Para ello, el software debe recibir ordenes del servidor,
+configurar la HackRF One, seleccionar la antena adecuada, capturar senales IQ,
+procesarlas localmente y enviar a la plataforma central productos utiles como PSD,
+metricas de modulacion, audio demodulado, estado del dispositivo y coordenadas GPS.
+
+\subsubsection{Objetivos especificos}
+
+\begin{itemize}
+  \item Controlar la adquisicion de radio mediante la HackRF One, ajustando
+  frecuencia central, tasa de muestreo, ganancias, amplificador y puerto de antena.
+  \item Ejecutar mediciones espectrales en modo \textit{realtime} y en campanas
+  programadas desde el servidor.
+  \item Procesar muestras IQ crudas para estimar densidad espectral de potencia
+  mediante metodos como Welch y banco de filtros polifase.
+  \item Demodular senales AM o FM cuando el servidor solicita audio en tiempo real.
+  \item Aplicar etapas de limpieza y correccion para mejorar la calidad de las
+  mediciones, incluyendo balance IQ y remocion del pico DC.
+  \item Mantener una calibracion de frecuencia que compense desviaciones del
+  oscilador de la HackRF.
+  \item Coordinar la comunicacion con el backend, el envio de resultados, los
+  reintentos ante fallos de red y el reporte de estado del sensor.
+  \item Gestionar recursos fisicos del sensor, como LTE, GPS, GPIO y multiplexor
+  de antena.
 \end{itemize}
+
+\subsection{Introduccion y arquitectura general}
+
+La arquitectura del sensor se puede entender como una cadena de trabajo: el
+servidor decide que se debe medir, el orquestador traduce esa instruccion a una
+configuracion de radio, el motor RF adquiere y procesa las muestras, y finalmente
+los resultados regresan al servidor.
+
+La division principal del sistema es la siguiente:
+
+\begin{itemize}
+  \item \textbf{Orquestacion en Python}: gestiona la relacion con el backend,
+  consulta instrucciones, programa campanas, controla estados del sistema, envia
+  comandos al motor RF y prepara los resultados para publicarlos.
+  \item \textbf{Motor RF en C}: controla la HackRF One, recibe muestras IQ,
+  administra buffers de alta velocidad, ejecuta procesamiento DSP, calcula PSD,
+  demodula audio y devuelve resultados al orquestador.
+  \item \textbf{Servicios auxiliares}: atienden funciones de soporte como GPS,
+  LTE, estado del sistema, reintentos de datos no enviados, WebRTC para audio y
+  control del multiplexor de antena.
+\end{itemize}
+
+La decision de separar Python y C responde a una necesidad practica. Python es
+adecuado para coordinacion, comunicacion HTTP, manejo de estados y programacion
+de tareas. C es adecuado para la parte sensible a latencia: captura de muestras,
+buffers, FFT, filtrado, PSD y demodulacion.
+
+\subsubsection{Servicios y modos de operacion}
+
+El sensor opera con varios servicios o modos complementarios:
+
+\begin{itemize}
+  \item \textbf{PSD en tiempo real}: el backend solicita una configuracion y el
+  sensor responde con una estimacion espectral de la banda capturada.
+  \item \textbf{PSD y audio en tiempo real}: ademas de la PSD, el sensor demodula
+  FM o AM y genera tramas de audio reproducibles por la plataforma.
+  \item \textbf{Campanas}: el backend programa mediciones periodicas; el sensor
+  guarda la configuracion, agenda ejecuciones y sube resultados en cada intervalo.
+  \item \textbf{Calibracion en frecuencia}: el sensor estima el error de sintonia
+  y aplica una correccion para que las mediciones queden mejor alineadas en
+  frecuencia.
+  \item \textbf{GPS y LTE}: el sensor mantiene conectividad celular y reporta
+  ubicacion geografica al servidor.
+  \item \textbf{Estado del dispositivo}: se reportan variables de salud como
+  conectividad, almacenamiento, temperatura, memoria y actividad del software.
+\end{itemize}
+
+
+\subsection{Bloques o partes del codigo}
+
+El codigo puede leerse como un conjunto de bloques funcionales. Cada bloque cumple
+una responsabilidad dentro del camino completo de la senal: desde la instruccion
+del backend hasta la publicacion del resultado.
+
+\subsubsection{Adquisicion}
+
+El bloque de adquisicion es el encargado de hablar con la HackRF One y convertir
+una instruccion de medicion en muestras IQ reales.
+
+Conceptualmente, este bloque realiza cinco acciones:
+
+\begin{enumerate}
+  \item Recibe una configuracion de medicion enviada por el orquestador. Esa
+  configuracion contiene parametros como frecuencia central, ancho de muestreo,
+  ganancias, metodo de PSD, puerto de antena, filtro solicitado y modo de
+  demodulacion.
+  \item Aplica la configuracion sobre la HackRF One. Esto incluye sintonia de
+  frecuencia, tasa de muestreo, ganancias de recepcion y correccion de frecuencia
+  cuando existe una calibracion disponible.
+  \item Inicia la recepcion de muestras IQ crudas desde el dispositivo SDR.
+  \item Deposita esas muestras en buffers circulares para separar la velocidad de
+  llegada del hardware de la velocidad de procesamiento del software.
+  \item Entrega bloques de muestras suficientemente grandes a los algoritmos de
+  procesamiento, evitando que cada operacion pesada interrumpa directamente la
+  captura.
+\end{enumerate}
+
+Las muestras IQ representan la senal recibida en banda base compleja. La componente
+\textit{I} corresponde a la parte en fase y la componente \textit{Q} a la parte en
+cuadratura. En conjunto permiten conservar informacion de amplitud y fase, que es
+necesaria para estimar el espectro, filtrar, demodular FM o demodular AM.
+
+\subsection{Uso de buffers}
+
+La logica de buffers es central en el sensor. La HackRF entrega datos de forma
+continua y rapida, mientras que la PSD, el filtrado o la demodulacion requieren
+procesamiento por bloques. Por eso el motor RF usa buffers circulares:
+
+\begin{itemize}
+  \item Un buffer principal recibe muestras IQ para estimacion espectral.
+  \item Un buffer de audio conserva muestras necesarias cuando se activa
+  demodulacion AM o FM.
+  \item El software drena estos buffers cuando ya hay suficientes muestras para
+  construir una respuesta.
+\end{itemize}
+
+Esta estructura permite que el sensor atienda procesos en tiempo real, como PSD y
+audio, sin tratar cada muestra de manera aislada. La idea pedagogica es similar a
+una banda transportadora: el hardware deposita muestras, el procesamiento toma
+paquetes completos y el orquestador recibe resultados ya elaborados.
+
+\subsection{Relacion con el backend}
+
+La adquisicion no decide por si sola que medir. Las instrucciones provienen del
+backend y llegan al motor RF a traves del orquestador. El backend define la
+intencion; el orquestador valida y traduce esa intencion; el motor RF la ejecuta
+sobre el hardware.
+
+Este esquema permite que el sensor funcione como un nodo remoto controlado por la
+plataforma, pero conservando autonomia local para manejar errores, tiempos de
+espera, buffers, reconexiones y estados internos.
+
+\subsubsection{Preproceso}
+
+El preproceso agrupa las operaciones que preparan la senal antes de extraer
+productos finales. Su objetivo es reducir artefactos propios del hardware y mejorar
+la calidad de la medicion.
+
+\subsection{Balance IQ}
+
+En un receptor SDR real, las ramas I y Q no siempre quedan perfectamente balanceadas.
+Puede haber diferencias de ganancia, pequenos desplazamientos DC o correlacion no
+deseada entre ambas componentes. Si estos efectos no se corrigen, pueden aparecer
+artefactos en el espectro o degradacion en la demodulacion.
+
+El balance IQ busca compensar esos errores antes del calculo de PSD o del filtrado.
+De forma conceptual, el algoritmo:
+
+\begin{itemize}
+  \item remueve desplazamientos promedio en las ramas I y Q;
+  \item compara la energia relativa de ambas ramas;
+  \item corrige diferencias de amplitud;
+  \item reduce correlaciones espurias entre I y Q.
+\end{itemize}
+
+No se trata de cambiar la informacion de la senal recibida, sino de disminuir
+imperfecciones introducidas por la cadena de recepcion.
+
+\subsection{Correccion de componente DC}
+
+La componente DC aparece cerca del centro de la banda base y suele estar asociada
+a efectos internos del receptor. En el flujo del sensor se atiende en dos niveles:
+
+\begin{itemize}
+  \item En el preproceso IQ se reduce el offset de las muestras antes de calcular
+  PSD o demodular.
+  \item En el postproceso de PSD se repara el pico central visible en el espectro
+  cuando aparece como un artefacto de medicion.
+\end{itemize}
+
+Esta separacion es importante: una cosa es limpiar la senal cruda y otra es pulir
+el producto espectral que se enviara al servidor.
+
+\subsubsection{Proceso}
+
+El bloque de proceso transforma muestras IQ en productos utiles para la plataforma.
+En este repositorio se implementan tres familias principales de procesamiento:
+estimacion de PSD, demodulacion de audio y filtrado de senales.
+
+\subsection{Estimacion de PSD}
+
+La PSD, o densidad espectral de potencia, permite observar como se distribuye la
+energia de la senal dentro de un rango de frecuencias. Es el producto principal
+para monitoreo espectral, porque permite identificar ocupacion de banda, niveles
+relativos de potencia, portadoras y posibles emisiones.
+
+El sensor contempla metodos como:
+
+\begin{itemize}
+  \item \textbf{Welch}: divide la senal en segmentos, aplica ventanas, calcula FFT
+  y promedia resultados para obtener una estimacion estable del espectro.
+  \item \textbf{Banco de filtros polifase}: mejora la separacion entre canales y
+  ayuda a controlar fugas espectrales cuando se requiere una estimacion mas
+  selectiva.
+\end{itemize}
+
+La PSD es una de las tareas mas costosas del sistema, porque requiere operar sobre
+grandes bloques de muestras y ejecutar transformadas de Fourier. Por eso el motor
+RF esta escrito en C y aprovecha una logica de trabajo multihilo y bibliotecas de
+procesamiento eficientes.
+
+\subsection{Demodulacion FM y AM}
+
+Cuando el backend solicita audio en tiempo real, el sensor no solo calcula PSD.
+Tambien toma las muestras IQ, extrae la informacion modulada y la convierte en
+audio reproducible.
+
+En FM, la informacion esta principalmente en la variacion de fase o frecuencia
+instantanea. El proceso conceptual consiste en observar como cambia la fase entre
+muestras consecutivas, convertir esa variacion en una senal de audio y acondicionar
+el resultado para reproduccion.
+
+En AM, la informacion esta principalmente en la envolvente de la senal. El proceso
+conceptual consiste en calcular la magnitud de la senal compleja, separar las
+variaciones utiles de la portadora y normalizar el audio resultante.
+
+Despues de demodular, el audio se convierte a un formato de transmision. El sensor
+genera tramas de audio, las codifica con Opus y las entrega al servicio local que
+publica el flujo mediante WebRTC. Esto permite que la plataforma escuche la senal
+con baja latencia sin que el backend tenga que procesar IQ crudo.
+
+\subsection{Filtrado}
+
+El filtrado permite concentrarse en una parte de la banda capturada y rechazar
+contenido fuera del rango de interes. El servidor puede solicitar un rango de
+frecuencia y el motor RF aplica un filtro pasabanda antes de calcular la PSD o de
+preparar la senal.
+
+Desde una perspectiva conceptual, el filtro funciona como una ventana selectiva:
+conserva la region que interesa y atenúa lo que queda por fuera. En el codigo se
+apoya en procedimientos de dominio frecuencial y validaciones para que el rango
+solicitado sea coherente con la banda realmente capturada por la HackRF.
+
+\subsection{Trabajo multihilo}
+
+El sistema separa tareas para mantener capacidad de respuesta:
+
+\begin{itemize}
+  \item Un flujo atiende la llegada de muestras desde la HackRF.
+  \item Otro flujo procesa bloques para PSD.
+  \item Cuando hay audio, un hilo adicional drena muestras, demodula y envia
+  tramas codificadas.
+  \item El orquestador permanece disponible para comunicarse con el backend y
+  manejar cambios de modo.
+\end{itemize}
+
+Esta organizacion evita que una tarea pesada, como una PSD de alta resolucion,
+bloquee completamente la captura o la transmision de audio.
+
+\subsubsection{Postproceso}
+
+El postproceso es la pulida final aplicada a los resultados antes de enviarlos al
+servidor. En este sistema, la etapa mas importante es la correccion del pico DC en
+la PSD.
+
+\subsection{Remocion del pico DC en PSD}
+
+Aunque el preproceso reduce offset en las muestras IQ, en la PSD puede quedar un
+pico artificial cerca del centro de la banda. Ese pico no siempre representa una
+emision real; con frecuencia es un artefacto propio del receptor SDR.
+
+El algoritmo de postproceso analiza el comportamiento estadistico de la PSD como
+una senal con variabilidad local. En lugar de borrar siempre un numero fijo de
+puntos, estima la region afectada y decide como reconstruirla.
+
+Conceptualmente, el procedimiento realiza:
+
+\begin{itemize}
+  \item deteccion de la region central afectada usando simetria y cambios locales
+  en la pendiente;
+  \item analisis de ocupacion espectral alrededor del centro;
+  \item validaciones con descriptores estadisticos como media, mediana,
+  dispersion y comportamiento de la cola alta;
+  \item ampliacion de la ventana de reparacion cuando la zona tiene baja
+  ocupacion espectral;
+  \item reconstruccion local mediante interpolacion lineal o ajuste polinomial.
+\end{itemize}
+
+El resultado enviado al backend conserva una PSD mas limpia. Cuando aplica, el
+software tambien puede conservar informacion de diagnostico sobre la correccion,
+como la ventana reparada y el modo de reconstruccion usado.
+
+\subsection{Calibracion en frecuencia}
+
+La calibracion en frecuencia busca compensar la desviacion entre la frecuencia
+nominal solicitada y la frecuencia real a la que queda sintonizado el receptor.
+En SDR de bajo costo, esta desviacion puede aparecer por tolerancias del oscilador,
+temperatura o condiciones de operacion.
+
+\subsubsection{Idea principal}
+
+El sensor usa una referencia conocida para estimar el error de frecuencia. En el
+caso de emisiones FM comerciales, una referencia util es el tono piloto estereo de
+19 kHz que aparece despues de demodular FM. Si una estacion FM fuerte contiene ese
+tono, el sensor puede usarlo como punto de comparacion.
+
+El flujo conceptual es:
+
+\begin{enumerate}
+  \item Capturar una porcion amplia de la banda donde se esperan emisoras FM.
+  \item Identificar candidatos con potencia suficiente.
+  \item Bajar cada candidato a banda base y demodular FM.
+  \item Buscar el tono piloto alrededor de 19 kHz en la senal demodulada.
+  \item Comparar la posicion observada con la posicion esperada.
+  \item Estimar un error de frecuencia y expresarlo como factor de correccion.
+\end{enumerate}
+
+\subsubsection{Uso de varias emisiones}
+
+Cuando hay varias emisiones candidatas, el sistema puede usar mas de una referencia
+para evitar depender de una sola estacion. Las emisiones mas confiables reciben
+mayor peso, por ejemplo si tienen mejor potencia o una deteccion mas clara del tono
+piloto. Con esa informacion se obtiene una estimacion mas robusta del error.
+
+\subsubsection{Aplicacion de la correccion}
+
+El resultado de la calibracion se guarda como un error de frecuencia, normalmente
+expresado en partes por millon. Luego, cuando el backend solicita una frecuencia
+central, el orquestador incluye ese factor en la configuracion enviada al motor RF.
+
+El motor usa la correccion para ajustar la sintonia de la HackRF. De esta manera,
+la frecuencia fisica de adquisicion queda mas alineada con la frecuencia nominal
+que la plataforma espera visualizar.
+
+\subsection{Orquestador}
+
+El orquestador es la logica de coordinacion del sensor. Su funcion no es procesar
+IQ de forma intensiva, sino dirigir el trabajo de todos los bloques.
+
+\subsubsection{Responsabilidades principales}
+
+\begin{itemize}
+  \item Consultar al backend para saber si hay solicitudes en tiempo real.
+  \item Consultar y sincronizar campanas programadas.
+  \item Validar configuraciones antes de enviarlas al motor RF.
+  \item Enviar comandos al motor RF usando mensajeria local ZeroMQ.
+  \item Recibir resultados de PSD y metricas desde el motor RF.
+  \item Aplicar postproceso sobre los resultados cuando corresponde.
+  \item Formatear y publicar datos hacia el backend mediante HTTP REST.
+  \item Controlar el inicio y parada del servicio de audio WebRTC.
+  \item Mantener estados globales como \texttt{IDLE}, \texttt{REALTIME},
+  \texttt{CAMPAIGN}, \texttt{KALIBRATING} y \texttt{ERROR}.
+  \item Gestionar memoria compartida local para parametros persistentes, como
+  \texttt{ppm\_error}, coordenadas GPS o configuraciones de campana.
+\end{itemize}
+
+\subsubsection{Modos controlados por el orquestador}
+
+\subsection{Campanas}
+
+Las campanas son mediciones programadas por el servidor. El orquestador consulta
+las campanas activas, selecciona la que corresponde ejecutar, guarda sus parametros
+y agenda ejecuciones periodicas. Cada ejecucion captura PSD y envia el resultado
+al backend. Si la red falla, el resultado puede quedar en una cola local para ser
+reenviado posteriormente.
+
+\subsection{PSD en tiempo real}
+
+En modo realtime, el servidor entrega una configuracion inmediata. El orquestador
+la envia al motor RF, espera la respuesta, aplica postproceso y sube el resultado.
+Mientras el backend siga enviando una solicitud valida, el sensor mantiene este
+modo activo.
+
+\subsection{PSD y audio en tiempo real}
+
+Cuando la solicitud incluye demodulacion, el orquestador activa tambien el camino
+de audio. En ese caso, el motor RF demodula AM o FM y genera tramas Opus; el
+servicio WebRTC se encarga de hacer disponible ese audio para la plataforma.
+
+\subsection{Calibracion}
+
+Antes o durante ciertos ciclos de operacion, el orquestador puede solicitar al
+motor RF una calibracion de frecuencia. El resultado se guarda localmente y se usa
+en adquisiciones posteriores.
+
+\subsection{Protocolos y procedimientos nombrados}
+
+El documento evita entrar en detalles de bajo nivel, pero es importante reconocer
+los protocolos y procedimientos principales que conectan los bloques:
+
+\begin{longtable}{p{0.30\textwidth}p{0.62\textwidth}}
+\toprule
+\textbf{Elemento} & \textbf{Uso conceptual en el sensor} \\
+\midrule
+\endhead
+HTTP REST & Comunicacion entre sensor y backend para consultar instrucciones y publicar datos. \\
+ZeroMQ & Canal local de comandos entre el orquestador Python y el motor RF en C. \\
+libhackrf/USB & Interfaz de control y adquisicion de muestras desde la HackRF One. \\
+WebRTC & Entrega de audio demodulado hacia cliente/plataforma con baja latencia. \\
+Opus & Codificacion de audio antes de enviarlo al servicio WebRTC. \\
+GPIO & Control de lineas fisicas para multiplexor de antena y soporte de hardware. \\
+PPP/LTE & Conectividad celular del sensor hacia la red. \\
+GPS/NMEA & Obtencion y conversion de coordenadas geograficas. \\
+Welch & Metodo de estimacion de PSD por segmentos y promediado. \\
+Banco polifase & Metodo de estimacion espectral con mejor control de separacion entre canales. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Flujo completo de funcionamiento}
+
+De forma resumida, el funcionamiento del sensor puede leerse como el siguiente
+ciclo:
+
+\begin{enumerate}
+  \item El sensor se identifica ante la plataforma mediante su direccion MAC y su
+  estado local.
+  \item El orquestador consulta si hay una tarea realtime o una campana activa.
+  \item Si hay tarea, se construye una configuracion de radio y se envia al motor
+  RF.
+  \item El motor RF configura la HackRF, selecciona antena si aplica y captura IQ.
+  \item Las muestras pasan por preproceso para mejorar su condicion de medicion.
+  \item El bloque de proceso calcula PSD, aplica filtros y, si se solicita,
+  demodula audio.
+  \item El postproceso corrige artefactos finales, especialmente el pico DC en la
+  PSD.
+  \item El orquestador empaqueta el resultado y lo envia al backend.
+  \item Si el envio falla, el dato puede quedar almacenado localmente para
+  reintento.
+  \item Los servicios auxiliares mantienen GPS, LTE, estado del sensor y audio
+  segun el modo activo.
+\end{enumerate}

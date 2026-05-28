@@ -1,0 +1,79 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {chapter}{Nota para los autores}{6}{chapter*.4}%
+\contentsline {section}{\numberline {0.1}Introducci\'on general}{7}{section.0.1}%
+\contentsline {section}{\numberline {0.2}An\'alisis de requerimientos, restricciones y uso}{7}{section.0.2}%
+\contentsline {section}{\numberline {0.3}Dise\~no general del sistema}{8}{section.0.3}%
+\contentsline {section}{\numberline {0.4}Hardware}{8}{section.0.4}%
+\contentsline {subsection}{\numberline {0.4.1}Prop\'osito de la secci\'on}{8}{subsection.0.4.1}%
+\contentsline {subsection}{\numberline {0.4.2}Contexto dentro del sistema general}{8}{subsection.0.4.2}%
+\contentsline {subsection}{\numberline {0.4.3}Desarrollo t\'ecnico}{11}{subsection.0.4.3}%
+\contentsline {subsubsection}{Arquitectura f\'isica del nodo}{11}{section*.9}%
+\contentsline {subsubsection}{Ruta RF y mux de antenas}{12}{section*.12}%
+\contentsline {subsubsection}{\'Arbol de potencia}{13}{section*.14}%
+\contentsline {subsection}{\numberline {0.4.4}Entradas, salidas e interfaces}{15}{subsection.0.4.4}%
+\contentsline {subsection}{\numberline {0.4.5}Decisiones de dise\~no o implementaci\'on}{15}{subsection.0.4.5}%
+\contentsline {subsection}{\numberline {0.4.6}Problemas presentados y ajustes realizados}{16}{subsection.0.4.6}%
+\contentsline {subsection}{\numberline {0.4.7}Validaci\'on, pruebas o evidencias}{17}{subsection.0.4.7}%
+\contentsline {subsection}{\numberline {0.4.8}Aprendizajes y transferencia de conocimiento}{17}{subsection.0.4.8}%
+\contentsline {subsection}{\numberline {0.4.9}Limitaciones}{18}{subsection.0.4.9}%
+\contentsline {subsection}{\numberline {0.4.10}Recomendaciones espec\'ificas}{18}{subsection.0.4.10}%
+\contentsline {section}{\numberline {0.5}Software del sensor}{18}{section.0.5}%
+\contentsline {subsection}{\numberline {0.5.1}Resumen}{18}{subsection.0.5.1}%
+\contentsline {subsubsection}{Proposito general}{19}{section*.18}%
+\contentsline {subsubsection}{Objetivos especificos}{19}{section*.19}%
+\contentsline {subsection}{\numberline {0.5.2}Introduccion y arquitectura general}{19}{subsection.0.5.2}%
+\contentsline {subsubsection}{Servicios y modos de operacion}{20}{section*.20}%
+\contentsline {subsection}{\numberline {0.5.3}Bloques o partes del codigo}{20}{subsection.0.5.3}%
+\contentsline {subsubsection}{Adquisicion}{21}{section*.21}%
+\contentsline {subsection}{\numberline {0.5.4}Uso de buffers}{21}{subsection.0.5.4}%
+\contentsline {subsection}{\numberline {0.5.5}Relacion con el backend}{22}{subsection.0.5.5}%
+\contentsline {subsubsection}{Preproceso}{22}{section*.22}%
+\contentsline {subsection}{\numberline {0.5.6}Balance IQ}{22}{subsection.0.5.6}%
+\contentsline {subsection}{\numberline {0.5.7}Correccion de componente DC}{22}{subsection.0.5.7}%
+\contentsline {subsubsection}{Proceso}{23}{section*.23}%
+\contentsline {subsection}{\numberline {0.5.8}Estimacion de PSD}{23}{subsection.0.5.8}%
+\contentsline {subsection}{\numberline {0.5.9}Demodulacion FM y AM}{23}{subsection.0.5.9}%
+\contentsline {subsection}{\numberline {0.5.10}Filtrado}{24}{subsection.0.5.10}%
+\contentsline {subsection}{\numberline {0.5.11}Trabajo multihilo}{24}{subsection.0.5.11}%
+\contentsline {subsubsection}{Postproceso}{24}{section*.24}%
+\contentsline {subsection}{\numberline {0.5.12}Remocion del pico DC en PSD}{25}{subsection.0.5.12}%
+\contentsline {subsection}{\numberline {0.5.13}Calibracion en frecuencia}{25}{subsection.0.5.13}%
+\contentsline {subsubsection}{Idea principal}{25}{section*.25}%
+\contentsline {subsubsection}{Uso de varias emisiones}{26}{section*.26}%
+\contentsline {subsubsection}{Aplicacion de la correccion}{26}{section*.27}%
+\contentsline {subsection}{\numberline {0.5.14}Orquestador}{26}{subsection.0.5.14}%
+\contentsline {subsubsection}{Responsabilidades principales}{26}{section*.28}%
+\contentsline {subsubsection}{Modos controlados por el orquestador}{27}{section*.29}%
+\contentsline {subsection}{\numberline {0.5.15}Campanas}{27}{subsection.0.5.15}%
+\contentsline {subsection}{\numberline {0.5.16}PSD en tiempo real}{27}{subsection.0.5.16}%
+\contentsline {subsection}{\numberline {0.5.17}PSD y audio en tiempo real}{27}{subsection.0.5.17}%
+\contentsline {subsection}{\numberline {0.5.18}Calibracion}{27}{subsection.0.5.18}%
+\contentsline {subsection}{\numberline {0.5.19}Protocolos y procedimientos nombrados}{28}{subsection.0.5.19}%
+\contentsline {subsection}{\numberline {0.5.20}Flujo completo de funcionamiento}{28}{subsection.0.5.20}%
+\contentsline {section}{\numberline {0.6}Plataforma web en la nube}{29}{section.0.6}%
+\contentsline {section}{\numberline {0.7}An\'alisis espectral y localizaci\'on en la nube}{29}{section.0.7}%
+\contentsline {subsection}{\numberline {0.7.1}Prop\'osito de la secci\'on}{29}{subsection.0.7.1}%
+\contentsline {subsection}{\numberline {0.7.2}Contexto dentro del sistema general}{30}{subsection.0.7.2}%
+\contentsline {subsection}{\numberline {0.7.3}Arquitectura del m\'odulo de postprocesamiento}{30}{subsection.0.7.3}%
+\contentsline {subsection}{\numberline {0.7.4}Flujo general de procesamiento}{32}{subsection.0.7.4}%
+\contentsline {subsection}{\numberline {0.7.5}Entradas del sistema}{32}{subsection.0.7.5}%
+\contentsline {subsection}{\numberline {0.7.6}Salidas del sistema}{34}{subsection.0.7.6}%
+\contentsline {subsection}{\numberline {0.7.7}Modos de operaci\'on}{35}{subsection.0.7.7}%
+\contentsline {subsubsection}{Detecci\'on autom\'atica de emisiones}{36}{section*.34}%
+\contentsline {subsubsection}{An\'alisis por picos solicitados}{36}{section*.35}%
+\contentsline {subsubsection}{Modo de cumplimiento}{37}{section*.36}%
+\contentsline {subsection}{\numberline {0.7.8}An\'alisis espectral realizado: frecuencia central, ancho de banda, potencia y MER/BER}{37}{subsection.0.7.8}%
+\contentsline {subsubsection}{Frecuencia central}{37}{section*.37}%
+\contentsline {subsubsection}{Ancho de banda}{38}{section*.39}%
+\contentsline {subsubsection}{Potencia de la emisi\'on}{39}{section*.41}%
+\contentsline {subsubsection}{MER y BER cuando aplica}{40}{section*.43}%
+\contentsline {section}{\numberline {0.8}Protocolos de prueba en nube y borde}{41}{section.0.8}%
+\contentsline {section}{\numberline {0.9}Integraci\'on general del sistema}{41}{section.0.9}%
+\contentsline {section}{\numberline {0.10}Conclusiones generales}{42}{section.0.10}%
+\contentsline {section}{\numberline {0.11}Recomendaciones}{43}{section.0.11}%
+\contentsline {section}{\numberline {0.12}Referencias}{43}{section.0.12}%
+\contentsline {section}{\numberline {.1}T\'ecnica de desarrollo en grupo usando agentes IA}{44}{section.Alph0.1}%
+\contentsline {section}{\numberline {.2}Diagramas adicionales}{44}{section.Alph0.2}%
+\contentsline {section}{\numberline {.3}Fragmentos de c\'odigo relevantes}{45}{section.Alph0.3}%
+\contentsline {section}{\numberline {.4}Manuales o gu\'ias de uso}{45}{section.Alph0.4}%
+\contentsline {section}{\numberline {.5}Resultados de pruebas}{46}{section.Alph0.5}%
