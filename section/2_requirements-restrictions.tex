@@ -1,18 +1,271 @@
 \chapter{Análisis de requerimientos, restricciones y uso}
 
-Esta sección debe consolidar los requerimientos funcionales y no funcionales del sistema,
-así como las restricciones de hardware, software, conectividad, presupuesto, tiempo o
-entorno de despliegue que condicionan el diseño.
+\section{Propósito del capítulo}
 
-El placeholder actual deja definido el espacio donde luego podrán incluirse tablas,
-listas o descripciones de casos de uso que permitan justificar decisiones de arquitectura
-y priorización técnica.
+Este capítulo consolida los requerimientos funcionales y no funcionales pactados para el sistema ANE-HX, desarrollado para la Agencia Nacional del Espectro (ANE) de Colombia. El objetivo es establecer un marco de referencia verificable que permita evaluar el grado de cumplimiento alcanzado en cada módulo del sistema y servir como guía para futuras iteraciones de desarrollo.
 
-\subsection*{Puntos sugeridos para completar}
+Los requerimientos aquí documentados provienen del pliego técnico oficial del proyecto. Se presentan agrupados por categoría funcional y se contrastan con el estado de implementación documentado en los capítulos técnicos de hardware (Capítulo~4), software del sensor (Capítulo~5), plataforma web (Capítulo~6) y análisis espectral (Capítulo~7).
+
+\section{Contexto dentro del sistema general}
+
+El sistema ANE-HX responde a la necesidad institucional de la ANE de monitorear el espectro radioeléctrico colombiano de forma automatizada, remota y trazable. La arquitectura del sistema se organiza en tres dominios que cubren el flujo completo desde la captura de señales en campo hasta la generación de reportes de cumplimiento:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Borde}: nodos de sensado desplegados en campo que adquieren señales de RF, ejecutan preprocesamiento local y transmiten productos espectrales hacia la nube mediante conectividad celular, WiFi o Ethernet.
+    \item \textbf{Nube}: plataforma central que recibe, almacena, procesa y visualiza los datos espectrales. Incluye el backend de orquestación, la base de datos de series temporales, el frontend de usuario y el módulo de postprocesamiento espectral.
+    \item \textbf{Usuarios}: personal técnico de la ANE que opera el sistema mediante la plataforma web, configura campañas de medición, consulta resultados y genera reportes de cumplimiento normativo.
+\end{enumerate}
+
+Los requerimientos se distribuyen a lo largo de esta cadena: la parametrización de adquisición y las capacidades de medición recaen en el software del sensor (borde); la visualización, la gestión de campañas y la generación de reportes residen en la plataforma web (nube); la detección de emisiones, el cumplimiento normativo y el análisis forense se implementan en el módulo de postprocesamiento (nube).
+
+\section{Desarrollo técnico: requerimientos por categoría}
+
+A continuación se presentan los requerimientos finales del sistema, organizados según las categorías definidas en el pliego técnico.
+
+\subsection{Requerimientos de arquitectura}
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Categoría & Requerimiento \\
+\midrule
+Seguridad de la información & Toda la información en tránsito entre el sensor y la interfaz de monitoreo debe usar SSL/TLS. \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Requerimientos funcionales}
+
+\subsubsection{Parametrización de adquisición}
+
+\begin{tabularx}{\textwidth}{@{}l X X@{}}
+\toprule
+Parámetro & Especificación & Restricción \\
+\midrule
+Frecuencia central & Desde 1 MHz hasta 6 GHz & Límite del hardware SDR \\
+Sample Rate & Hasta 20 MS/s, mínimo 200 kS/s & Seleccionable por el usuario \\
+Ancho de banda instantáneo & Máximo 20 MHz, mínimo 2 MHz & Determinado por el sample rate \\
+Redundancia GPS & Ubicación manual adicional & Conserva la reportada por el GPS \\
+\bottomrule
+\end{tabularx}
+
+\subsubsection{Parametrización de visualización}
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Parámetro & Especificación \\
+\midrule
+RBW & Ajustable mediante selección de puntos FFT. $RBW = Sample Rate / FFT Size$ \\
+VBW & Suavizado del espectro en niveles: bajo, medio, alto \\
+Filtros por software & Pasabajo, pasabanda, pasaalto con frecuencia central, ancho de banda y activación/desactivación \\
+Resolución & Pasos de 500 Hz, resolución de hasta 10 Hz \\
+Unidades de medida & Frecuencia: Hz, kHz, MHz, GHz. Potencia: dBm (prioritario), dBmV, dBuV, V, W. Campo eléctrico: dBuV/m (prioritario), dBmV/m, mV/m, W/m$^2$, dBW/m$^2$/MHz \\
+Umbral de detección & Configurable a partir de 3 dB, 5 dB u otro valor definido por el usuario \\
+\bottomrule
+\end{tabularx}
+
+\subsubsection{Medición, visualización y audio}
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Función & Especificación \\
+\midrule
+Indicadores espectrales & Traza máxima, traza mínima, promedio, RMS, máximo y mínimo \\
+Marcadores & Al menos 4 marcadores individuales y tipo delta, con cálculo de delta de potencia y delta de frecuencia \\
+Ancho de banda & Método $-X$ dB ($X$ seleccionable: 3, 10 o 26 dB) y OBW (99\% de potencia) \\
+Potencia de canal & Para emisiones de hasta 20 MHz de ancho de banda \\
+Demodulación FM/AM & Demodular y escuchar emisiones FM y AM. Medir profundidad de modulación AM y excursión de frecuencia FM \\
+\bottomrule
+\end{tabularx}
+
+\subsubsection{Cumplimiento normativo}
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Verificación & Especificación \\
+\midrule
+Frecuencias sin uso & Detectar ausencia de emisiones autorizadas en bandas con licencia asignada \\
+Emisiones no autorizadas & Detectar emisiones no registradas en la base de datos de operadores autorizados del MinTIC \\
+Incumplimiento de ancho de banda & Detectar señales que excedan los límites de ancho de banda autorizados por servicio \\
+Radiodifusión sonora & Recolección de datos para identificación de intermodulaciones en la banda 88--108 MHz \\
+Servicio móvil aeronáutico & Detección de emisiones desviadas en la banda 108--137 MHz \\
+\bottomrule
+\end{tabularx}
+
+\subsubsection{Herramientas de gestión}
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Función & Especificación \\
+\midrule
+Monitoreo de sensores & Alertas sobre violación de umbrales de variables del sensor: disco, RAM, CPU \\
+Monitoreo de conectividad & Calidad de conexión IP mediante RTT y estado del canal (alive/not alive) \\
+Agenda de programaciones & Publicar agenda de escaneos, mantener sesiones privadas y permitir cancelación por rol supervisor \\
+Generación de reportes & Al menos 1 reporte con variables definidas por la entidad, entregado en CSV \\
+\bottomrule
+\end{tabularx}
+
+\subsubsection{Análisis forense y almacenamiento}
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Función & Especificación \\
+\midrule
+Referenciación de información & Timestamp + geotags + identificador del sensor para cada medición \\
+Almacenamiento en sensor & Archivos de muestreo (.cs8) en el almacenamiento local disponible \\
+Almacenamiento centralizado & Resultados de monitoreo programado en servidores institucionales de la ANE \\
+\bottomrule
+\end{tabularx}
+
+\subsubsection{Funciones avanzadas y soporte}
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Función & Especificación \\
+\midrule
+Datasets para análisis & Recolección y organización de datos para procesos de análisis posteriores y entrenamiento de modelos \\
+Acceso remoto & Acceso vía IP a sensores para actualización de software y aplicación de parches \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Requerimientos de red}
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Requerimiento & Especificación \\
+\midrule
+WiFi & Habilitar conexión inalámbrica \\
+Ethernet & Puerto de red cableado conservando características ambientales del nodo \\
+Enrutamiento automático & Seleccionar automáticamente el canal de comunicación disponible (Ethernet, WiFi o celular) \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Requerimientos de hardware}
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Requerimiento & Especificación \\
+\midrule
+GPS & Conexión móvil mediante SIM card institucional. No depender de tecnologías propietarias. Precisión horizontal $\leq$ 10 m, vertical $\leq$ 15 m (estándar L1 GNSS civil) \\
+Multiplexación de antenas & Board que permita usar 4 antenas distintas en procesos de adquisición espectral \\
+Kit de antenas & Tres antenas por sensor: (1) TDT, (2) telefonía móvil Down link ($f > 2$ GHz), (3) VHF/UHF y frecuencias intermedias \\
+EMC & Optimizar susceptibilidad electromagnética para evitar interferencias que falseen mediciones \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Requerimientos de exactitud y confiabilidad}
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Requerimiento & Especificación \\
+\midrule
+Sincronización NTP & Sincronización a reloj de red NTP en cada sensor para etiquetado temporal de muestreos \\
+Calibración & Procedimientos de calibración de frecuencia, ganancia de recepción, balance IQ y corrección de offset, verificados con equipos certificados \\
+DANL & Determinar el nivel más bajo de señal detectable sin señal presente \\
+Rango dinámico & Determinar la diferencia entre la señal máxima sin distorsión y la mínima detectable sobre ruido \\
+Exactitud de frecuencia & Determinar la diferencia máxima aceptable entre frecuencia real y medida \\
+Precisión de amplitud & Determinar el margen de error en la medición de potencia, expresado en dB \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Requerimientos de interoperabilidad}
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+\toprule
+Requerimiento & Especificación \\
+\midrule
+Exportación de datos & Escaneos descargables en formato CSV, JSON y XML para procesamiento offline \\
+\bottomrule
+\end{tabularx}
+
+\section{Entradas, salidas e interfaces}
+
+El sistema ANE-HX opera como una plataforma integral que recibe señales de RF en los nodos de borde y entrega información procesada a los operadores mediante la interfaz web. La Tabla~\ref{tab:req_io} resume las entradas y salidas principales.
+
+\begin{table}[H]
+\centering
+\caption{Entradas y salidas principales del sistema ANE-HX.}
+\label{tab:req_io}
+\begin{tabularx}{\textwidth}{@{}l X X@{}}
+\toprule
+Nivel & Entradas & Salidas \\
+\midrule
+Borde & Señales RF (1 MHz -- 6 GHz), parámetros de campaña, comandos de control remoto & Muestras IQ, PSD, métricas espectrales, audio demodulado, telemetría del sensor, coordenadas GPS \\
+Nube & Datos espectrales desde sensores, parámetros de postprocesamiento, bases de licencias del MinTIC & Visualizaciones en tiempo real, reportes de cumplimiento (CSV), datos exportables (CSV/JSON/XML), alertas \\
+Usuario & Credenciales de acceso, parámetros de configuración, solicitudes de reporte & Interfaz web con tableros, gráficas, reportes descargables, agenda de campañas \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Decisiones de diseño o implementación}
+
+La definición de los requerimientos condicionó las siguientes decisiones de diseño del sistema:
+
 \begin{itemize}[leftmargin=*]
-  \item Requerimientos funcionales del sistema.
-  \item Requerimientos no funcionales: latencia, disponibilidad, seguridad, escalabilidad.
-  \item Restricciones de adquisición, procesamiento y transmisión de datos.
-  \item Limitaciones del entorno operativo o experimental.
-  \item Casos de uso o escenarios de operación.
+    \item \textbf{Arquitectura borde-nube}: la exigencia de monitoreo remoto con acceso vía IP y transmisión celular determinó la separación entre adquisición local (Raspberry Pi 5 + HackRF One) y procesamiento centralizado en servidores institucionales de la ANE.
+    \item \textbf{Modularidad del software}: los requerimientos de parametrización, medición, cumplimiento normativo y gestión se implementaron como módulos independientes (sensor SDR, plataforma web, postprocesamiento espectral) que se comunican mediante API REST y WebSocket.
+    \item \textbf{Selección del SDR}: el HackRF One se eligió por su rango de operación (1 MHz -- 6 GHz) y ancho de banda instantáneo (hasta 20 MHz), que cubren exactamente las bandas requeridas. Su naturaleza de código abierto evita dependencias de tecnologías propietarias.
+    \item \textbf{Base de datos temporal}: la necesidad de almacenar y consultar series temporales de métricas espectrales con timestamp y geolocalización motivó la adopción de PostgreSQL con extensión TimescaleDB.
+    \item \textbf{Postprocesamiento en Python}: los algoritmos de detección de emisiones, estimación de parámetros y comparación contra licencias se implementaron en Python por su ecosistema de librerías científicas (NumPy, SciPy) y su facilidad de integración como microservicio.
+    \item \textbf{Umbral fijo con linealización}: las restricciones de CPU de la Raspberry Pi 5 llevaron a descartar algoritmos adaptativos costosos en favor de un umbral fijo precedido por una corrección de linealidad del sistema, como se detalla en el Capítulo~7.
+\end{itemize}
+
+\section{Problemas presentados y ajustes realizados}
+
+\begin{table}[H]
+\centering
+\caption{Problemas encontrados en la implementación de requerimientos.}
+\label{tab:req_problemas}
+\begin{tabularx}{\textwidth}{@{}p{2.5cm} p{2.2cm} p{2.5cm} p{2.8cm} X@{}}
+\toprule
+Problema & Evidencia & Causa probable & Decisión o ajuste & Resultado \\
+\midrule
+Subtensión del nodo bajo carga SDR/LTE & Caídas de voltaje en EXT5V con HackRF y módem LTE activos simultáneamente & La Raspberry Pi 5 no puede suministrar corriente suficiente a todos los periféricos por sus puertos & Diseñar árbol de potencia externo sobredimensionado con fuente dedicada & Operación estable del nodo con todos los periféricos activos \\
+Falsos positivos en detección de emisiones & Umbral fijo producía detecciones espurias por curvatura del ruido del receptor & No linealidad del piso de ruido del hardware SDR & Implementar corrección de linealidad antes de aplicar umbral fijo & Reducción drástica de falsas alarmas con bajo costo computacional \\
+Timeouts en generación de reportes & Errores 504 en frontend con grandes volúmenes de datos & Procesamiento y armado de reportes excedía el timeout del servidor & Extender timeouts a 3600 s en Node.js y Nginx & Reportes generados exitosamente incluso para campañas extensas \\
+Saturación del canal de subida & Resolución y tasa de refresco limitadas en transmisiones desde borde & Ancho de banda del canal celular insuficiente para tramas de alta resolución & Ajustar resolución espectral según disponibilidad de canal & Compromiso aceptable entre resolución y capacidad de transmisión \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Validación, pruebas o evidencias}
+
+La validación de los requerimientos se realizó de forma incremental a medida que cada módulo alcanzaba un estado funcional:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Parametrización de adquisición}: verificada mediante campañas de medición configuradas desde la plataforma web con distintas frecuencias centrales, sample rates y ganancias. Los resultados se validaron por inspección espectral en la interfaz de monitoreo en tiempo real.
+    \item \textbf{Medición de ancho de banda y potencia}: contrastada contra señales de referencia conocidas (portadoras de FM comercial en la banda 88--108 MHz) cuyos parámetros nominales están documentados en las bases de licencias del MinTIC.
+    \item \textbf{Cumplimiento normativo}: validado mediante el procesamiento de capturas reales contra un archivo CSV de licencias de prueba, verificando la correcta asociación por frecuencia, el filtrado por municipio y código DANE, y la emisión de resultados de cumplimiento.
+    \item \textbf{Exportación de datos}: verificada la generación de archivos CSV con la estructura de columnas solicitada por la entidad.
+    \item \textbf{Conectividad y monitoreo}: el sistema se desplegó en un servidor institucional de la ANE, validando la comunicación extremo a extremo entre el sensor en campo y la plataforma web, incluyendo el enrutamiento automático entre WiFi y Ethernet.
+\end{itemize}
+
+Las evidencias detalladas de cada prueba se documentan en el Capítulo~7 (pruebas del módulo de postprocesamiento) y en las secciones de validación de los capítulos~4, 5 y 6.
+
+\section{Aprendizajes y transferencia de conocimiento}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Anticipar restricciones de potencia desde el inicio}: el cuello de botella más recurrente en el hardware fue la alimentación. La lección aprendida es que el árbol de potencia debe diseñarse antes de integrar los periféricos, no como una corrección posterior.
+    \item \textbf{El cumplimiento normativo requiere datos administrativos limpios}: la variabilidad en nombres de municipios, códigos DANE y formatos de licencias obligó a implementar normalización de texto y reglas de compatibilidad. Esto debe considerarse desde la fase de diseño de datos.
+    \item \textbf{El ancho de banda del canal celular condiciona la resolución espectral}: la capacidad de transmisión desde el borde es el factor limitante para la resolución de las capturas. Futuros despliegues deben dimensionar el canal de subida según la densidad espectral requerida.
+    \item \textbf{Modularidad facilita la validación incremental}: la separación en módulos independientes (sensor, plataforma, postprocesamiento) permitió probar y validar cada requerimiento en el contexto del módulo que lo implementa, sin depender del sistema completo.
+\end{itemize}
+
+\section{Limitaciones}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{MER/BER solo para TDT}: la estimación de calidad de señal (MER/BER) está implementada únicamente para señales de Televisión Digital Terrestre con modulación 64-QAM. No cubre otros servicios de radiodifusión o comunicaciones.
+    \item \textbf{Detección de intermodulaciones}: la recolección de datos para identificación de intermodulaciones en la banda de radiodifusión sonora está iniciada pero no se ha completado el análisis automático.
+    \item \textbf{Caracterización metrológica}: la determinación formal de DANL, rango dinámico y exactitud de amplitud requiere equipos de calibración certificados no disponibles durante el desarrollo. Las mediciones actuales son operativas, no metrológicas.
+    \item \textbf{Almacenamiento de muestras crudas}: el almacenamiento de archivos .cs8 en el sensor está limitado por la capacidad del almacenamiento local de la Raspberry Pi 5 (tarjeta SD).
+    \item \textbf{Acceso remoto}: el acceso remoto a sensores vía IP está implementado a nivel de sistema operativo (SSH) pero no integrado en la plataforma web como funcionalidad de usuario.
+\end{itemize}
+
+\section{Recomendaciones específicas}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Completar la caracterización metrológica}: realizar una campaña de calibración con equipos certificados para determinar formalmente DANL, rango dinámico, exactitud de frecuencia y precisión de amplitud del sistema.
+    \item \textbf{Extender MER/BER a otros servicios}: ampliar la estimación de calidad de señal a modulaciones de radiodifusión sonora (FM) y servicios móviles, utilizando métricas como SINAD o profundidad de modulación.
+    \item \textbf{Automatizar detección de intermodulaciones}: desarrollar el módulo de análisis automático de intermodulaciones a partir de los datasets ya recolectados en las bandas 88--108 MHz y 108--137 MHz.
+    \item \textbf{Integrar acceso remoto en la plataforma}: incorporar en la interfaz web una funcionalidad de acceso remoto a sensores que permita actualizaciones de software y diagnóstico sin requerir acceso por SSH.
+    \item \textbf{Ampliar almacenamiento local}: evaluar la migración a almacenamiento externo (USB o NAS) para aumentar la capacidad de retención de muestras crudas (.cs8) en el nodo de borde.
+    \item \textbf{Implementar reportes adicionales}: desarrollar los formatos de reporte complementarios (JSON, XML) según la especificación de interoperabilidad, más allá del CSV actualmente implementado.
 \end{itemize}

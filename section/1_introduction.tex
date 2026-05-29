@@ -1,18 +1,63 @@
 \chapter{Introducción general}
 
-Esta sección debe presentar el contexto del proyecto, el problema que se busca resolver
-y la motivación del sistema. También sirve para explicar, de forma breve, cuál es el
-alcance del documento y cómo se relacionan sus partes principales.
+\section{Propósito y contexto del proyecto}
 
-Como placeholder, este texto puede reemplazarse posteriormente por una narrativa más
-formal que describa el objetivo del sistema, los actores involucrados y el valor técnico
-de la solución propuesta.
+Este documento constituye el informe final del sistema de monitoreo espectral \textbf{ANE-HX}, desarrollado como proyecto académico de ingeniería para la Agencia Nacional del Espectro (ANE) de Colombia. El sistema integra componentes de hardware, software de adquisición por radio definida por software (SDR), procesamiento en borde, plataforma web en la nube y algoritmos de análisis espectral para construir una solución funcional de monitoreo del espectro radioeléctrico.
 
-\subsection*{Puntos sugeridos para completar}
+El informe se organiza como memoria técnica del sistema, registro de decisiones de diseño, evidencia de pruebas realizadas e instrumento de transferencia de conocimiento hacia futuros equipos que deban mantener, reproducir o extender el desarrollo.
+
+\section{Problema o necesidad principal}
+
+El monitoreo del espectro radioeléctrico requiere capturar señales en campo, transportarlas a un entorno de análisis, extraer parámetros técnicos de las emisiones detectadas y contrastarlos contra información regulatoria. Un sistema que resuelva este flujo de extremo a extremo debe coordinar hardware de adquisición, conectividad celular, almacenamiento en la nube, algoritmos de procesamiento espectral y una interfaz para operadores.
+
+El proyecto ANE-HX aborda esta cadena completa mediante una arquitectura modular que separa el sensado en borde, la transmisión de datos, la persistencia y visualización en la nube, y el postprocesamiento analítico. Cada módulo se documenta en un capítulo independiente.
+
+\section{Alcance del documento}
+
+El presente informe cubre el diseño, la implementación, las pruebas y los aprendizajes obtenidos durante el desarrollo del sistema. No se incluye el código fuente completo de los módulos de software, el cual reside en repositorios independientes referenciados en cada capítulo.
+
+Los capítulos que contienen contenido técnico desarrollado son:
+
 \begin{itemize}[leftmargin=*]
-  \item Descripción del problema o necesidad principal.
-  \item Objetivo general del sistema.
-  \item Alcance del documento técnico.
-  \item Resumen corto de la arquitectura o módulos principales.
-  \item Relación entre borde, nube y análisis posterior.
+    \item Capítulo 4: Hardware del nodo de sensado espectral.
+    \item Capítulo 5: Software del sensor (adquisición SDR y preprocesamiento en borde).
+    \item Capítulo 6: Plataforma web en la nube (frontend, backend, base de datos y despliegue).
+    \item Capítulo 7: Análisis espectral y localización en la nube (postprocesamiento de capturas).
+    \item Anexo A: Técnica de desarrollo colaborativo usando agentes de inteligencia artificial.
 \end{itemize}
+
+Los capítulos restantes (2, 3, 8, 9, 10, 11, 12 y anexos B, C, D, E) contienen la estructura prevista para completar la documentación de requerimientos, diseño general, pruebas, integración, conclusiones, recomendaciones, referencias y material complementario.
+
+\section{Resumen de la arquitectura y los módulos principales}
+
+El sistema ANE-HX se organiza en tres dominios:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Borde}: un nodo físico compuesto por una Raspberry Pi 5, un SDR HackRF One, una tarjeta auxiliar MonRaF2 (concentrador RF, LTE, GNSS y multiplexor de antenas) y antenas RF. El software embebido controla la adquisición, ejecuta preprocesamiento y transmite productos espectrales hacia la nube mediante conectividad celular.
+    \item \textbf{Nube}: una plataforma web con frontend SPA (React), backend de orquestación (Node.js), base de datos PostgreSQL con extensión TimescaleDB para series temporales, y un microservicio de postprocesamiento espectral en Python.
+    \item \textbf{Usuarios}: personas operadoras y administradoras que acceden a la plataforma web para visualizar métricas en tiempo real, gestionar campañas de medición, consultar reportes de cumplimiento normativo y administrar sensores.
+\end{enumerate}
+
+\subsection{Capítulo 4: Hardware}
+
+Documenta el diseño físico del nodo ANE2. Describe la arquitectura de potencia, la ruta RF desde las antenas hasta el SDR, el árbol de alimentación, la conectividad GPIO entre la Raspberry Pi 5 y la MonRaF2, y las mediciones de voltaje y temperatura bajo carga. Incluye decisiones de diseño como la separación de la fuente de potencia del cómputo frente a los periféricos SDR y LTE, y una matriz de problemas encontrados con sus respectivos ajustes.
+
+\subsection{Capítulo 5: Software del sensor}
+
+Describe la arquitectura del código que se ejecuta en el nodo de borde. Cubre el control de la HackRF One, la selección de antena, la adquisición de muestras IQ, el preprocesamiento (balance IQ, corrección DC, estimación de PSD, calibración en frecuencia), la demodulación de FM y AM, y la comunicación con el backend. El software opera mediante un orquestador que gestiona modos de operación como campañas programadas, PSD en tiempo real y calibración.
+
+\subsection{Capítulo 6: Plataforma web en la nube}
+
+Documenta la capa central de coordinación e interfaz de usuario. El frontend, construido con React y Vite, ofrece autenticación, tableros de monitoreo con gráficas en tiempo real vía WebSocket, gestión de sensores y generación de reportes de cumplimiento. El backend, basado en Node.js y Express, expone una API REST, maneja WebSockets para telemetría y audio, y orquesta las campañas de medición. La base de datos TimescaleDB almacena series temporales de métricas espectrales y coordenadas GPS.
+
+\subsection{Capítulo 7: Análisis espectral y localización en la nube}
+
+Describe el módulo de postprocesamiento encargado de convertir capturas espectrales crudas en parámetros técnicos interpretables: frecuencia central, ancho de banda, potencia, MER y BER para señales TDT. El módulo implementa tres modos de operación (detección automática, análisis por picos y cumplimiento contra licencias), utiliza un algoritmo de linealización con umbral fijo optimizado para la Raspberry Pi 5, y soporta filtrado geográfico mediante códigos DANE y nombre de municipio para la validación normativa contra bases de licencias oficiales.
+
+\subsection{Anexo A: Técnica de desarrollo con agentes IA}
+
+Documenta la metodología de trabajo colaborativo del equipo utilizando agentes de inteligencia artificial (Gemini CLI y GitHub Copilot CLI). Describe la instalación, la arquitectura multi-agente basada en roles, la metodología de prompting estructurada (ROLE $\rightarrow$ OBJECTIVE $\rightarrow$ CONTEXT $\rightarrow$ REASONING), los problemas encontrados durante la colaboración con IA y las lecciones aprendidas.
+
+\section{Convenciones del documento}
+
+El informe está redactado en español, compilado con \LaTeX{} y utiliza codificación UTF-8. Cada capítulo sigue una estructura homogénea: propósito, contexto en el sistema, desarrollo técnico, entradas y salidas, decisiones de diseño, problemas y ajustes, validación, aprendizajes, limitaciones y recomendaciones. Las referencias a repositorios de software incluyen el enlace real o la indicación explícita de que el repositorio está pendiente de publicación. No se incluye código fuente extenso dentro del documento.
