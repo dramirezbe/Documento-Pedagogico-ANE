@@ -19,6 +19,7 @@ El presente informe cubre el diseño, la implementación, las pruebas y los apre
 Los capítulos que contienen contenido técnico desarrollado son:
 
 \begin{itemize}[leftmargin=*]
+    \item Capítulo 2: Análisis de requerimientos, restricciones y uso.
     \item Capítulo 4: Hardware del nodo de sensado espectral.
     \item Capítulo 5: Software del sensor (adquisición SDR y preprocesamiento en borde).
     \item Capítulo 6: Plataforma web en la nube (frontend, backend, base de datos y despliegue).
@@ -26,7 +27,7 @@ Los capítulos que contienen contenido técnico desarrollado son:
     \item Anexo A: Técnica de desarrollo colaborativo usando agentes de inteligencia artificial.
 \end{itemize}
 
-Los capítulos restantes (2, 3, 8, 9, 10, 11, 12 y anexos B, C, D, E) contienen la estructura prevista para completar la documentación de requerimientos, diseño general, pruebas, integración, conclusiones, recomendaciones, referencias y material complementario.
+Los capítulos restantes (3, 8, 9, 10, 11, 12 y anexos B, C, D) contienen la estructura prevista como placeholders para completar la documentación de diseño general, pruebas, integración, conclusiones, recomendaciones, referencias y material complementario.
 
 \section{Resumen de la arquitectura y los módulos principales}
 
@@ -37,6 +38,10 @@ El sistema ANE-HX se organiza en tres dominios:
     \item \textbf{Nube}: una plataforma web con frontend SPA (React), backend de orquestación (Node.js), base de datos PostgreSQL con extensión TimescaleDB para series temporales, y un microservicio de postprocesamiento espectral en Python.
     \item \textbf{Usuarios}: personas operadoras y administradoras que acceden a la plataforma web para visualizar métricas en tiempo real, gestionar campañas de medición, consultar reportes de cumplimiento normativo y administrar sensores.
 \end{enumerate}
+
+\subsection{Capítulo 2: Análisis de requerimientos, restricciones y uso}
+
+Consolida los requerimientos funcionales y no funcionales pactados en el pliego técnico del proyecto. Organiza las especificaciones por categoría —parametrización, medición, cumplimiento normativo, gestión, análisis forense, red, hardware, exactitud e interoperabilidad— y las contrasta con el estado de implementación documentado en los capítulos técnicos. Incluye una matriz de problemas encontrados durante la implementación de los requerimientos y sus ajustes correspondientes.
 
 \subsection{Capítulo 4: Hardware}
 

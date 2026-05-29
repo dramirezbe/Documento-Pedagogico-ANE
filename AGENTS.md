@@ -28,15 +28,15 @@ section/img/      ← imágenes por carpeta: cap04_hw/, cap05_sdr/, etc.
 
 `\inputchapter{section/archivo}` carga con fallback si el archivo no existe.
 
-## Placeholders (10 de 16 archivos)
+## Placeholders (9 de 16 archivos)
 
 Los siguientes capítulos **no tienen contenido real**, solo estructura con `[[Placeholder]]`:
 
-2, 3, 8, 9, 10, 11, 12, B, C, D
+3, 8, 9, 10, 11, 12, B, C, D
 
 Reconocibles por la marca `[[Placeholder]]` en cada sección.
 
-Los que SÍ tienen contenido real: 1 (Introducción), 4 (HW), 5 (SDR), 6 (Plataforma cloud), 7 (Análisis espectral), Anexo A (IA).
+Los que SÍ tienen contenido real: 1 (Introducción), 2 (Requerimientos), 4 (HW), 5 (SDR), 6 (Plataforma cloud), 7 (Análisis espectral), Anexo A (IA).
 
 ## Capítulo 7 — gotchas específicas
 

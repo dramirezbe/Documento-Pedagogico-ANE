@@ -29,7 +29,7 @@ section/img/             Imágenes por carpeta: cap04_hw/, cap05_sdr/, etc.
 | Archivo | Contenido | Estado |
 |---|---|---|
 | `section/1_introduction.tex` | Introducción general | Escrito |
-| `section/2_requirements-restrictions.tex` | Requerimientos y restricciones | [[Placeholder]] |
+| `section/2_requirements-restrictions.tex` | Requerimientos y restricciones | Escrito |
 | `section/3_general_design_system.tex` | Diseño general del sistema | [[Placeholder]] |
 | `section/4_HW.tex` | Hardware del nodo de sensado | Escrito |
 | `section/5_SDR-acquisition.tex` | Software del sensor (SDR) | Escrito |
