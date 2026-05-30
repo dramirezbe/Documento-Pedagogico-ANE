@@ -1,0 +1,246 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {chapter}{\numberline {1}Introducción general}{12}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Propósito y contexto del proyecto}{12}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Problema o necesidad principal}{12}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Alcance del documento}{13}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Resumen de la arquitectura y los módulos principales}{13}{section.1.4}%
+\contentsline {subsection}{\numberline {1.4.1}Capítulo 2: Análisis de requerimientos, restricciones y uso}{14}{subsection.1.4.1}%
+\contentsline {subsection}{\numberline {1.4.2}Capítulo 4: Hardware}{14}{subsection.1.4.2}%
+\contentsline {subsection}{\numberline {1.4.3}Capítulo 5: Software del sensor}{14}{subsection.1.4.3}%
+\contentsline {subsection}{\numberline {1.4.4}Capítulo 6: Plataforma web en la nube}{14}{subsection.1.4.4}%
+\contentsline {subsection}{\numberline {1.4.5}Capítulo 7: Análisis espectral y localización en la nube}{15}{subsection.1.4.5}%
+\contentsline {subsection}{\numberline {1.4.6}Anexo A: Técnica de desarrollo con agentes IA}{15}{subsection.1.4.6}%
+\contentsline {section}{\numberline {1.5}Convenciones del documento}{15}{section.1.5}%
+\contentsline {chapter}{\numberline {2}Análisis de requerimientos, restricciones y uso}{16}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Propósito del capítulo}{16}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Contexto dentro del sistema general}{16}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Desarrollo técnico: requerimientos por categoría}{17}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Requerimientos de arquitectura}{17}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Requerimientos funcionales}{17}{subsection.2.3.2}%
+\contentsline {subsubsection}{Parametrización de adquisición}{17}{section*.4}%
+\contentsline {subsubsection}{Parametrización de visualización}{18}{section*.5}%
+\contentsline {subsubsection}{Medición, visualización y audio}{18}{section*.6}%
+\contentsline {subsubsection}{Cumplimiento normativo}{19}{section*.7}%
+\contentsline {subsubsection}{Herramientas de gestión}{19}{section*.8}%
+\contentsline {subsubsection}{Análisis forense y almacenamiento}{19}{section*.9}%
+\contentsline {subsubsection}{Funciones avanzadas y soporte}{20}{section*.10}%
+\contentsline {subsection}{\numberline {2.3.3}Requerimientos de red}{20}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Requerimientos de hardware}{20}{subsection.2.3.4}%
+\contentsline {subsection}{\numberline {2.3.5}Requerimientos de exactitud y confiabilidad}{21}{subsection.2.3.5}%
+\contentsline {subsection}{\numberline {2.3.6}Requerimientos de interoperabilidad}{21}{subsection.2.3.6}%
+\contentsline {section}{\numberline {2.4}Entradas, salidas e interfaces}{21}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Decisiones de diseño o implementación}{22}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Problemas presentados y ajustes realizados}{23}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Validación, pruebas o evidencias}{24}{section.2.7}%
+\contentsline {section}{\numberline {2.8}Aprendizajes y transferencia de conocimiento}{24}{section.2.8}%
+\contentsline {section}{\numberline {2.9}Limitaciones}{25}{section.2.9}%
+\contentsline {section}{\numberline {2.10}Recomendaciones específicas}{25}{section.2.10}%
+\contentsline {chapter}{\numberline {3}Diseño general del sistema}{27}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Propósito del capítulo}{27}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Contexto dentro del sistema general}{27}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Desarrollo técnico}{27}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Entradas, salidas e interfaces}{27}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Decisiones de diseño o implementación}{27}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Problemas presentados y ajustes realizados}{28}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Validación, pruebas o evidencias}{28}{section.3.7}%
+\contentsline {section}{\numberline {3.8}Aprendizajes y transferencia de conocimiento}{28}{section.3.8}%
+\contentsline {section}{\numberline {3.9}Limitaciones}{28}{section.3.9}%
+\contentsline {section}{\numberline {3.10}Recomendaciones específicas}{28}{section.3.10}%
+\contentsline {chapter}{\numberline {4}Hardware}{29}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Propósito del capítulo}{29}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Contexto dentro del sistema general}{29}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Desarrollo técnico}{32}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Arquitectura física del nodo}{32}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Ruta RF y mux de antenas}{33}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Árbol de potencia}{34}{subsection.4.3.3}%
+\contentsline {section}{\numberline {4.4}Entradas, salidas e interfaces}{36}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Decisiones de diseño o implementación}{36}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Problemas presentados y ajustes realizados}{37}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Validación, pruebas o evidencias}{38}{section.4.7}%
+\contentsline {section}{\numberline {4.8}Aprendizajes y transferencia de conocimiento}{38}{section.4.8}%
+\contentsline {section}{\numberline {4.9}Limitaciones}{39}{section.4.9}%
+\contentsline {section}{\numberline {4.10}Recomendaciones específicas}{39}{section.4.10}%
+\contentsline {chapter}{\numberline {5}Software del sensor}{40}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Propósito del capítulo}{40}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Contexto dentro del sistema general}{41}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Desarrollo técnico}{42}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Adquisición}{42}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}Uso de buffers}{43}{subsection.5.3.2}%
+\contentsline {subsection}{\numberline {5.3.3}Preprocesamiento}{43}{subsection.5.3.3}%
+\contentsline {subsubsection}{Balance IQ}{43}{section*.20}%
+\contentsline {subsubsection}{Corrección de componente DC}{44}{section*.21}%
+\contentsline {subsection}{\numberline {5.3.4}Procesamiento}{44}{subsection.5.3.4}%
+\contentsline {subsubsection}{Estimación de PSD}{44}{section*.22}%
+\contentsline {subsubsection}{Demodulación FM y AM}{45}{section*.23}%
+\contentsline {subsubsection}{Filtrado}{45}{section*.24}%
+\contentsline {subsubsection}{Trabajo multihilo}{45}{section*.25}%
+\contentsline {subsection}{\numberline {5.3.5}Postprocesamiento}{46}{subsection.5.3.5}%
+\contentsline {subsubsection}{Remoción del pico DC en PSD}{46}{section*.26}%
+\contentsline {subsection}{\numberline {5.3.6}Calibración en frecuencia}{47}{subsection.5.3.6}%
+\contentsline {subsection}{\numberline {5.3.7}Orquestador}{48}{subsection.5.3.7}%
+\contentsline {section}{\numberline {5.4}Entradas, salidas e interfaces}{49}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Entradas}{49}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}Salidas}{49}{subsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.4.3}Interfaces y protocolos}{50}{subsection.5.4.3}%
+\contentsline {section}{\numberline {5.5}Decisiones de diseño o implementación}{51}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Problemas presentados y ajustes realizados}{52}{section.5.6}%
+\contentsline {section}{\numberline {5.7}Validación, pruebas o evidencias}{52}{section.5.7}%
+\contentsline {section}{\numberline {5.8}Aprendizajes y transferencia de conocimiento}{53}{section.5.8}%
+\contentsline {section}{\numberline {5.9}Limitaciones}{54}{section.5.9}%
+\contentsline {section}{\numberline {5.10}Recomendaciones específicas}{55}{section.5.10}%
+\contentsline {chapter}{\numberline {6}Plataforma web en la nube}{57}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Propósito del capítulo}{57}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Contexto dentro del sistema general}{57}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Desarrollo técnico}{58}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Frontend}{58}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.2}Backend}{60}{subsection.6.3.2}%
+\contentsline {subsection}{\numberline {6.3.3}Base de datos}{63}{subsection.6.3.3}%
+\contentsline {subsection}{\numberline {6.3.4}Despliegue}{64}{subsection.6.3.4}%
+\contentsline {section}{\numberline {6.4}Entradas, salidas e interfaces}{64}{section.6.4}%
+\contentsline {subsection}{\numberline {6.4.1}Entradas}{64}{subsection.6.4.1}%
+\contentsline {subsection}{\numberline {6.4.2}Salidas}{65}{subsection.6.4.2}%
+\contentsline {subsection}{\numberline {6.4.3}Interfaces}{65}{subsection.6.4.3}%
+\contentsline {section}{\numberline {6.5}Decisiones de diseño o implementación}{66}{section.6.5}%
+\contentsline {subsection}{\numberline {6.5.1}Separación frontend/backend con API REST}{66}{subsection.6.5.1}%
+\contentsline {subsection}{\numberline {6.5.2}WebSocket sobre polling para tiempo real}{66}{subsection.6.5.2}%
+\contentsline {subsection}{\numberline {6.5.3}PostgreSQL y TimescaleDB para datos de series temporales}{67}{subsection.6.5.3}%
+\contentsline {subsection}{\numberline {6.5.4}Microservicio de postprocesamiento en Python}{67}{subsection.6.5.4}%
+\contentsline {subsection}{\numberline {6.5.5}Separación de canales WebSocket para datos y audio}{68}{subsection.6.5.5}%
+\contentsline {section}{\numberline {6.6}Problemas presentados y ajustes realizados}{68}{section.6.6}%
+\contentsline {section}{\numberline {6.7}Validación, pruebas o evidencias}{71}{section.6.7}%
+\contentsline {section}{\numberline {6.8}Aprendizajes y transferencia de conocimiento}{71}{section.6.8}%
+\contentsline {section}{\numberline {6.9}Limitaciones}{73}{section.6.9}%
+\contentsline {section}{\numberline {6.10}Recomendaciones específicas}{74}{section.6.10}%
+\contentsline {section}{\numberline {6.11}Repositorios}{75}{section.6.11}%
+\contentsline {chapter}{\numberline {7}Análisis espectral y localización en la nube}{76}{chapter.7}%
+\contentsline {section}{\numberline {7.1}1. Propósito de la sección}{76}{section.7.1}%
+\contentsline {section}{\numberline {7.2}2. Contexto del módulo dentro del sistema ANE-HX}{76}{section.7.2}%
+\contentsline {section}{\numberline {7.3}3. Arquitectura del módulo de postprocesamiento}{77}{section.7.3}%
+\contentsline {section}{\numberline {7.4}4. Flujo general de procesamiento}{78}{section.7.4}%
+\contentsline {section}{\numberline {7.5}5. Entradas del sistema}{79}{section.7.5}%
+\contentsline {section}{\numberline {7.6}6. Salidas del sistema}{80}{section.7.6}%
+\contentsline {section}{\numberline {7.7}7. Modos de operación}{82}{section.7.7}%
+\contentsline {subsection}{\numberline {7.7.1}Detección automática}{83}{subsection.7.7.1}%
+\contentsline {subsection}{\numberline {7.7.2}Análisis por picos}{83}{subsection.7.7.2}%
+\contentsline {subsection}{\numberline {7.7.3}Cumplimiento contra licencias}{83}{subsection.7.7.3}%
+\contentsline {section}{\numberline {7.8}8. Análisis espectral realizado}{84}{section.7.8}%
+\contentsline {subsection}{\numberline {7.8.1}Frecuencia central}{84}{subsection.7.8.1}%
+\contentsline {subsection}{\numberline {7.8.2}Ancho de banda}{85}{subsection.7.8.2}%
+\contentsline {subsection}{\numberline {7.8.3}Potencia}{86}{subsection.7.8.3}%
+\contentsline {subsection}{\numberline {7.8.4}MER/BER si aplica}{87}{subsection.7.8.4}%
+\contentsline {section}{\numberline {7.9}9. Comparación contra licencias y uso de DANE/municipio}{87}{section.7.9}%
+\contentsline {subsection}{\numberline {7.9.1}1. Filtrado geográfico y asociación de licencia}{88}{subsection.7.9.1}%
+\contentsline {subsection}{\numberline {7.9.2}2. Criterios de cumplimiento técnico}{88}{subsection.7.9.2}%
+\contentsline {subsection}{\numberline {7.9.3}3. Manejo de múltiples jurisdicciones (Múltiples DANE)}{88}{subsection.7.9.3}%
+\contentsline {section}{\numberline {7.10}10. Localización administrativa}{89}{section.7.10}%
+\contentsline {subsection}{\numberline {7.10.1}1. Origen del parámetro territorial}{89}{subsection.7.10.1}%
+\contentsline {subsection}{\numberline {7.10.2}2. Reglas de interpretación y jerarquía de prioridad}{90}{subsection.7.10.2}%
+\contentsline {subsection}{\numberline {7.10.3}3. Normalización de texto y emparejamiento (Matching)}{91}{subsection.7.10.3}%
+\contentsline {section}{\numberline {7.11}11. Interfaces del módulo}{91}{section.7.11}%
+\contentsline {section}{\numberline {7.12}12. Decisiones de diseño}{91}{section.7.12}%
+\contentsline {subsection}{\numberline {7.12.1}Estimación de Frecuencia Central ($F_c$)}{92}{subsection.7.12.1}%
+\contentsline {subsection}{\numberline {7.12.2}Estimación de Ancho de Banda (BW)}{92}{subsection.7.12.2}%
+\contentsline {subsection}{\numberline {7.12.3}Estimación de Potencia}{92}{subsection.7.12.3}%
+\contentsline {subsection}{\numberline {7.12.4}Estimación de MER y BER}{93}{subsection.7.12.4}%
+\contentsline {section}{\numberline {7.13}13. Problemas encontrados y ajustes realizados}{93}{section.7.13}%
+\contentsline {subsection}{\numberline {7.13.1}Evolución de la detección del piso de ruido}{93}{subsection.7.13.1}%
+\contentsline {subsection}{\numberline {7.13.2}Ajuste final por restricciones de Hardware (Raspberry Pi 5)}{94}{subsection.7.13.2}%
+\contentsline {section}{\numberline {7.14}14. Pruebas o validaciones sugeridas}{94}{section.7.14}%
+\contentsline {subsection}{\numberline {7.14.1}1. Estrategia de pruebas automatizadas}{95}{subsection.7.14.1}%
+\contentsline {subsection}{\numberline {7.14.2}2. Métricas de evaluación recomendadas}{95}{subsection.7.14.2}%
+\contentsline {subsubsection}{Métricas de Detección (Clasificación)}{95}{section*.35}%
+\contentsline {subsubsection}{Métricas de Precisión de Medida (Regresión)}{96}{section*.36}%
+\contentsline {subsubsection}{Métricas de Rendimiento del Sistema}{96}{section*.37}%
+\contentsline {section}{\numberline {7.15}15. Limitaciones actuales}{96}{section.7.15}%
+\contentsline {subsection}{\numberline {7.15.1}1. Restricciones de capacidad de procesamiento}{97}{subsection.7.15.1}%
+\contentsline {subsection}{\numberline {7.15.2}2. Saturación del canal de transmisión (Ancho de Banda)}{97}{subsection.7.15.2}%
+\contentsline {subsection}{\numberline {7.15.3}3. Estimación del umbral en entornos con baja SNR}{97}{subsection.7.15.3}%
+\contentsline {section}{\numberline {7.16}16. Recomendaciones de mejora}{97}{section.7.16}%
+\contentsline {subsection}{\numberline {7.16.1}Mejora de la infraestructura de comunicaciones}{97}{subsection.7.16.1}%
+\contentsline {subsection}{\numberline {7.16.2}Exploración de algoritmos basados en Inteligencia Artificial (IA)}{98}{subsection.7.16.2}%
+\contentsline {subsection}{\numberline {7.16.3}Actualización del hardware de procesamiento (Hardware Upgrade)}{98}{subsection.7.16.3}%
+\contentsline {section}{\numberline {7.17}17. Cierre técnico de la sección}{98}{section.7.17}%
+\contentsline {chapter}{\numberline {8}Protocolos de prueba edge-cloud}{100}{section*.38}%
+\contentsline {section}{\numberline {8.1}Objetivo del capítulo}{100}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Alcance de las pruebas}{100}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Arquitectura bajo prueba}{101}{section.8.3}%
+\contentsline {section}{\numberline {8.4}Criterios generales de aceptación}{102}{section.8.4}%
+\contentsline {section}{\numberline {8.5}Estrategia general de pruebas}{103}{section.8.5}%
+\contentsline {subsection}{\numberline {8.5.1}Pruebas funcionales}{103}{subsection.8.5.1}%
+\contentsline {subsection}{\numberline {8.5.2}Pruebas de integración edge}{103}{subsection.8.5.2}%
+\contentsline {subsection}{\numberline {8.5.3}Pruebas de integración edge-cloud}{103}{subsection.8.5.3}%
+\contentsline {subsection}{\numberline {8.5.4}Pruebas metrológicas y espectrales}{103}{subsection.8.5.4}%
+\contentsline {subsection}{\numberline {8.5.5}Pruebas pedagógicas}{104}{subsection.8.5.5}%
+\contentsline {section}{\numberline {8.6}Matriz general de pruebas}{104}{section.8.6}%
+\contentsline {section}{\numberline {8.7}Protocolos detallados de prueba}{107}{section.8.7}%
+\contentsline {subsection}{\numberline {8.7.1}PR-EC-001: registro e identificación del sensor}{107}{subsection.8.7.1}%
+\contentsline {subsection}{\numberline {8.7.2}PR-EC-002: heartbeat y salud del sensor}{108}{subsection.8.7.2}%
+\contentsline {subsection}{\numberline {8.7.3}PR-EC-003: configuración de adquisición SDR}{109}{subsection.8.7.3}%
+\contentsline {subsection}{\numberline {8.7.4}PR-EC-004: validación de RBW}{110}{subsection.8.7.4}%
+\contentsline {subsection}{\numberline {8.7.5}PR-EC-005: adquisición IQ y generación de PSD}{110}{subsection.8.7.5}%
+\contentsline {subsection}{\numberline {8.7.6}PR-EC-006: detección de emisiones por umbral}{111}{subsection.8.7.6}%
+\contentsline {subsection}{\numberline {8.7.7}PR-EC-007: medición de ancho de banda ocupado}{111}{subsection.8.7.7}%
+\contentsline {subsection}{\numberline {8.7.8}PR-EC-008: programación y ejecución de campañas}{112}{subsection.8.7.8}%
+\contentsline {subsection}{\numberline {8.7.9}PR-EC-009: recuperación ante pérdida de conectividad}{112}{subsection.8.7.9}%
+\contentsline {subsection}{\numberline {8.7.10}PR-EC-010: exportación de datos}{113}{subsection.8.7.10}%
+\contentsline {section}{\numberline {8.8}Pruebas metrológicas recomendadas}{114}{section.8.8}%
+\contentsline {subsection}{\numberline {8.8.1}DANL}{114}{subsection.8.8.1}%
+\contentsline {subsection}{\numberline {8.8.2}Exactitud de frecuencia}{114}{subsection.8.8.2}%
+\contentsline {subsection}{\numberline {8.8.3}Precisión de amplitud}{115}{subsection.8.8.3}%
+\contentsline {subsection}{\numberline {8.8.4}Rango dinámico}{115}{subsection.8.8.4}%
+\contentsline {section}{\numberline {8.9}Pruebas de instalación y operación de campo}{115}{section.8.9}%
+\contentsline {section}{\numberline {8.10}Problemas, decisiones y ajustes esperados}{116}{section.8.10}%
+\contentsline {section}{\numberline {8.11}Evidencias mínimas por prueba}{117}{section.8.11}%
+\contentsline {section}{\numberline {8.12}Transferencia de conocimiento}{118}{section.8.12}%
+\contentsline {section}{\numberline {8.13}Recomendaciones para futuras pruebas}{119}{section.8.13}%
+\contentsline {section}{\numberline {8.14}Conclusiones del capítulo}{120}{section.8.14}%
+\contentsline {chapter}{\numberline {9}Integración general del sistema}{121}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Propósito del capítulo}{121}{section.9.1}%
+\contentsline {section}{\numberline {9.2}Contexto dentro del sistema general}{121}{section.9.2}%
+\contentsline {section}{\numberline {9.3}Desarrollo técnico}{121}{section.9.3}%
+\contentsline {section}{\numberline {9.4}Entradas, salidas e interfaces}{121}{section.9.4}%
+\contentsline {section}{\numberline {9.5}Decisiones de diseño o implementación}{121}{section.9.5}%
+\contentsline {section}{\numberline {9.6}Problemas presentados y ajustes realizados}{122}{section.9.6}%
+\contentsline {section}{\numberline {9.7}Validación, pruebas o evidencias}{122}{section.9.7}%
+\contentsline {section}{\numberline {9.8}Aprendizajes y transferencia de conocimiento}{122}{section.9.8}%
+\contentsline {section}{\numberline {9.9}Limitaciones}{122}{section.9.9}%
+\contentsline {section}{\numberline {9.10}Recomendaciones específicas}{122}{section.9.10}%
+\contentsline {chapter}{\numberline {10}Conclusiones generales}{123}{chapter.10}%
+\contentsline {section}{\numberline {10.1}Síntesis de resultados técnicos}{123}{section.10.1}%
+\contentsline {section}{\numberline {10.2}Logros del diseño e implementación}{123}{section.10.2}%
+\contentsline {section}{\numberline {10.3}Resultados de la integración}{123}{section.10.3}%
+\contentsline {section}{\numberline {10.4}Lecciones aprendidas}{123}{section.10.4}%
+\contentsline {section}{\numberline {10.5}Cumplimiento de objetivos}{123}{section.10.5}%
+\contentsline {chapter}{\numberline {11}Recomendaciones}{124}{chapter.11}%
+\contentsline {section}{\numberline {11.1}Mejoras de arquitectura}{124}{section.11.1}%
+\contentsline {section}{\numberline {11.2}Mejoras de hardware}{124}{section.11.2}%
+\contentsline {section}{\numberline {11.3}Mejoras de software}{124}{section.11.3}%
+\contentsline {section}{\numberline {11.4}Mejoras de documentación}{124}{section.11.4}%
+\contentsline {section}{\numberline {11.5}Reducción de riesgos identificados}{124}{section.11.5}%
+\contentsline {chapter}{\numberline {12}Referencias}{125}{chapter.12}%
+\contentsline {chapter}{\numberline {A}Técnica de desarrollo en grupo usando agentes IA}{126}{appendix.Alph1}%
+\contentsline {section}{\numberline {A.1}Propósito del capítulo}{126}{section.Alph1.1}%
+\contentsline {section}{\numberline {A.2}Contexto dentro del sistema general}{126}{section.Alph1.2}%
+\contentsline {section}{\numberline {A.3}Desarrollo técnico: Ecosistema de Agentes CLI}{126}{section.Alph1.3}%
+\contentsline {subsection}{\numberline {A.3.1}Instalación y Configuración}{127}{subsection.Alph1.3.1}%
+\contentsline {subsection}{\numberline {A.3.2}Arquitectura Multi-Agente}{127}{subsection.Alph1.3.2}%
+\contentsline {section}{\numberline {A.4}Decisiones de diseño: Metodología de Prompting}{129}{section.Alph1.4}%
+\contentsline {section}{\numberline {A.5}Problemas presentados y ajustes realizados}{129}{section.Alph1.5}%
+\contentsline {section}{\numberline {A.6}Validación y Evidencias}{129}{section.Alph1.6}%
+\contentsline {section}{\numberline {A.7}Aprendizajes y transferencia de conocimiento}{130}{section.Alph1.7}%
+\contentsline {section}{\numberline {A.8}Recomendaciones específicas}{130}{section.Alph1.8}%
+\contentsline {chapter}{\numberline {B}Diagramas adicionales}{132}{appendix.Alph2}%
+\contentsline {section}{\numberline {B.1}Diagramas de arquitectura extendida}{132}{section.Alph2.1}%
+\contentsline {section}{\numberline {B.2}Diagramas de despliegue y conectividad}{132}{section.Alph2.2}%
+\contentsline {section}{\numberline {B.3}Secuencias operativas}{132}{section.Alph2.3}%
+\contentsline {section}{\numberline {B.4}Esquemas detallados de componentes}{132}{section.Alph2.4}%
+\contentsline {chapter}{\numberline {C}Manuales o guías de uso}{133}{appendix.Alph3}%
+\contentsline {section}{\numberline {C.1}Requisitos previos de instalación}{133}{section.Alph3.1}%
+\contentsline {section}{\numberline {C.2}Instrucciones de operación cotidiana}{133}{section.Alph3.2}%
+\contentsline {section}{\numberline {C.3}Solución de problemas frecuentes}{133}{section.Alph3.3}%
+\contentsline {section}{\numberline {C.4}Recomendaciones para mantenimiento}{133}{section.Alph3.4}%
+\contentsline {chapter}{\numberline {D}Resultados de pruebas}{134}{appendix.Alph4}%
+\contentsline {section}{\numberline {D.1}Tablas de métricas y mediciones}{134}{section.Alph4.1}%
+\contentsline {section}{\numberline {D.2}Evidencias visuales de ejecución}{134}{section.Alph4.2}%
+\contentsline {section}{\numberline {D.3}Comparación entre escenarios de prueba}{134}{section.Alph4.3}%
+\contentsline {section}{\numberline {D.4}Observaciones y anomalías detectadas}{134}{section.Alph4.4}%
