@@ -1,0 +1,28 @@
+name: Build LaTeX PDF
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-pdf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile main.tex
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          latexmk_use_xelatex: true
+          args: -interaction=nonstopmode -file-line-error -halt-on-error
+
+      - name: Upload main.pdf
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-pdf
+          path: main.pdf
