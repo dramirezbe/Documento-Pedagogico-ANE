@@ -1,31 +1,651 @@
-\chapter{Protocolos de prueba en nube y borde}
+\normalfont\color{black}
+\clearpage
 
-\section{Propósito del capítulo}
-[[Placeholder]]
+\refstepcounter{chapter}
+\setcounter{section}{0}
+\setcounter{subsection}{0}
+\setcounter{subsubsection}{0}
+\setcounter{figure}{0}
+\setcounter{table}{0}
 
-\section{Contexto dentro del sistema general}
-[[Placeholder]]
+\addcontentsline{toc}{chapter}{Protocolos de prueba edge-cloud}
+\markboth{Protocolos de prueba edge-cloud}{Protocolos de prueba edge-cloud}
 
-\section{Desarrollo técnico}
-[[Placeholder]]
+{\normalfont\huge\bfseries\color{black}Capítulo \thechapter\par}
 
-\section{Entradas, salidas e interfaces}
-[[Placeholder]]
+\vspace{0.8cm}
 
-\section{Decisiones de diseño o implementación}
-[[Placeholder]]
+{\normalfont\Huge\bfseries\color{black}Protocolos de prueba edge-cloud\par}
 
-\section{Problemas presentados y ajustes realizados}
-[[Placeholder]]
+\vspace{1.2cm}
 
-\section{Validación, pruebas o evidencias}
-[[Placeholder]]
+\normalcolor
+\normalfont\color{black}
 
-\section{Aprendizajes y transferencia de conocimiento}
-[[Placeholder]]
+\section{Objetivo del capítulo}
 
-\section{Limitaciones}
-[[Placeholder]]
+Este capítulo presenta el protocolo de pruebas propuesto para validar el funcionamiento integral de la plataforma de monitoreo espectral ANE-HX, considerando tanto el componente de borde \textit{edge} --sensor, receptor SDR, procesamiento local, almacenamiento temporal y telemetría-- como el componente \textit{cloud} --plataforma web, gestión de campañas, almacenamiento centralizado, visualización, reportes y administración de usuarios--.
 
-\section{Recomendaciones específicas}
-[[Placeholder]]
+El objetivo no es únicamente verificar que cada módulo funcione de manera aislada, sino comprobar que el flujo completo de monitoreo espectral sea trazable, repetible, técnicamente coherente y útil para procesos de vigilancia, análisis y transferencia de conocimiento.
+
+Desde el enfoque pedagógico del informe final, este capítulo busca que un nuevo integrante del equipo pueda entender qué se debe probar, por qué se debe probar, cómo debe ejecutarse cada prueba y qué evidencia debe conservarse para respaldar los resultados obtenidos.
+
+\section{Alcance de las pruebas}
+
+El protocolo cubre las pruebas necesarias para verificar que el sistema pueda ejecutar campañas de monitoreo espectral, adquirir datos de radiofrecuencia, procesar señales localmente, transmitir resultados hacia la plataforma central, visualizar mediciones, generar históricos, exportar información y soportar operación remota.
+
+El alcance incluye los siguientes aspectos:
+
+\begin{itemize}
+    \item Configuración de sensores y selección de antenas.
+    \item Parametrización de frecuencia central, ancho de banda de monitoreo, sample rate, tamaño FFT, RBW, VBW y umbrales.
+    \item Adquisición de datos IQ y estimación de densidad espectral de potencia.
+    \item Validación de detección de emisiones.
+    \item Cálculo de métricas espectrales: frecuencia central, ancho de banda, potencia integrada, ancho de banda ocupado y desviación respecto a valores nominales.
+    \item Evaluación de conectividad entre sensor y plataforma.
+    \item Supervisión de variables de salud del sensor: CPU, RAM, disco, temperatura, estado del proceso SDR, GPS, NTP y red.
+    \item Programación y ejecución de campañas de monitoreo.
+    \item Almacenamiento local y centralizado de datos.
+    \item Exportación de resultados.
+    \item Validación de roles, usuarios, trazabilidad y reportes.
+\end{itemize}
+
+No todas las pruebas descritas en este capítulo deben entenderse como pruebas de aceptación contractual estricta. Algunas corresponden a pruebas funcionales, otras a pruebas técnicas de ingeniería, otras a pruebas de diagnóstico y otras a pruebas pedagógicas orientadas a la transferencia de conocimiento.
+
+\section{Arquitectura bajo prueba}
+
+La arquitectura bajo prueba se entiende como una cadena completa de adquisición, procesamiento, transmisión, almacenamiento y análisis. El sistema puede representarse conceptualmente mediante los siguientes bloques:
+
+\begin{enumerate}
+    \item \textbf{Frente de radiofrecuencia:} antenas, conmutador RF, conectores, acoples, filtros y receptor SDR.
+    \item \textbf{Nodo edge:} computador embebido, receptor SDR, motor de adquisición, procesamiento local, almacenamiento temporal y telemetría.
+    \item \textbf{Canal de comunicación:} Ethernet, WiFi o red móvil, con verificación de disponibilidad, latencia y estabilidad.
+    \item \textbf{Backend institucional o cloud:} recepción de datos, base de datos, administración de campañas, gestión de sensores y procesamiento adicional.
+    \item \textbf{Interfaz de usuario:} visualización espectral, mapa, campañas, historial, alertas, usuarios, reportes y exportaciones.
+\end{enumerate}
+
+La validación debe comprobar que estos bloques funcionen de manera coordinada. Un sensor puede adquirir correctamente, pero si no transmite datos con timestamp, geolocalización, identificador único y parámetros de adquisición, la medición pierde trazabilidad. De forma equivalente, una interfaz puede visualizar datos, pero si no conserva los parámetros técnicos de captura, no permite auditoría posterior ni reproducción del análisis.
+
+\section{Criterios generales de aceptación}
+
+Para cada prueba se deben registrar, como mínimo, los siguientes elementos:
+
+\begin{itemize}
+    \item Identificador de prueba.
+    \item Módulo evaluado.
+    \item Requerimiento asociado.
+    \item Condiciones iniciales.
+    \item Procedimiento paso a paso.
+    \item Resultado esperado.
+    \item Resultado observado.
+    \item Evidencia: captura, archivo JSON, archivo CSV, log, gráfica, reporte o fotografía.
+    \item Estado: aprobada, aprobada con observaciones, fallida o no ejecutada.
+    \item Responsable y fecha de ejecución.
+\end{itemize}
+
+Se recomienda clasificar los resultados de la siguiente manera:
+
+\begin{itemize}
+    \item \textbf{Aprobada:} el comportamiento observado coincide con el resultado esperado.
+    \item \textbf{Aprobada con observaciones:} la funcionalidad opera, pero existen restricciones, desviaciones menores o recomendaciones.
+    \item \textbf{Fallida:} el sistema no cumple el criterio definido o presenta comportamiento no reproducible.
+    \item \textbf{No ejecutada:} la prueba no pudo realizarse por falta de equipo, datos, acceso o condiciones controladas.
+\end{itemize}
+
+\section{Estrategia general de pruebas}
+
+La estrategia propuesta combina pruebas funcionales, pruebas de integración, pruebas metrológicas, pruebas de operación remota y pruebas pedagógicas. Esta división permite diferenciar entre errores de software, fallas de comunicación, limitaciones del hardware SDR y problemas de operación.
+
+\subsection{Pruebas funcionales}
+
+Las pruebas funcionales verifican que las opciones visibles para el usuario operen de acuerdo con lo esperado. Incluyen inicio de sesión, selección de sensores, configuración de campañas, visualización de mediciones, consulta de históricos, generación de reportes y exportación de datos.
+
+\subsection{Pruebas de integración edge}
+
+Las pruebas de integración edge evalúan la interacción entre el hardware y el software local del sensor. Incluyen comunicación con el SDR, selección de antenas, adquisición de muestras IQ, generación de PSD, almacenamiento local, lectura de GPS, sincronización horaria y monitoreo de recursos del sistema.
+
+\subsection{Pruebas de integración edge-cloud}
+
+Las pruebas de integración edge-cloud verifican la comunicación entre el sensor y la plataforma central. Incluyen registro del sensor, envío de telemetría, envío de resultados espectrales, ejecución remota de campañas, recuperación ante pérdida de conectividad y consistencia de timestamps.
+
+\subsection{Pruebas metrológicas y espectrales}
+
+Las pruebas metrológicas y espectrales permiten conocer los límites reales del sistema de medición. Incluyen sensibilidad, DANL, rango dinámico, exactitud de frecuencia, precisión de amplitud, estabilidad del piso de ruido, medición de ancho de banda y detección de emisiones.
+
+\subsection{Pruebas pedagógicas}
+
+Las pruebas pedagógicas verifican que los procedimientos puedan ser reproducidos por nuevos usuarios técnicos. El objetivo es que el informe final no sea solamente un documento de cierre, sino también una guía de transferencia de conocimiento para operación, mantenimiento y evolución de la plataforma.
+
+\section{Matriz general de pruebas}
+
+La Tabla \ref{tab:matriz-pruebas-edge-cloud} presenta una matriz general de pruebas recomendadas para el sistema edge-cloud. Los estados deben actualizarse de acuerdo con la evidencia real disponible.
+
+\begingroup
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{|>{\raggedright\arraybackslash}p{1.6cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{5.0cm}|}
+\caption{Matriz general de pruebas edge-cloud.}
+\label{tab:matriz-pruebas-edge-cloud}\\
+\hline
+\textbf{ID} & \textbf{Prueba} & \textbf{Módulo} & \textbf{Resultado esperado} \\
+\hline
+\endfirsthead
+\hline
+\textbf{ID} & \textbf{Prueba} & \textbf{Módulo} & \textbf{Resultado esperado} \\
+\hline
+\endhead
+PR-EC-001 & Registro e identificación del sensor & Plataforma y edge & El sensor aparece registrado con identificador único, ubicación, estado y metadatos técnicos. \\
+\hline
+PR-EC-002 & Heartbeat del sensor & Edge-cloud & El sensor reporta periódicamente estado de CPU, RAM, disco, temperatura, red, GPS y proceso SDR. \\
+\hline
+PR-EC-003 & Verificación de conectividad & Red & La plataforma identifica si el sensor está en línea o fuera de línea y registra latencia cuando aplique. \\
+\hline
+PR-EC-004 & Sincronización temporal & Edge, NTP y GPS & Los timestamps de adquisición son coherentes con la hora del sistema. \\
+\hline
+PR-EC-005 & Selección de sensor activo & Interfaz & El usuario puede seleccionar un sensor disponible y habilitar el panel de adquisición. \\
+\hline
+PR-EC-006 & Selección de antena & Hardware RF & La antena seleccionada corresponde al puerto RF activado. \\
+\hline
+PR-EC-007 & Configuración de frecuencia central & SDR & El sistema permite configurar una frecuencia válida dentro del rango técnico del hardware. \\
+\hline
+PR-EC-008 & Configuración de sample rate & SDR y DSP & El sistema acepta valores permitidos y rechaza configuraciones fuera del rango soportado. \\
+\hline
+PR-EC-009 & Configuración de FFT y RBW & DSP & El RBW mostrado coincide con la relación entre sample rate y tamaño FFT. \\
+\hline
+PR-EC-010 & Adquisición IQ local & Edge SDR & El sensor captura muestras IQ y registra una salida válida sin corrupción. \\
+\hline
+PR-EC-011 & Cálculo de PSD & DSP edge & La PSD generada presenta eje de frecuencia, unidades de potencia y número de bins coherentes. \\
+\hline
+PR-EC-012 & Visualización espectral & Interfaz cloud & La plataforma muestra la traza espectral correspondiente al sensor y configuración seleccionados. \\
+\hline
+PR-EC-013 & Detección por umbral & Algoritmo espectral & El sistema diferencia piso de ruido y ocupación de señal mediante un umbral configurable. \\
+\hline
+PR-EC-014 & Medición de frecuencia central & Algoritmo espectral & La frecuencia medida de una emisión conocida se mantiene dentro de la tolerancia definida. \\
+\hline
+PR-EC-015 & Medición de ancho de banda & Algoritmo espectral & El sistema calcula ancho de banda por método X dB y por OBW cuando aplique. \\
+\hline
+PR-EC-016 & Medición de potencia de canal & Algoritmo espectral & El sistema integra potencia sobre el ancho de canal definido y reporta un valor trazable. \\
+\hline
+PR-EC-017 & Corrección de DC offset & DSP edge & La componente central espuria se reduce respecto a la señal cruda. \\
+\hline
+PR-EC-018 & Corrección de balance IQ & DSP edge & Se reduce la imagen espectral y mejora la calidad de la PSD. \\
+\hline
+PR-EC-019 & Ejecución de campaña programada & Plataforma y edge & La campaña se ejecuta en el horario configurado y genera resultados históricos. \\
+\hline
+PR-EC-020 & Cancelación de campaña & Plataforma & Un usuario autorizado puede cancelar una campaña programada antes de su ejecución. \\
+\hline
+PR-EC-021 & Persistencia ante pérdida de red & Edge & Si se pierde conectividad, el sensor conserva resultados temporalmente cuando sea posible. \\
+\hline
+PR-EC-022 & Almacenamiento centralizado & Backend & Los resultados quedan asociados a sensor, timestamp, ubicación y parámetros de adquisición. \\
+\hline
+PR-EC-023 & Consulta de histórico & Plataforma & El usuario puede consultar campañas y mediciones anteriores con filtros básicos. \\
+\hline
+PR-EC-024 & Exportación CSV y JSON & Plataforma & La plataforma exporta resultados completos y legibles para procesamiento offline. \\
+\hline
+PR-EC-025 & Validación de roles & Seguridad & Los permisos dependen del rol del usuario. \\
+\hline
+PR-EC-026 & Alertas de salud del sensor & Plataforma y telemetría & La plataforma genera alertas cuando una variable supera un umbral definido. \\
+\hline
+PR-EC-027 & Prueba de mapa geográfico & Interfaz y geolocalización & El sensor aparece ubicado correctamente en el mapa. \\
+\hline
+PR-EC-028 & Prueba de DANL & Caracterización RF & Se documenta el nivel de ruido propio del sistema por banda o configuración. \\
+\hline
+PR-EC-029 & Prueba de rango dinámico & Caracterización RF & Se identifica el intervalo entre señal mínima detectable y máxima señal sin distorsión evidente. \\
+\hline
+PR-EC-030 & Prueba de exactitud de frecuencia & Caracterización RF & La diferencia entre frecuencia inyectada y frecuencia medida queda dentro de la tolerancia definida. \\
+\hline
+PR-EC-031 & Prueba de precisión de amplitud & Caracterización RF & La diferencia entre potencia de referencia y potencia medida se registra en dB. \\
+\hline
+PR-EC-032 & Prueba de documentación pedagógica & Transferencia de conocimiento & Un usuario técnico puede reproducir una prueba siguiendo el procedimiento documentado. \\
+\hline
+\end{longtable}
+\endgroup
+\color{black}
+
+\section{Protocolos detallados de prueba}
+
+\subsection{PR-EC-001: registro e identificación del sensor}
+
+\textbf{Objetivo:} verificar que cada sensor pueda ser registrado en la plataforma con un identificador único y metadatos suficientes para trazabilidad.
+
+\textbf{Condiciones iniciales:}
+
+\begin{itemize}
+    \item Plataforma cloud activa.
+    \item Usuario con permisos de administración.
+    \item Sensor energizado y con conectividad disponible.
+\end{itemize}
+
+\textbf{Procedimiento:}
+
+\begin{enumerate}
+    \item Ingresar a la plataforma con usuario administrador.
+    \item Acceder al módulo de configuración o registro de dispositivos.
+    \item Crear o editar un sensor.
+    \item Asociar nombre, identificador, ubicación, antenas disponibles y descripción técnica.
+    \item Guardar la configuración.
+    \item Verificar que el sensor aparezca en el listado general.
+\end{enumerate}
+
+\textbf{Resultado esperado:} el sensor queda registrado, aparece disponible para campañas y conserva sus metadatos técnicos.
+
+\textbf{Evidencia sugerida:} captura del formulario de registro, captura del listado de sensores y registro en base de datos.
+
+\subsection{PR-EC-002: heartbeat y salud del sensor}
+
+\textbf{Objetivo:} comprobar que el nodo edge reporte periódicamente su estado operativo.
+
+\textbf{Variables mínimas a registrar:}
+
+\begin{itemize}
+    \item Estado en línea o fuera de línea.
+    \item Uso de CPU.
+    \item Uso de RAM.
+    \item Uso de disco.
+    \item Temperatura.
+    \item Estado del proceso SDR.
+    \item Estado de red.
+    \item Estado GPS o coordenadas.
+    \item Hora del sistema.
+\end{itemize}
+
+\textbf{Procedimiento:}
+
+\begin{enumerate}
+    \item Encender el sensor.
+    \item Verificar conectividad IP.
+    \item Ingresar al panel de sensores.
+    \item Observar la actualización periódica del estado.
+    \item Desconectar temporalmente la red del sensor.
+    \item Verificar que la plataforma detecte el cambio de estado.
+    \item Reconectar el sensor.
+    \item Confirmar recuperación del estado en línea.
+\end{enumerate}
+
+\textbf{Resultado esperado:} la plataforma refleja correctamente el estado operativo del sensor y permite detectar fallas de conectividad o recursos.
+
+\subsection{PR-EC-003: configuración de adquisición SDR}
+
+\textbf{Objetivo:} validar que la plataforma pueda enviar parámetros de adquisición al sensor y que el sensor los aplique correctamente.
+
+\textbf{Parámetros bajo prueba:}
+
+\begin{itemize}
+    \item Frecuencia central.
+    \item Ancho de banda de monitoreo.
+    \item Sample rate.
+    \item Ganancia de recepción, si aplica.
+    \item Tamaño FFT.
+    \item Antena seleccionada.
+    \item Duración de adquisición.
+\end{itemize}
+
+\textbf{Procedimiento:}
+
+\begin{enumerate}
+    \item Seleccionar un sensor en línea.
+    \item Seleccionar una antena compatible con la banda de prueba.
+    \item Configurar una frecuencia central conocida.
+    \item Configurar sample rate y tamaño FFT.
+    \item Iniciar adquisición.
+    \item Revisar logs del sensor.
+    \item Verificar que la configuración aplicada coincide con la configuración solicitada.
+\end{enumerate}
+
+\textbf{Resultado esperado:} el sensor aplica los parámetros y genera una medición válida sin errores de configuración.
+
+\subsection{PR-EC-004: validación de RBW}
+
+\textbf{Objetivo:} verificar que el valor de RBW mostrado por la plataforma sea coherente con los parámetros DSP.
+
+El RBW debe calcularse como:
+
+\[
+RBW = \frac{F_s}{N_{FFT}}
+\]
+
+donde $F_s$ es el sample rate y $N_{FFT}$ es el tamaño de la FFT.
+
+\textbf{Procedimiento:}
+
+\begin{enumerate}
+    \item Configurar un sample rate conocido.
+    \item Configurar un tamaño FFT conocido.
+    \item Iniciar adquisición.
+    \item Consultar el RBW mostrado en la interfaz o archivo de salida.
+    \item Calcular manualmente el RBW.
+    \item Comparar ambos valores.
+\end{enumerate}
+
+\textbf{Resultado esperado:} el RBW reportado coincide con el cálculo teórico, dentro de una tolerancia asociada al redondeo de visualización.
+
+\subsection{PR-EC-005: adquisición IQ y generación de PSD}
+
+\textbf{Objetivo:} comprobar que el sensor capture datos IQ y genere una PSD correctamente indexada en frecuencia.
+
+\textbf{Procedimiento:}
+
+\begin{enumerate}
+    \item Configurar una banda con actividad espectral conocida.
+    \item Ejecutar una adquisición.
+    \item Confirmar la existencia de archivo IQ, buffer o salida procesada.
+    \item Verificar número de muestras.
+    \item Generar PSD.
+    \item Confirmar que el eje de frecuencia corresponde a la frecuencia central y al ancho de banda configurados.
+    \item Verificar que la potencia se encuentre en unidades consistentes.
+\end{enumerate}
+
+\textbf{Resultado esperado:} la PSD debe contener vector de frecuencias, vector de potencia, metadatos de adquisición y timestamp.
+
+\subsection{PR-EC-006: detección de emisiones por umbral}
+
+\textbf{Objetivo:} validar que el algoritmo pueda distinguir entre piso de ruido y emisiones presentes.
+
+\textbf{Procedimiento:}
+
+\begin{enumerate}
+    \item Capturar una banda con al menos una emisión visible.
+    \item Estimar el piso de ruido.
+    \item Definir un umbral de detección, por ejemplo $NF + 3$ dB o $NF + 5$ dB.
+    \item Identificar bins por encima del umbral.
+    \item Agrupar bins contiguos como emisiones.
+    \item Registrar frecuencia central, ancho de banda y potencia.
+\end{enumerate}
+
+\textbf{Resultado esperado:} el algoritmo detecta emisiones reales y evita clasificar fluctuaciones aleatorias de ruido como señales.
+
+\subsection{PR-EC-007: medición de ancho de banda ocupado}
+
+\textbf{Objetivo:} comprobar que el sistema mida ancho de banda usando criterios X dB y OBW.
+
+\textbf{Procedimiento:}
+
+\begin{enumerate}
+    \item Seleccionar una emisión estable.
+    \item Calcular el punto de máxima potencia.
+    \item Aplicar el método X dB para $X = 3$, $X = 10$ o $X = 26$, según configuración.
+    \item Calcular OBW al 99\% integrando potencia acumulada.
+    \item Comparar ambos resultados.
+    \item Registrar diferencias y condiciones de medición.
+\end{enumerate}
+
+\textbf{Resultado esperado:} el sistema reporta ancho de banda de forma consistente y diferencia explícitamente el método usado.
+
+\subsection{PR-EC-008: programación y ejecución de campañas}
+
+\textbf{Objetivo:} verificar que una campaña programada desde la plataforma sea ejecutada por el sensor correspondiente.
+
+\textbf{Procedimiento:}
+
+\begin{enumerate}
+    \item Crear una campaña con sensor, antena, frecuencia, ancho de banda, duración y periodicidad.
+    \item Guardar la campaña.
+    \item Verificar que aparece como programada.
+    \item Esperar la hora de ejecución.
+    \item Confirmar inicio de adquisición en el sensor.
+    \item Verificar recepción de datos en la plataforma.
+    \item Revisar histórico de campaña.
+\end{enumerate}
+
+\textbf{Resultado esperado:} la campaña se ejecuta automáticamente y genera registros consultables.
+
+\subsection{PR-EC-009: recuperación ante pérdida de conectividad}
+
+\textbf{Objetivo:} evaluar la tolerancia del sistema ante desconexiones temporales entre edge y cloud.
+
+\textbf{Procedimiento:}
+
+\begin{enumerate}
+    \item Iniciar una campaña o adquisición.
+    \item Interrumpir temporalmente la conectividad del sensor.
+    \item Verificar que el sensor no pierda la adquisición local, si el diseño lo permite.
+    \item Restaurar la conectividad.
+    \item Confirmar si los resultados pendientes son transmitidos.
+    \item Revisar logs de error y recuperación.
+\end{enumerate}
+
+\textbf{Resultado esperado:} el sistema debe registrar la pérdida de conexión, conservar datos críticos y recuperar operación sin intervención manual, cuando sea técnicamente posible.
+
+\subsection{PR-EC-010: exportación de datos}
+
+\textbf{Objetivo:} validar que los resultados puedan descargarse para análisis offline.
+
+\textbf{Formatos mínimos sugeridos:}
+
+\begin{itemize}
+    \item CSV para análisis tabular.
+    \item JSON para interoperabilidad técnica.
+    \item XML si se requiere integración con sistemas institucionales.
+\end{itemize}
+
+\textbf{Procedimiento:}
+
+\begin{enumerate}
+    \item Seleccionar una campaña terminada.
+    \item Descargar resultados en CSV.
+    \item Descargar resultados en JSON.
+    \item Verificar que los archivos incluyan sensor, timestamp, coordenadas, parámetros de adquisición y resultados espectrales.
+    \item Abrir los archivos en una herramienta externa.
+\end{enumerate}
+
+\textbf{Resultado esperado:} los archivos exportados son legibles, completos y consistentes con la medición mostrada en plataforma.
+
+\section{Pruebas metrológicas recomendadas}
+
+\subsection{DANL}
+
+El DANL permite estimar el nivel promedio de ruido mostrado por el sistema en ausencia de señales intencionales. Esta prueba es fundamental para conocer la sensibilidad práctica del sistema.
+
+\textbf{Procedimiento sugerido:}
+
+\begin{enumerate}
+    \item Terminar el puerto RF en 50 $\Omega$.
+    \item Configurar frecuencia central y sample rate.
+    \item Realizar varias capturas.
+    \item Promediar la PSD.
+    \item Registrar el nivel de ruido por banda.
+    \item Repetir para distintas frecuencias representativas.
+\end{enumerate}
+
+\textbf{Resultado esperado:} se obtiene una curva o tabla de DANL por frecuencia y configuración.
+
+\subsection{Exactitud de frecuencia}
+
+\textbf{Procedimiento sugerido:}
+
+\begin{enumerate}
+    \item Inyectar una señal senoidal de frecuencia conocida.
+    \item Configurar el sensor alrededor de esa frecuencia.
+    \item Medir la frecuencia de pico.
+    \item Calcular el error absoluto y relativo en ppm.
+\end{enumerate}
+
+\[
+Error_{Hz} = f_{medida} - f_{referencia}
+\]
+
+\[
+Error_{ppm} = \frac{f_{medida} - f_{referencia}}{f_{referencia}} \times 10^6
+\]
+
+\textbf{Resultado esperado:} el error de frecuencia queda documentado y puede compararse entre sensores.
+
+\subsection{Precisión de amplitud}
+
+\textbf{Procedimiento sugerido:}
+
+\begin{enumerate}
+    \item Inyectar una señal de potencia conocida.
+    \item Medir la potencia reportada por el sistema.
+    \item Repetir para varios niveles de potencia.
+    \item Calcular error en dB.
+\end{enumerate}
+
+\[
+Error_{dB} = P_{medida} - P_{referencia}
+\]
+
+\textbf{Resultado esperado:} se obtiene una tabla de error de amplitud por nivel de potencia.
+
+\subsection{Rango dinámico}
+
+\textbf{Procedimiento sugerido:}
+
+\begin{enumerate}
+    \item Estimar el DANL del receptor.
+    \item Inyectar señales de amplitud creciente.
+    \item Identificar el nivel máximo antes de compresión, saturación o aparición significativa de espurios.
+    \item Calcular la diferencia entre el nivel máximo lineal y el nivel mínimo detectable.
+\end{enumerate}
+
+\textbf{Resultado esperado:} se documenta el rango dinámico práctico del sistema bajo condiciones de prueba.
+
+\section{Pruebas de instalación y operación de campo}
+
+Las pruebas de campo deben validar que el sensor opere en condiciones reales de instalación. Se recomienda incluir:
+
+\begin{itemize}
+    \item Verificación de alimentación estable.
+    \item Estado de sellado y protección ambiental.
+    \item Correcta instalación de antenas.
+    \item Confirmación de GPS.
+    \item Conectividad IP.
+    \item Prueba de adquisición corta.
+    \item Verificación de reporte en plataforma.
+    \item Registro fotográfico del emplazamiento.
+\end{itemize}
+
+Estas pruebas son importantes porque un sistema puede funcionar correctamente en laboratorio, pero presentar fallas en campo por alimentación inestable, mala conectividad, ubicación deficiente de antenas, ausencia de sincronización temporal o interferencias locales.
+
+\section{Problemas, decisiones y ajustes esperados}
+
+La Tabla \ref{tab:problemas-pruebas-edge-cloud} resume problemas típicos que pueden aparecer durante la validación del sistema, junto con causas probables y ajustes recomendados.
+
+\begin{table}[H]
+\centering
+\caption{Problemas frecuentes durante las pruebas edge-cloud.}
+\label{tab:problemas-pruebas-edge-cloud}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Ajuste recomendado} \\
+\hline
+Pérdida temporal de conectividad del sensor & Sensor aparece fuera de línea o sin heartbeat & Red inestable, pérdida de enlace WiFi, LTE o Ethernet & Implementar persistencia local y reintento de transmisión. \\
+\hline
+Espurio en frecuencia central & Pico persistente en el centro de la PSD & DC offset del receptor de conversión directa & Aplicar corrección DC o estrategia de sintonía con desplazamiento. \\
+\hline
+Imágenes espectrales & Componentes reflejadas alrededor de la portadora & Desbalance de amplitud o fase entre ramas I y Q & Aplicar corrección de balance IQ y documentar mejora. \\
+\hline
+Medición inestable del piso de ruido & Variación fuerte del umbral entre capturas & Ganancia no controlada, entorno RF variable o promediado insuficiente & Fijar ganancia, aumentar promediado y registrar condiciones de prueba. \\
+\hline
+Inconsistencia entre campaña y datos recibidos & Resultados sin metadatos completos & Falta de asociación entre adquisición, sensor y campaña & Exigir identificador de campaña, sensor, timestamp y configuración en cada paquete. \\
+\hline
+Errores de usuario en configuración & Frecuencias o anchos de banda fuera de rango & Falta de validación en interfaz & Agregar validaciones y mensajes pedagógicos. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Evidencias mínimas por prueba}
+
+Cada prueba debe acompañarse de evidencia verificable. Se recomienda conservar, como mínimo, los siguientes tipos de evidencia:
+
+\begin{itemize}
+    \item Capturas de pantalla de la interfaz.
+    \item Logs del sensor.
+    \item Logs de backend.
+    \item Archivos de salida en CSV o JSON.
+    \item Gráficas de PSD.
+    \item Fotografías del montaje físico.
+    \item Tabla de resultados observados.
+    \item Comentarios del responsable de la prueba.
+\end{itemize}
+
+Una posible estructura de carpetas para organizar evidencias es la siguiente:
+
+\begin{verbatim}
+section/img/test_protocols/
+    PR-EC-001-sensor-registration.png
+    PR-EC-002-heartbeat.png
+    PR-EC-005-psd-example.png
+    PR-EC-008-campaign-execution.png
+
+test-results/
+    PR-EC-005-psd-output.json
+    PR-EC-010-export.csv
+    PR-EC-014-frequency-accuracy.csv
+    PR-EC-028-danl-results.csv
+\end{verbatim}
+
+Para cada evidencia se debe indicar:
+
+\begin{itemize}
+    \item Nombre del archivo.
+    \item Prueba asociada.
+    \item Fecha.
+    \item Responsable.
+    \item Descripción breve.
+    \item Interpretación del resultado.
+\end{itemize}
+
+\section{Transferencia de conocimiento}
+
+El capítulo debe cumplir una función pedagógica: permitir que un nuevo integrante del equipo entienda qué se prueba, por qué se prueba y cómo interpretar los resultados.
+
+\begin{table}[H]
+\centering
+\caption{Aprendizajes transferibles asociados a las pruebas.}
+\label{tab:transferencia-conocimiento-pruebas}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}p{3.4cm}|}
+\hline
+\textbf{Tema} & \textbf{Aprendizaje obtenido} & \textbf{Prueba asociada} \\
+\hline
+RBW y FFT & El RBW depende directamente del sample rate y del tamaño FFT; no es un parámetro independiente. & PR-EC-004 \\
+\hline
+Piso de ruido y umbral & El umbral debe definirse por encima del piso de ruido para evitar falsos positivos. & PR-EC-006 \\
+\hline
+DC offset & Los SDR de conversión directa pueden presentar espurios en frecuencia central que afectan la detección. & PR-EC-017 \\
+\hline
+Balance IQ & El desbalance IQ genera imágenes espectrales que pueden confundirse con emisiones reales. & PR-EC-018 \\
+\hline
+Trazabilidad & Toda medición debe conservar sensor, timestamp, ubicación y parámetros de adquisición. & PR-EC-022 \\
+\hline
+Flujo edge-cloud & El sistema no se valida únicamente en el sensor ni únicamente en la web; debe validarse el flujo completo. & PR-EC-001 a PR-EC-027 \\
+\hline
+Caracterización RF & DANL, exactitud de frecuencia, precisión de amplitud y rango dinámico permiten conocer los límites reales del sistema. & PR-EC-028 a PR-EC-031 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\section{Recomendaciones para futuras pruebas}
+
+Se recomienda que las pruebas futuras incorporen mayor automatización, especialmente en los siguientes aspectos:
+
+\begin{itemize}
+    \item Generación automática de reportes de prueba.
+    \item Ejecución periódica de pruebas de conectividad y heartbeat.
+    \item Validación automática de estructura JSON.
+    \item Comparación automática entre configuración solicitada y configuración aplicada.
+    \item Pruebas con señales sintéticas controladas.
+    \item Pruebas de regresión después de cada actualización del software.
+    \item Banco de pruebas con generador RF, atenuadores calibrados y carga de 50 $\Omega$.
+    \item Registro sistemático de temperatura, ganancia, frecuencia, antena y condiciones ambientales.
+\end{itemize}
+
+También se recomienda separar claramente tres niveles de evidencia:
+
+\begin{enumerate}
+    \item \textbf{Evidencia de funcionamiento:} capturas de interfaz, logs y archivos exportados.
+    \item \textbf{Evidencia técnica:} mediciones, gráficas de PSD, cálculos de error y resultados de caracterización.
+    \item \textbf{Evidencia pedagógica:} explicación del procedimiento, interpretación de resultados y recomendaciones de uso.
+\end{enumerate}
+
+\section{Conclusiones del capítulo}
+
+El protocolo de pruebas edge-cloud permite validar la plataforma ANE-HX como un sistema integral de monitoreo espectral, no como una suma aislada de componentes. La correcta operación depende de la coordinación entre el receptor SDR, el procesamiento local, la conectividad, la plataforma central, la visualización, el almacenamiento histórico y la capacidad de exportar resultados.
+
+Las pruebas propuestas cubren el flujo completo desde la adquisición RF hasta la consulta de resultados en la plataforma. Además, incorporan pruebas metrológicas necesarias para entender las limitaciones reales del sistema, tales como DANL, rango dinámico, exactitud de frecuencia y precisión de amplitud.
+
+Desde el enfoque pedagógico del informe final, este capítulo debe servir como guía para que futuros usuarios, desarrolladores o funcionarios puedan reproducir pruebas, interpretar evidencias y comprender por qué cada validación es necesaria dentro de un sistema institucional de monitoreo del espectro.
