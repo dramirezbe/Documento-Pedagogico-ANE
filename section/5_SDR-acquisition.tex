@@ -1,9 +1,8 @@
-```latex
-\chapter{Software del sensor}
+\chapter{Software de adquisición SDR del sensor}
 
 \section{Propósito del capítulo}
 
-El propósito de este capítulo es describir, de forma pedagógica y conceptual, la
+El propósito de este capítulo es describir, de forma técnica y verificable, la
 arquitectura del código que corre directamente en el sensor de monitoreo espectral
 remoto. El sensor está compuesto por una Raspberry Pi 5, una HackRF One y una
 tarjeta auxiliar que integra comunicación LTE, receptor GPS y un multiplexor para
@@ -52,6 +51,16 @@ objetivos:
   \item Gestionar recursos físicos del sensor, como LTE, GPS, GPIO y multiplexor
   de antena.
 \end{itemize}
+
+El capítulo describe el software actualmente implementado en el repositorio. La
+capa de control se encuentra principalmente en \texttt{orchestrator.py},
+\texttt{campaign\_runner.py}, \texttt{status.py}, \texttt{retry\_queue.py},
+\texttt{functions.py}, \texttt{cfg.py} y \texttt{utils/}. La capa de adquisición y
+procesamiento RF se encuentra en \texttt{rf/rf.c} y \texttt{rf/libs/*.c}. Los
+servicios de posicionamiento y conectividad se encuentran en \texttt{gps-lte/},
+mientras que el audio en tiempo real se articula con \texttt{server\_webrtc.py}.
+Por tanto, las funcionalidades descritas no son una especificación abstracta, sino
+una lectura organizada del código del sensor.
 
 
 \section{Contexto dentro del sistema general}
@@ -112,6 +121,174 @@ El sensor opera con varios servicios o modos complementarios:
   conectividad, almacenamiento, temperatura, memoria y actividad del software.
 \end{itemize}
 
+\subsection{Arquitectura funcional del software SDR}
+
+La ruta principal de una medición puede resumirse como una cadena de control y una
+cadena de datos. La cadena de control inicia en el backend, pasa por el
+orquestador Python y llega al motor RF mediante mensajería local. La cadena de
+datos inicia en la HackRF One, produce muestras IQ, ejecuta procesamiento digital
+de señales en C y retorna productos resumidos hacia la plataforma.
+
+% Requiere en el preambulo:
+% \usepackage{tikz}
+% \usetikzlibrary{arrows.meta,positioning}
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  scale=0.92,
+  transform shape,
+  font=\tiny,
+  external/.style={
+    draw,
+    rounded corners=2pt,
+    very thick,
+    align=center,
+    text width=2.35cm,
+    minimum height=0.88cm,
+    fill=blue!8
+  },
+  orchbox/.style={
+    draw,
+    rounded corners=4pt,
+    very thick,
+    align=center,
+    minimum width=3.35cm,
+    minimum height=4.25cm,
+    fill=blue!4
+  },
+  motorbox/.style={
+    draw,
+    rounded corners=4pt,
+    very thick,
+    align=center,
+    minimum width=3.35cm,
+    minimum height=4.75cm,
+    fill=green!10
+  },
+  submain/.style={
+    draw,
+    rounded corners=2pt,
+    thick,
+    align=center,
+    text width=2.78cm,
+    minimum height=0.48cm,
+    fill=blue!10
+  },
+  subrf/.style={
+    draw,
+    rounded corners=2pt,
+    thick,
+    align=center,
+    text width=2.78cm,
+    minimum height=0.48cm,
+    fill=green!16
+  },
+  aux/.style={
+    draw,
+    rounded corners=2pt,
+    thick,
+    align=center,
+    text width=2.55cm,
+    minimum height=0.72cm,
+    fill=orange!13
+  },
+  flow/.style={-Latex, very thick},
+  ctrl/.style={-Latex, very thick},
+  hw/.style={Latex-Latex, very thick},
+  side/.style={-Latex, thick},
+  parallel/.style={-Latex, thick, dashed},
+  edgeLabel/.style={midway, fill=white, inner sep=1pt, align=center}
+]
+
+\node[external] (backend) at (-0.35,0) {\textbf{Backend / API}\\solicitudes, campañas\\resultados};
+
+\node[orchbox] (orch) at (3.10,0) {};
+\node[font=\tiny\bfseries, anchor=north] at (orch.north) {Orquestador Python};
+\node[submain] (api) at (3.10,1.23) {\textbf{HTTP / API REST}\\consulta y publicación};
+\node[submain] (services) at (3.10,0.45) {\textbf{Control de servicios}\\realtime, campañas, audio};
+\node[submain] (cron) at (3.10,-0.33) {\textbf{Control de tiempos}\\cron de campañas};
+\node[submain] (post) at (3.10,-1.11) {\textbf{Postproceso}\\remoción de pico DC};
+
+\node[motorbox] (motor) at (7.25,0) {};
+\node[font=\tiny\bfseries, anchor=north] at (motor.north) {Motor RF en C};
+\node[subrf] (acq) at (7.25,1.42) {\textbf{Control de adquisición}\\configuración HackRF};
+\node[subrf] (buffers) at (7.25,0.62) {\textbf{Lógica de buffers}\\recepción y drenaje IQ};
+\node[subrf] (preiq) at (7.25,-0.18) {\textbf{Preproceso IQ}\\balance y corrección DC};
+\node[subrf] (psd) at (7.25,-0.98) {\textbf{Procesamiento}\\PSD, audio y métricas};
+\node[subrf] (omp) at (7.25,-1.78) {\textbf{Multihilo}\\OpenMP y tareas paralelas};
+
+\node[external, fill=green!10] (hackrf) at (10.95,-0.35) {\textbf{HackRF One}\\sintonía, ganancias\\flujo IQ};
+\node[aux] (status) at (-0.35,2.35) {\textbf{Servicio status}\\temperatura, CPU, RAM\\disco y ping};
+\node[aux] (webrtc) at (3.10,2.75) {\textbf{Servicio WebRTC}\\audio paralelo\\RTP / ICE};
+\node[aux] (gpio) at (10.95,1.35) {\textbf{GPIO / MUX}\\selección física\\de antena};
+
+\draw[ctrl] (backend.east) -- (orch.west);
+\draw[ctrl] (orch.east) -- (motor.west);
+\draw[hw] (motor.east) -- ++(0.45,0) |- (hackrf.west);
+\draw[flow] (psd.west) -- (post.east);
+
+\draw[parallel] (orch.north) -- (webrtc.south);
+\draw[parallel] (status.south) -- (backend.north);
+\draw[side] (acq.east) -- ++(0.35,0) |- (gpio.west);
+\draw[side] (gpio.south) -- (hackrf.north);
+
+\node[align=center, font=\tiny] at (5.45,-3.05) {
+Azul: plano de control/publicación \quad
+Verde: adquisición y DSP\\
+Naranja: servicios paralelos o auxiliares
+};
+
+\end{tikzpicture}
+\caption{Diagrama de bloques de la arquitectura funcional del software SDR del sensor.}
+\label{fig:arquitectura-software-sdr}
+\end{figure}
+
+En el diagrama, el orquestador Python se muestra como el proceso de coordinación:
+consulta y publica por API REST, activa servicios de tiempo real, campañas y
+audio, agenda campañas mediante cron y aplica el postproceso final de PSD. El
+motor RF en C concentra el camino crítico de adquisición y DSP: configura la
+HackRF, administra buffers, preprocesa IQ, estima PSD, produce métricas y usa
+multihilo para las etapas de cómputo intensivo. El servicio WebRTC corre en
+paralelo al orquestador y se activa cuando hay demodulación; toma audio
+demodulado del camino RF y lo entrega mediante WebRTC usando RTP e ICE. El
+servicio de estado también corre de forma continua y reporta métricas de salud
+del sistema hacia la plataforma.
+
+\begin{center}
+\begin{tabular}{p{0.24\textwidth}p{0.66\textwidth}}
+\toprule
+\textbf{Bloque} & \textbf{Responsabilidad técnica} \\
+\midrule
+Backend & Publica solicitudes de medición, campañas, parámetros RF y recibe resultados. \\
+Orquestador Python & Consulta tareas por API REST, coordina servicios, agenda campañas y aplica postproceso de PSD. \\
+ZeroMQ IPC & Transporta comandos JSON locales entre Python y C usando un flujo estricto REQ/REP. \\
+Motor RF C & Configura HackRF, controla adquisición, buffers, preproceso IQ, PSD, métricas, audio y multihilo. \\
+libhackrf/USB & Ejecuta la comunicación de bajo nivel con la HackRF One y entrega muestras IQ intercaladas. \\
+WebRTC/Opus & Corre en paralelo, se activa con demodulación y entrega audio mediante WebRTC, RTP e ICE. \\
+Servicio status & Reporta temperatura, carga de CPU, RAM usada, espacio en disco y ping hacia la plataforma. \\
+ShmStore & Comparte estado en \texttt{/dev/shm/persistent.json}, como \texttt{ppm\_error}, GPS y campañas. \\
+GPS/LTE/GPIO & Mantiene ubicación, conectividad celular y control físico del multiplexor de antenas. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Esta separación define una frontera importante: el sensor ejecuta adquisición,
+procesamiento básico y control local; la plataforma central se encarga de
+persistencia histórica, visualización, comparación institucional, reportes y
+analítica de mayor nivel. La tabla siguiente resume esa distribución.
+
+\begin{center}
+\begin{tabular}{p{0.28\textwidth}p{0.62\textwidth}}
+\toprule
+\textbf{Nivel} & \textbf{Funciones principales} \\
+\midrule
+Sensor/edge & Adquisición IQ, PSD local, filtrado, demodulación AM/FM, GPS, estado, reintentos y audio. \\
+Backend/cloud & Almacenamiento histórico, campañas, gestión de sensores, APIs, consolidación y reglas institucionales. \\
+Frontend & Visualización, selección de parámetros, marcadores visuales, navegación de resultados y operación del usuario. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
 
 \section{Desarrollo técnico}
 
@@ -150,6 +327,82 @@ Las muestras IQ representan la señal recibida en banda base compleja. La compon
 \textit{I} corresponde a la parte en fase y la componente \textit{Q} a la parte en
 cuadratura. En conjunto permiten conservar información de amplitud y fase, que es
 necesaria para estimar el espectro, filtrar, demodular FM o demodular AM.
+
+En términos operativos, una adquisición completa sigue el siguiente procedimiento:
+
+\begin{enumerate}
+  \item Validar que la máquina de estados global permita la medición solicitada.
+  El sistema evita ejecutar adquisiciones simultáneas entre \texttt{REALTIME},
+  \texttt{CAMPAIGN} y \texttt{KALIBRATING}.
+
+  \item Construir una configuración JSON con frecuencia central, tasa de muestreo,
+  RBW, ventana, ganancias, antena, filtro, modo de demodulación y error de
+  frecuencia \texttt{ppm\_error} cuando está disponible.
+
+  \item Enviar la configuración al motor RF por ZeroMQ y esperar una respuesta
+  antes de emitir otro comando, porque el contrato local es REQ/REP.
+
+  \item Seleccionar el puerto de antena mediante GPIO cuando el hardware auxiliar
+  lo requiere.
+
+  \item Configurar la HackRF One con \texttt{libhackrf}: frecuencia central,
+  \textit{sample rate}, LNA, VGA, amplificador y corrección de frecuencia.
+
+  \item Iniciar el flujo USB de muestras IQ, llenar buffers circulares y vigilar
+  condiciones de saturación, ausencia de dispositivo o error de streaming.
+
+  \item Cerrar de forma controlada la captura, liberar recursos temporales y
+  devolver al orquestador una respuesta JSON con resultados o error.
+\end{enumerate}
+
+\subsection{Parámetros SDR configurables}
+
+Los parámetros de medición llegan desde el backend, son validados por el
+orquestador y finalmente son interpretados por el parser del motor RF. La tabla
+resume los parámetros más relevantes para adquisición y procesamiento.
+
+\begin{longtable}{p{0.23\textwidth}p{0.18\textwidth}p{0.43\textwidth}}
+\toprule
+\textbf{Parámetro} & \textbf{Unidad/formato} & \textbf{Uso en el sensor} \\
+\midrule
+\endhead
+Frecuencia central & Hz & Sintonía nominal de la HackRF. Puede corregirse internamente con \texttt{ppm\_error}. \\
+Sample rate & muestras/s & Ancho de adquisición instantáneo y base para calcular resolución frecuencial. \\
+Span & Hz & Banda observada alrededor de la frecuencia central; en la práctica queda limitado por el sample rate útil. \\
+FFT size / \texttt{nperseg} & muestras & Número de puntos por segmento para Welch o tamaño de FFT en procesamiento espectral. \\
+RBW & Hz & Resolución aproximada de frecuencia; se relaciona con \texttt{sample\_rate}/\texttt{FFT size}. \\
+Overlap Welch & fracción & Porcentaje de solape entre segmentos para estabilizar la PSD. \\
+Ventana & texto & Tipo de ventana espectral: Hamming, Hann, Blackman, Kaiser, Tukey, entre otras. \\
+Método PSD & texto & Selección entre Welch y banco de filtros polifase cuando se requiere mayor selectividad. \\
+LNA/VGA & dB configurados & Ganancias de recepción de la HackRF; afectan nivel relativo y riesgo de saturación. \\
+Amplificador RF & booleano & Habilita o deshabilita el amplificador frontal de la HackRF. \\
+Puerto de antena & entero & Selección física del camino RF mediante el multiplexor de antenas. \\
+Filtro digital & Hz inicio/fin & Recorta la región de interés dentro de la banda realmente capturada. \\
+Demodulación & AM/FM/ninguna & Activa el camino de audio en tiempo real. \\
+Cooldown & segundos & Pausa solicitada entre capturas o ciclos de consulta. \\
+ppm\_error & ppm & Corrección de frecuencia estimada durante calibración. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Span, sample rate, FFT y RBW}
+
+En el sensor, \textit{sample rate}, span, tamaño de FFT y RBW no son parámetros
+independientes. La tasa de muestreo define el ancho instantáneo máximo que puede
+observarse en una sola captura. El tamaño de FFT o \texttt{nperseg} define cuántos
+puntos se usan para dividir esa banda en contenedores de frecuencia. Como regla
+práctica:
+
+\[
+\mathrm{RBW} \approx \frac{\mathrm{sample\_rate}}{\mathrm{FFT\ size}}
+\]
+
+Una RBW menor mejora la separación entre componentes cercanas, pero exige más
+muestras por segmento, más memoria temporal, más cómputo FFT y normalmente mayor
+latencia. Una RBW mayor reduce costo computacional y mejora la respuesta temporal,
+pero disminuye la capacidad de distinguir señales próximas. Por esta razón, el
+motor RF no debe reducir unilateralmente la tasa de muestreo o el tamaño de FFT
+solicitados para ahorrar recursos: esos parámetros hacen parte de la medición
+definida por el servidor.
 
 \subsection{Uso de buffers}
 
@@ -235,10 +488,37 @@ El sensor contempla métodos como:
   selectiva.
 \end{itemize}
 
+En la implementación, el método Welch es el camino principal para entregar una PSD
+estable en tiempo real y en campañas. El banco de filtros polifase se reserva para
+casos donde se requiere mejor separación espectral o menor fuga entre canales,
+asumiendo un mayor costo computacional. La configuración incluye tamaño de
+segmento, solape, tipo de ventana, tasa de muestreo y método PSD; con estos datos
+se genera el eje de frecuencia y el vector de potencia relativo.
+
 La PSD es una de las tareas más costosas del sistema, porque requiere operar sobre
 grandes bloques de muestras y ejecutar transformadas de Fourier. Por eso el motor
-RF está escrito en C y aprovecha una lógica de trabajo multihilo y bibliotecas de
-procesamiento eficientes.
+RF está escrito en C y aprovecha una lógica de trabajo multihilo, planes FFTW y
+buffers reutilizables por hilo. El uso de cachés locales reduce la sobrecarga de
+planificación FFT, pero exige cuidado con memoria dinámica, OpenMP y almacenamiento
+local de hilo.
+
+\subsubsection{Escala de potencia y unidades}
+
+El resultado logarítmico que produce el sensor debe interpretarse como una escala
+relativa al rango digital del receptor, es decir, como dBFS o potencia relativa,
+no como una medición absoluta en dBm. En este proyecto no se realizó una
+calibración de potencia de la cadena RF completa. Por tanto, no se conoce con
+certeza la tensión equivalente de saturación del ADC, las atenuaciones internas de
+la HackRF, las pérdidas de cables, el factor de antena, la ganancia real de cada
+etapa ni la respuesta en frecuencia del conjunto antena-cable-SDR.
+
+Esta aclaración es crítica: aunque el sistema puede mostrar diferencias relativas
+entre señales, detectar ocupación y comparar niveles dentro de una misma
+configuración, no debe reportarse como instrumento calibrado en dBm, dB$\mu$V/m,
+mV/m, W/m$^2$ o dBW/m$^2$/MHz sin una calibración externa. Para convertir la
+escala actual a unidades absolutas se requeriría caracterizar el sistema con un
+generador RF calibrado, niveles conocidos, varias frecuencias, varias ganancias,
+registro de pérdidas y una curva de corrección con incertidumbre asociada.
 
 \subsubsection{Demodulación FM y AM}
 
@@ -272,6 +552,14 @@ conserva la región que interesa y atenúa lo que queda por fuera. En el código
 apoya en procedimientos de dominio frecuencial y validaciones para que el rango
 solicitado sea coherente con la banda realmente capturada por la HackRF.
 
+Actualmente el filtro se expresa como un intervalo de frecuencias de inicio y fin
+dentro de la banda capturada. Si el rango solicitado cae por fuera de los límites
+de Nyquist definidos por la frecuencia central y la tasa de muestreo, el parser
+ajusta el intervalo al rango físicamente observable. Filtros pasabajo o pasaaltos
+pueden representarse como casos particulares de ese intervalo, pero una
+caracterización formal de orden, ancho de transición y atenuación fuera de banda
+debería documentarse como mejora futura si se requiere trazabilidad metrológica.
+
 \subsubsection{Trabajo multihilo}
 
 El sistema separa tareas para mantener capacidad de respuesta:
@@ -288,9 +576,10 @@ El sistema separa tareas para mantener capacidad de respuesta:
 Esta organización evita que una tarea pesada, como una PSD de alta resolución,
 bloquee completamente la captura o la transmisión de audio.
 
-La lógica de multitarea y multihilo usada para paralelizar procesos dentro del
-motor RF se apoya en la librería OpenMP para C. Esta herramienta permite distribuir
-regiones de cómputo entre varios hilos de ejecución de forma relativamente sencilla,
+La lógica de multitarea y multihilo usada para paralelizar regiones de cómputo
+dentro del motor RF se apoya en la librería OpenMP para C. Esta herramienta
+permite distribuir operaciones repetitivas, como acumulaciones, compensación IQ y
+segmentos de PSD, entre varios hilos de ejecución de forma relativamente sencilla,
 sin tener que implementar manualmente toda la administración de hilos mediante
 interfaces de menor nivel.
 
@@ -301,7 +590,10 @@ entre núcleos de CPU. En segundo lugar, reduce la complejidad del código frent
 una implementación completamente manual con hilos, bloqueos y sincronización
 explícita. Finalmente, es una solución ampliamente soportada en entornos de
 compilación en C, lo que permite mantener una implementación portable y fácil de
-integrar dentro del motor RF.
+integrar dentro del motor RF. No obstante, OpenMP se usa con cautela: el código
+evita depender de referencias inseguras a almacenamiento local de hilo dentro de
+regiones paralelas y controla la cantidad de hilos para no saturar la Raspberry Pi
+5 durante PSD de alta resolución o audio simultáneo.
 
 \subsection{Postprocesamiento}
 
@@ -389,9 +681,11 @@ Sus responsabilidades principales son:
   \item Formatear y publicar datos hacia el backend mediante HTTP REST.
   \item Controlar el inicio y parada del servicio de audio WebRTC.
   \item Mantener estados globales como \texttt{IDLE}, \texttt{REALTIME},
-  \texttt{CAMPAIGN}, \texttt{CALIBRATING} y \texttt{ERROR}.
-  \item Gestionar memoria compartida local para parámetros persistentes, como
-  \texttt{ppm\_error}, coordenadas GPS o configuraciones de campaña.
+  \texttt{CAMPAIGN}, \texttt{KALIBRATING} y \texttt{ERROR}.
+  \item Gestionar memoria compartida local mediante \texttt{ShmStore}; el archivo
+  usado es \texttt{/dev/shm/}\\\texttt{persistent.json}. Allí se conservan
+  parámetros como \texttt{ppm\_error}, coordenadas GPS o configuraciones de
+  campaña.
 \end{itemize}
 
 Las campañas son mediciones programadas por el servidor. El orquestador consulta
@@ -454,6 +748,24 @@ Las principales salidas del sistema son:
   \item Datos almacenados localmente para reintento cuando hay fallos de red.
 \end{itemize}
 
+Estas salidas tienen formatos y alcances diferentes. Para evitar ambigüedad, la
+tabla siguiente resume qué producto genera el sensor y qué significado tiene.
+
+\begin{longtable}{p{0.22\textwidth}p{0.24\textwidth}p{0.40\textwidth}}
+\toprule
+\textbf{Salida} & \textbf{Formato} & \textbf{Observación técnica} \\
+\midrule
+\endhead
+PSD & JSON con eje de frecuencia y potencia relativa & Producto principal de monitoreo. La escala logarítmica es relativa/dBFS si no existe calibración de potencia. \\
+Audio & Tramas Opus/WebRTC & Disponible solo cuando se solicita demodulación AM o FM en tiempo real. \\
+GPS & Campos de estado y coordenadas & Debe asociarse a la medición con estado de fix cuando esté disponible. \\
+Estado & JSON HTTP & Incluye variables de salud como conectividad, temperatura, memoria, almacenamiento y actividad. \\
+Calibración & \texttt{ppm\_error} & Corrección de frecuencia persistida en memoria compartida. No equivale a calibración de potencia. \\
+Reintentos & JSON local/cola & Resultados no enviados por falla de red, para posterior publicación. \\
+Logs & Archivos en \texttt{Logs/} & Evidencia operativa para diagnóstico y soporte. \\
+\bottomrule
+\end{longtable}
+
 \subsection{Interfaces y protocolos}
 
 Los protocolos y procedimientos principales que conectan los bloques del sensor
@@ -478,6 +790,37 @@ OpenMP & Paralelización de tareas de cómputo dentro del motor RF desarrollado 
 \bottomrule
 \end{longtable}
 
+\subsection{Contrato local Python-C}
+
+La comunicación entre el orquestador y el motor RF usa ZeroMQ mediante el
+transporte \texttt{ipc://} y el endpoint local \texttt{/tmp/rf\_engine}. Aunque la clase Python se llama
+\texttt{ZmqPairController}, el socket usado por Python es \texttt{REQ} y el socket
+del motor C es \texttt{REP}. Por tanto, el flujo es estrictamente secuencial: por
+cada solicitud debe recibirse una respuesta antes de emitir el siguiente comando.
+Esta restricción complementa la máquina de estados global y evita adquisiciones
+concurrentes sobre la misma HackRF.
+
+\begin{longtable}{p{0.20\textwidth}p{0.32\textwidth}p{0.34\textwidth}}
+\toprule
+\textbf{Comando lógico} & \textbf{Parámetros principales} & \textbf{Respuesta esperada} \\
+\midrule
+\endhead
+PSD/realtime & Frecuencia central, sample rate, RBW, ventana, método PSD, ganancias, antena y filtro & JSON con frecuencia, PSD, estado y metadatos de adquisición. \\
+PSD con audio & Parámetros PSD más \texttt{demodulation=am/fm} & PSD y activación del flujo Opus/WebRTC para audio. \\
+Campaña & Configuración guardada por campaña, ventana temporal e intervalo & Resultado PSD por ejecución y publicación o reintento. \\
+Calibración de frecuencia & \texttt{calibrate=true} y configuración RF base & JSON con estado de calibración completa y \texttt{ppm\_error}. \\
+Filtro & \texttt{start\_freq\_hz}, \texttt{end\_freq\_hz} & Procesamiento limitado al rango válido dentro de la banda capturada. \\
+Parada/reset & Cambio de modo o solicitud sin demodulación & Cierre del camino de audio o retorno a estado de espera según corresponda. \\
+\bottomrule
+\end{longtable}
+
+Los errores relevantes de esta interfaz incluyen JSON inválido, timeout de
+ZeroMQ, respuesta tardía, HackRF no disponible, frecuencia fuera del rango
+soportado, tasa de muestreo inválida, saturación USB, falla de streaming, filtro
+fuera de banda, error de demodulación o falla de publicación HTTP. Ante timeout,
+el controlador Python recrea el socket para descartar respuestas tardías y
+restaurar el estado REQ/REP.
+
 
 \section{Decisiones de diseño o implementación}
 
@@ -497,7 +840,9 @@ captura de muestras.
 También se decidió usar ZeroMQ como canal local de comunicación entre el
 orquestador Python y el motor RF en C. Esto permite separar responsabilidades,
 mantener independencia entre procesos y enviar comandos o recibir resultados sin
-integrar todo el sistema en un único ejecutable.
+integrar todo el sistema en un único ejecutable. La elección de REQ/REP mantiene
+un contrato simple y controlado: una solicitud de adquisición, calibración o audio
+debe cerrarse con una respuesta antes de iniciar otra operación RF.
 
 Para la entrega de audio en tiempo real, se optó por demodular localmente la señal
 en el sensor, codificar el audio con Opus y publicarlo mediante WebRTC. Esta
@@ -548,6 +893,15 @@ frecuencia basada en referencias presentes en emisiones FM comerciales.
 Además, la operación en tiempo real exige que el sistema no bloquee la adquisición
 mientras procesa datos. Para esto se ajustó la arquitectura mediante buffers
 circulares, separación de tareas y paralelización con OpenMP dentro del motor RF.
+
+En la operación real también deben considerarse errores de adquisición y de
+periféricos: HackRF no detectada, saturación del bus USB, overflow de buffers,
+frecuencia o sample rate inválidos, antena no disponible, falla de GPIO, pérdida
+de LTE, ausencia de fix GPS, timeout de ZeroMQ, caída del backend o temperatura
+alta de la Raspberry Pi. El software atiende parte de estas condiciones con
+estados, reintentos, logs, recreación de sockets y retorno a \texttt{IDLE}; otras
+condiciones requieren diagnóstico operativo o criterios de aceptación definidos
+por el despliegue.
 
 
 \section{Validación, pruebas o evidencias}
@@ -604,6 +958,60 @@ Como evidencias funcionales del sistema se consideran:
   disponible.
   \item El manejo de reintentos ante fallos de comunicación con el backend.
 \end{itemize}
+
+Para que la validación sea repetible, se propone registrar cada prueba con entrada,
+procedimiento, salida esperada y criterio de aceptación. La siguiente matriz
+resume pruebas mínimas para el software del sensor.
+
+\begin{longtable}{p{0.22\textwidth}p{0.34\textwidth}p{0.30\textwidth}}
+\toprule
+\textbf{Prueba} & \textbf{Procedimiento} & \textbf{Criterio de aceptación} \\
+\midrule
+\endhead
+Conexión HackRF & Iniciar motor RF y enviar configuración PSD básica. & El motor responde JSON válido y no reporta dispositivo ausente. \\
+PSD con señal conocida & Inyectar o sintonizar una portadora conocida. & El pico aparece en la frecuencia esperada dentro de la tolerancia de calibración. \\
+RBW/FFT & Ejecutar capturas con distinto RBW y mismo sample rate. & La separación de bins cambia según sample rate/FFT sin degradar parámetros solicitados. \\
+Demodulación FM/AM & Solicitar audio con señal compatible. & Se activa WebRTC/Opus y se recibe audio sin bloquear la PSD. \\
+GPS/LTE & Ejecutar reporte de estado en campo. & Se reporta conectividad y coordenadas cuando existe fix válido. \\
+Campaña & Programar ventana de campaña y esperar ejecución. & Se genera medición en el intervalo esperado y se publica o encola. \\
+Caída de red & Interrumpir LTE/backend durante envío. & El resultado queda en cola local y se reintenta posteriormente. \\
+Calibración de frecuencia & Ejecutar calibración con emisora FM fuerte. & Se obtiene \texttt{ppm\_error} razonable o se rechaza la calibración si no hay referencia. \\
+Carga térmica & Ejecutar PSD de alta resolución por tiempo prolongado. & El sensor mantiene operación y reporta temperatura/estado para diagnóstico. \\
+\bottomrule
+\end{longtable}
+
+\section{Trazabilidad frente a requisitos funcionales}
+
+La tabla siguiente relaciona funciones esperadas en un sistema de monitoreo
+espectral con el estado del software descrito en este capítulo. La columna de
+estado diferencia lo implementado en el sensor, lo parcialmente cubierto y lo que
+debe tratarse como recomendación o desarrollo futuro.
+
+\begin{longtable}{p{0.27\textwidth}p{0.18\textwidth}p{0.39\textwidth}}
+\toprule
+\textbf{Funcionalidad} & \textbf{Estado} & \textbf{Comentario técnico} \\
+\midrule
+\endhead
+Frecuencia central & Implementado & Configurable desde backend y aplicada por HackRF con corrección \texttt{ppm\_error}. \\
+Sample rate/span hasta 20 MHz & Implementado & La captura instantánea depende de la tasa de muestreo útil de la HackRF. \\
+RBW y FFT & Implementado & RBW derivada de sample rate y tamaño FFT/\texttt{nperseg}. \\
+Ventanas y Welch & Implementado & Soporta ventanas y solape para estabilizar PSD. \\
+Banco polifase & Implementado / parcial & Disponible como método PSD alternativo con mayor costo de CPU. \\
+VBW/suavizado & Parcial & Puede aproximarse por promediado; falta formalizar como parámetro metrológico separado. \\
+Filtros digitales & Parcial & Implementado como rango pasabanda validado; falta caracterización formal LP/HP/PB. \\
+Demodulación AM/FM & Implementado & Audio local con codificación Opus y publicación WebRTC. \\
+GPS & Implementado & Se reportan coordenadas; se recomienda documentar fix, precisión y HDOP si están disponibles. \\
+LTE/reintentos & Implementado & Envío HTTP y cola local ante fallos de red. \\
+Unidades dBm/dB$\mu$V/m & Pendiente & Requieren calibración de potencia, antena, pérdidas y curva de corrección. \\
+Escala dBFS relativa & Implementado & Es la interpretación válida actual de los niveles logarítmicos del sensor. \\
+Marcadores, OBW y potencia de canal & Parcial/futuro & Pueden calcularse sobre PSD; debe definirse si se ejecutan en sensor, backend o frontend. \\
+Sweep mayor a 20 MHz & Futuro & Requiere barrido por ventanas, solape, tiempo de permanencia y unión espectral. \\
+Almacenamiento IQ & Parcial/futuro & Debe formalizar formato \texttt{.cs8}/metadatos si se requiere evidencia forense. \\
+NTP/timestamping & Parcial & Se usan tiempos del sistema; se recomienda documentar fuente, zona horaria y tolerancia. \\
+Monitoreo del sensor & Implementado / parcial & Estado, temperatura, memoria, almacenamiento y conectividad reportados para diagnóstico. \\
+Seguridad HTTPS/TLS & Implementado / parcial & La URL base usa HTTPS; falta documentar autenticación, certificados y manejo de credenciales. \\
+\bottomrule
+\end{longtable}
 
 
 \section{Aprendizajes y transferencia de conocimiento}
@@ -664,16 +1072,23 @@ implementada depende de detectar emisiones FM comerciales y, en particular,
 referencias como el tono piloto estéreo de 19 kHz. Por esta razón, en zonas
 aisladas o en lugares donde no existan emisoras FM suficientemente fuertes o
 claras, el sensor puede no contar con referencias adecuadas para ejecutar la
-calibración.
+calibración. Alternativas futuras incluyen una referencia RF externa, GPSDO,
+beacons conocidos, estaciones patrón, comparación contra analizador certificado o
+calibración periódica en laboratorio.
 
 Otra limitación importante corresponde a la calibración en potencia. Las HackRF
-One usadas en el sistema no son instrumentos calibrados en potencia absoluta. Por
-esta razón, al calcular el logaritmo de la potencia de la PSD, el resultado se
-interpreta en términos relativos, como dBFS, y no directamente como dBm o dB
-absolutos referenciados. Para obtener mediciones robustas de potencia absoluta,
-sería necesario realizar una calibración externa con señales de referencia,
-instrumentación adecuada y una curva de corrección que relacione los niveles
-medidos por el sensor con niveles reales de potencia.
+One usadas en el sistema no son instrumentos calibrados en potencia absoluta y en
+este proyecto no se realizó una calibración de amplitud de la cadena RF. Por esta
+razón, al calcular el logaritmo de la potencia de la PSD, el resultado no debe
+interpretarse como dBm ni como dB absolutos referenciados. La interpretación
+correcta actual es relativa al rango digital de la adquisición, es decir, dBFS o
+nivel relativo. No se conoce con certeza la tensión de saturación equivalente del
+ADC, los rangos internos de tensión, las atenuaciones de la HackRF, las pérdidas
+del cableado, el factor de antena ni la ganancia real del conjunto. Para obtener
+mediciones robustas de potencia absoluta, sería necesario realizar una calibración
+externa con señales de referencia, instrumentación adecuada y una curva de
+corrección que relacione los niveles medidos por el sensor con niveles reales de
+potencia.
 
 Finalmente, al tratarse de un sistema remoto basado en conectividad LTE, el envío
 de resultados puede verse afectado por cobertura, disponibilidad de red, pérdida
@@ -710,13 +1125,16 @@ recomendaciones específicas:
   más amplia.
 
   \item Desarrollar una metodología de calibración en potencia si el sistema se va
-  a usar para mediciones absolutas. Esta calibración debería permitir convertir
-  los niveles relativos de PSD, expresados en dBFS, a unidades referenciadas como
-  dBm.
+  a usar para mediciones absolutas. Esta calibración debería usar un generador RF
+  calibrado, niveles conocidos, varias frecuencias, varias combinaciones de
+  ganancia, registro de pérdidas de cable, factor de antena, incertidumbre y una
+  curva de corrección para convertir dBFS a unidades referenciadas como dBm.
 
   \item Complementar la calibración en frecuencia con otros métodos de referencia
   para escenarios donde no existan emisoras FM comerciales disponibles o donde el
-  tono piloto de 19 kHz no pueda detectarse de manera confiable.
+  tono piloto de 19 kHz no pueda detectarse de manera confiable, por ejemplo
+  GPSDO, señal patrón externa, beacons conocidos o comparación con un instrumento
+  certificado.
 
   \item Medir y caracterizar la latencia extremo a extremo del sistema, desde la
   adquisición en el sensor hasta la visualización en la plataforma, para definir
@@ -726,9 +1144,15 @@ recomendaciones específicas:
   de frecuencia, fallos de red y estado del dispositivo, con el fin de facilitar
   soporte técnico y depuración.
 
+  \item Formalizar timestamping y georreferenciación por medición, incluyendo
+  fuente de tiempo, sincronización NTP, zona horaria, formato ISO 8601, estado de
+  fix GPS, número de satélites y precisión cuando estén disponibles.
+
+  \item Definir responsabilidades para marcadores, OBW, potencia de canal,
+  umbrales y exportación: qué se calcula en el sensor, qué se deriva en backend y
+  qué se visualiza o ajusta en frontend.
+
   \item Evaluar periódicamente el desempeño térmico y de recursos de la Raspberry
   Pi 5, especialmente durante tareas de PSD de alta resolución, demodulación de
   audio y operación multihilo.
 \end{itemize}
-```
-    
