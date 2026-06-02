@@ -9,20 +9,22 @@ on:
 jobs:
   build-pdf:
     runs-on: ubuntu-latest
+    permissions:
+      contents: red
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Compile main.tex
+      - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
           root_file: main.tex
           latexmk_use_xelatex: true
           args: -interaction=nonstopmode -file-line-error -halt-on-error
 
-      - name: Upload main.pdf
+      - name: Upload PDF
         uses: actions/upload-artifact@v4
         with:
-          name: main-pdf
+          name: documento-final
           path: main.pdf

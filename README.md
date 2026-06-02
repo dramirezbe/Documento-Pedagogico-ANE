@@ -41,13 +41,20 @@ section/img/             Imágenes por carpeta: cap04_hw/, cap05_sdr/, etc.
 | `section/11_Recommendations.tex` | Recomendaciones | [[Placeholder]] |
 | `section/12_References.tex` | Referencias | [[Placeholder]] |
 | `section/A_IA-collaboration-technique.tex` | Técnica de desarrollo con agentes IA | Escrito |
-| `section/B_Additional_diagrams.tex` | Diagramas adicionales | [[Placeholder]] |
+| `section/B_Additional_diagrams.tex` | Diagramas adicionales | Parcial — flujo de plataforma |
 | `section/C_Manuals_guides.tex` | Manuales o guías de uso | [[Placeholder]] |
 | `section/D_Test_results.tex` | Resultados de pruebas | [[Placeholder]] |
 
 ---
 
 ## 4. Cómo compilar
+
+**Compilación automática (CI).** En cada push a `main`, el workflow
+`.github/workflows/build-pdf.yml` compila `main.tex` con XeLaTeX. El PDF
+resultante (`main.pdf`) queda disponible como artefacto del workflow
+(descargable desde la pestaña Actions del repositorio).
+
+**Compilación manual.**
 
 Cada archivo de capítulo debe iniciar con `\chapter{...}` y debe contener, como mínimo, las siguientes secciones:
 
