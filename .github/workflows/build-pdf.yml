@@ -10,7 +10,7 @@ jobs:
   build-pdf:
     runs-on: ubuntu-latest
     permissions:
-      contents: red
+      contents: read
 
     steps:
       - name: Checkout repository
