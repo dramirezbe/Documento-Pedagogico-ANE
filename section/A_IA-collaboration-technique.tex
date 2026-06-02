@@ -1,103 +1,137 @@
-\chapter{Técnica de desarrollo en grupo usando agentes IA}
+\chapter{Material de apoyo: uso de agentes de IA para documentación, desarrollo y revisión técnica del proyecto}
 \label{annex:ia_collaboration}
 
-\section{Propósito del capítulo}
-Este anexo tiene como objetivo documentar la metodología de trabajo colaborativo y la infraestructura técnica utilizada por el equipo de desarrollo al integrarse con agentes de Inteligencia Artificial (IA). Se busca proporcionar una guía clara sobre la instalación, configuración y mejores prácticas de \textit{prompting} para asegurar que el uso de estas herramientas sea trazable, repetible y de alta calidad dentro del ciclo de vida del proyecto.
+\section{Nota de alcance y propósito}
+Este capítulo no describe un módulo funcional o componente obligatorio del sistema ANE. Se presenta exclusivamente como \textbf{material de apoyo metodológico} que documenta las técnicas de asistencia técnica utilizadas por el equipo de trabajo. El objetivo es proporcionar una guía sobre cómo el uso responsable de Inteligencia Artificial (IA) ha apoyado la documentación, revisión de código y organización de la información durante el ciclo de vida del proyecto.
 
-\section{Contexto dentro del sistema general}
-En el desarrollo de sistemas complejos como el de adquisición SDR y plataformas \textit{cloud}, el uso de agentes IA (como Gemini CLI y Copilot CLI) permite acelerar la automatización de flujos de trabajo, la revisión de código y la generación de documentación técnica. Esta técnica no reemplaza la supervisión humana, sino que actúa como un multiplicador de capacidades, integrando razonamiento multi-agente para la toma de decisiones técnicas y el análisis de contexto.
+\section{Contexto y diferenciación funcional}
+Es fundamental diferenciar entre el uso de la IA como herramienta de apoyo al desarrollo y su posible rol como componente funcional del sistema.
+\begin{itemize}
+    \item \textbf{IA como herramienta de apoyo}: Metodología aplicada para mejorar la productividad, coherencia documental y calidad del código mediante revisión asistida.
+    \item \textbf{IA como componente del sistema}: Funcionalidades de análisis inteligente de señales o gestión autónoma que se plantean como propuestas futuras y no forman parte de la arquitectura operativa actual de ANE.
+\end{itemize}
 
-\section{Desarrollo técnico: Ecosistema de Agentes CLI}
-El equipo utiliza una combinación de herramientas de terminal que permiten una interacción directa con modelos de lenguaje avanzados.
+\section{Metodología de trabajo: Ecosistema de Agentes}
+El equipo emplea herramientas de IA aprobadas institucionalmente para asistir en tareas técnicas. Aunque el enfoque es agnóstico al modelo, se documentan a continuación los pasos de habilitación para las herramientas utilizadas como referencia durante el proyecto.
 
-\subsection{Instalación y Configuración}
-A continuación se detallan los comandos principales para habilitar el entorno de agentes:
+\subsection{Habilitación del Entorno (Ejemplos CLI)}
+Para permitir una interacción directa desde la terminal y facilitar la automatización, se utilizaron los siguientes agentes:
 
 \begin{itemize}
-    \item \textbf{GitHub Copilot CLI}: Utilizado principalmente para asistencia en codificación y automatización de tareas de repositorio.
+    \item \textbf{GitHub Copilot CLI}: Utilizado para asistencia en codificación y gestión de repositorios.
     \begin{itemize}
         \item Instalación: \texttt{npm install -g @github/copilot}
         \item Autenticación: \texttt{copilot /login}
     \end{itemize}
-    \item \textbf{Gemini CLI}: Utilizado para tareas multimodales, gestión de habilidades (\textit{skills}) y análisis de arquitectura.
+    \item \textbf{Gemini CLI}: Utilizado para tareas multimodales, análisis de arquitectura y gestión de habilidades.
     \begin{itemize}
         \item Instalación: \texttt{npm install -g @google/gemini-cli}
         \item Inicio: \texttt{gemini}
     \end{itemize}
 \end{itemize}
 
-\subsection{Arquitectura Multi-Agente}
-El sistema se diseña bajo un esquema de roles especializados que colaboran para resolver tareas complejas:
+\subsection{Arquitectura Multi-Agente Asistida}
+La arquitectura multi-agente se define aquí como una \textbf{metodología de trabajo asistido}, no como una implementación automática dentro del sistema. Se sugieren los siguientes roles para la colaboración:
 
 \begin{itemize}
-    \item \textbf{Agente Coordinador}: Asigna roles y selecciona el modelo más apto.
-    \item \textbf{Agente de Interpretación}: Analiza el contexto de la petición.
-    \item \textbf{Agente de Backend}: Gestiona el almacenamiento y la comunicación con APIs.
-    \item \textbf{Agente de Procesamiento}: Maneja tareas específicas de señales (audio/espectro).
+    \item \textbf{Agente Documental}: Apoyo en redacción técnica, generación de tablas y coherencia de estilo.
+    \item \textbf{Agente de Código}: Revisión de scripts, detección de errores lógicos y sugerencias de optimización.
+    \item \textbf{Agente de Pruebas}: Generación de casos de prueba y protocolos de validación.
+    \item \textbf{Agente de Arquitectura}: Análisis de dependencias y revisión de diagramas de diseño.
+    \item \textbf{Agente de Señales/RF}: Apoyo en el análisis de logs y procesamiento teórico de espectro.
+    \item \textbf{Agente de Revisión}: Validación cruzada de respuestas para minimizar alucinaciones.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{section/img/annexes/ai_structure.png}
-    \caption{Diseño conceptual del sistema multi-agente: Relación entre agentes y el flujo de decisión. Fuente: Elaboración propia.}
+    \includegraphics[width=0.4\textwidth]{section/img/annexes/ai_structure.png}
+    \caption{Diseño conceptual del sistema multi-agente: Relación metodológica entre roles de asistencia. Fuente: Elaboración propia.}
     \label{fig:ai_conceptual_structure}
 \end{figure}
 
-\section{Decisiones de diseño: Metodología de Prompting}
-Para minimizar alucinaciones y maximizar la coherencia de las respuestas, se ha adoptado una estructura obligatoria para cada interacción con los agentes, basada en el modelo \textbf{ROLE \(\rightarrow\) OBJECTIVE \(\rightarrow\) CONTEXT \(\rightarrow\) REASONING}.
+\section{Gobernanza y Uso Responsable de IA}
+El uso de herramientas de IA en el proyecto ANE está sujeto a las siguientes restricciones de seguridad y ética:
+\begin{itemize}
+    \item \textbf{Revisión Humana Obligatoria}: Ningún resultado generado por IA se considera definitivo sin la validación técnica de un responsable humano.
+    \item \textbf{Confidencialidad}: Está estrictamente prohibido cargar información sensible, credenciales, llaves de API o datos institucionales restringidos en herramientas externas.
+    \item \textbf{No Normatividad}: La IA no es una fuente normativa; las decisiones técnicas se basan en estándares de ingeniería y requerimientos del proyecto.
+    \item \textbf{Validación de Código}: No se acepta código sugerido sin pruebas unitarias y validación en el entorno de desarrollo.
+\end{itemize}
+
+\section{Trazabilidad Metodológica}
+A continuación, se presenta la trazabilidad del uso de IA frente a las actividades de apoyo del proyecto.
 
 \begin{table}[H]
 \centering
-\caption{Componentes de un Prompt de alta calidad.}
-\label{tab:prompt_components}
-\begin{tabularx}{\textwidth}{>{\bfseries}l X}
+\caption{Trazabilidad de actividades de apoyo con IA.}
+\label{tab:ai_traceability}
+\begin{tabularx}{\textwidth}{@{}l X l@{}}
 \toprule
-Componente & Descripción \\
+Actividad de Apoyo & Aplicación en el Proyecto & Estado \\
 \midrule
-Role & Define quién debe responder (e.g., "Senior Software Developer"). \\
-Objective & Define qué se quiere lograr de forma clara y concisa. \\
-Context & Proporciona archivos relevantes, restricciones y entorno. \\
-Reasoning & Solicita al agente explicar su lógica antes de entregar el resultado. \\
-Output Format & Especifica el formato deseado (JSON, LaTeX, C code, etc.). \\
+Documentación Técnica & Generación de estructuras y tablas iniciales. & Aplicado \\
+Revisión de Código & Análisis de scripts de adquisición edge. & Parcial \\
+Generación de Pruebas & Creación de protocolos de validación HW. & Sugerido \\
+Análisis de Errores & Interpretación de logs de comunicación cloud. & Aplicado \\
+Organización de Info. & Clasificación de requisitos y dependencias. & Recomendado \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\section{Problemas presentados y ajustes realizados}
-Durante la implementación de esta metodología, se identificaron los siguientes desafíos:
+\section{Flujo de Trabajo Colaborativo (Paso a Paso)}
+Para asegurar la calidad y trazabilidad, se sigue el siguiente flujo:
+\begin{enumerate}
+    \item \textbf{Definir Tarea}: Clarificar el objetivo técnico y las restricciones.
+    \item \textbf{Preparar Contexto}: Seleccionar archivos, logs o requisitos relevantes.
+    \item \textbf{Consultar IA}: Utilizar prompts estructurados (ROLE-OBJECTIVE-CONTEXT).
+    \item \textbf{Revisar Respuesta}: Identificar posibles errores o inconsistencias.
+    \item \textbf{Validar Técnicamente}: Probar el código o verificar los datos en el sistema real.
+    \item \textbf{Integrar y Documentar}: Subir al repositorio (GitHub) indicando la asistencia recibida y quién validó.
+\end{enumerate}
 
-\begin{longtable}{p{2.6cm} p{2.6cm} p{2.6cm} p{3cm} p{3cm}}
-\caption{Problemas en la colaboración con IA y ajustes aplicados.}\\
+\section{Trazabilidad de Prompts y Relación con GitHub}
+Cada interacción significativa con la IA debe ser trazable. Se recomienda asociar los prompts importantes a:
+\begin{itemize}
+    \item \textbf{GitHub Issues}: Documentar el prompt usado para resolver un bug específico.
+    \item \textbf{Commits/PRs}: Indicar en el mensaje del commit si se utilizó asistencia de IA y quién realizó la revisión final.
+    \item \textbf{Archivo de Evidencias}: Registro del prompt, respuesta y decisión tomada.
+\end{itemize}
+
+\section{Problemas, Limitaciones y Ajustes}
+La IA presenta limitaciones inherentes que deben ser gestionadas mediante supervisión constante.
+
+\begin{longtable}{p{2.6cm} p{3.2cm} p{3cm} p{3cm} p{2.8cm}}
+\caption{Gestión de problemas y limitaciones de la IA.}\\
 \toprule
-\textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Decisón o ajuste} & \textbf{Resultado} \\
+\textbf{Problema/Riesgo} & \textbf{Manifestación} & \textbf{Causa} & \textbf{Ajuste/Acción} & \textbf{Resultado} \\
 \midrule
 \endfirsthead
 \toprule
-\textbf{Problema} & \textbf{Evidencia} & \textbf{Causa probable} & \textbf{Decisón o ajuste} & \textbf{Resultado} \\
+\textbf{Problema/Riesgo} & \textbf{Manifestación} & \textbf{Causa} & \textbf{Ajuste/Acción} & \textbf{Resultado} \\
 \midrule
 \endhead
-Alucinaciones técnicas & Código que usa librerías inexistentes. & Contexto insuficiente en el prompt inicial. & Implementar el patrón ROLE-CONTEXT. & Mayor precisión en el código generado. \\
+Alucinaciones & Librerías inexistentes o comandos falsos. & Falta de datos en el modelo. & Validación cruzada y búsqueda en docs oficiales. & Eliminación de errores técnicos. \\
 \midrule
-Pérdida de hilo conductor & El agente olvida restricciones previas. & Ventana de contexto saturada. & Uso de comandos \texttt{/compact} y archivos \texttt{.geminiignore}. & Sesiones más largas y eficientes. \\
+Exposición de Datos & Riesgo de subir credenciales. & Descuido en la preparación de contexto. & Uso de \texttt{.gitignore} y limpieza de prompts. & Integridad de secretos mantenida. \\
+\midrule
+Dependencia & Pérdida de criterio técnico propio. & Uso excesivo sin razonamiento. & Rotación de tareas y revisión por pares. & Mantenimiento del conocimiento. \\
 \bottomrule
 \end{longtable}
 
-\section{Validación y Evidencias}
-La metodología se valida mediante la revisión humana de cada entrega. El flujo de trabajo colaborativo asegura que ningún cambio se integre sin pasar por un ciclo de validación cruzada entre agentes y desarrolladores.
+\section{Métricas de Utilidad y Evidencias}
+Para evaluar la efectividad de esta metodología, se consideran las siguientes métricas simples:
+\begin{itemize}
+    \item \textbf{Tareas Apoyadas}: Número de capítulos o módulos revisados con asistencia.
+    \item \textbf{Propuestas Aceptadas/Descartadas}: Porcentaje de sugerencias de IA integradas tras revisión.
+    \item \textbf{Tiempo Ahorrado}: Estimación del impacto en la velocidad de documentación y depuración.
+\end{itemize}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{section/img/annexes/ai_roles.png}
-    \caption{Roles asignados y estados de diseño en el flujo de trabajo IA. Fuente: Elaboración propia.}
+    \caption{Flujo de trabajo y validación humana en la integración de resultados. Fuente: Elaboración propia.}
     \label{fig:ai_roles_workflow}
 \end{figure}
 
-\section{Aprendizajes y transferencia de conocimiento}
-\begin{itemize}
-    \item \textbf{Criterio de Realidad}: La IA es un asistente, no un ejecutor autónomo sin supervisión. La validación humana es mandatoria.
-    \item \textbf{Modulariad}: Es preferible pedir tareas pequeñas y específicas que una solución completa y compleja en un solo prompt.
-    \item \textbf{Documentación}: Mantener archivos \texttt{GEMINI.md} o \texttt{AGENTS\_CLI.md} en la raíz del proyecto ayuda a los agentes a entender rápidamente las convenciones del equipo.
-\end{itemize}
-
-\section{Recomendaciones específicas}
-Se recomienda la rotación de roles entre los desarrolladores para familiarizarse con las capacidades de diferentes \textit{backends} (GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro) según la naturaleza de la tarea.
+\section{Conclusión del capítulo}
+La Inteligencia Artificial se propone y utiliza como un multiplicador de productividad para el equipo técnico. Sin embargo, se enfatiza que la responsabilidad final de todas las decisiones, la seguridad del código y la veracidad de la documentación recae exclusivamente en los ingenieros responsables del proyecto. La validación humana es el pilar central que garantiza la integridad del sistema ANE.
