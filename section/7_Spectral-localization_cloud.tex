@@ -265,9 +265,9 @@ Potencia (Cumple\_P) & P\_medida $\leq$ P\_nominal & Sin margen de tolerancia; c
 \begin{tabular}{p{4cm}p{5cm}p{5cm}}
 \textbf{Estado} & \textbf{Significado} & \textbf{Cuándo ocurre} \\
 \hline
-\textquotedbllicencia\textquotedbl: \textquotedbl NO\textquotedbl & Búsqueda ejecutada; no se encontró licencia en la tolerancia & Se pasó filtro DANE/municipio y CSV de licencias, pero ningún registro coincide \\
-\textquotedbllicencia\textquotedbl: \texttt{null} & No se intentó hacer matching & Faltó filtro dane/municipio O faltó CSV de licencias \\
-\textquotedbllicencia\textquotedbl: \textless nombre\textgreater & Match encontrado & Licencia identificada; se evalúan Cumple\_FC, Cumple\_BW, Cumple\_P \\
+\enquote{licencia}: \enquote{NO} & Búsqueda ejecutada; no se encontró licencia en la tolerancia & Se pasó filtro DANE/municipio y CSV de licencias, pero ningún registro coincide \\
+\enquote{licencia}: \texttt{null} & No se intentó hacer matching & Faltó filtro dane/municipio O faltó CSV de licencias \\
+\enquote{licencia}: \textless nombre\textgreater & Match encontrado & Licencia identificada; se evalúan Cumple\_FC, Cumple\_BW, Cumple\_P \\
 \end{tabular}
 
 \section{Formato de la Base de Licencias}
@@ -397,11 +397,11 @@ Salida: \texttt{\{\"mode\": \"compliance\", \"results\": [\{\"Licencia\": null, 
 JSON incompleto (falta Pxx o frecuencias) & \texttt{payload\_parser} rechaza la entrada & Error 400 / excepción con mensaje descriptivo \\
 Frecuencias inválidas (\texttt{start} $\geq$ \texttt{end}) & \texttt{SpectrumFrame} detecta incoherencia & Error con razón \texttt{frecuencias\_invalidas} \\
 Pxx vacío o con un solo bin & No se puede calcular RBW ni detectar emisiones & \texttt{num\_emissions=0}; \texttt{results=[]} \\
-DANE no encontrado en CSV de licencias & Filtro no retorna registros & Licencia: \textquotedbl NO\textquotedbl para todas las emisiones \\
+DANE no encontrado en CSV de licencias & Filtro no retorna registros & Licencia: \enquote{NO} para todas las emisiones \\
 Base de licencias no cargada (\texttt{lic=None}) & Matching no se ejecuta & Licencia: \texttt{null}; reason: \texttt{filtro\_no\_especificado} \\
 Captura sin SNR suficiente para MER/BER & Cálculo de MER/BER se omite & \texttt{mer\_db} y \texttt{ber\_est} ausentes del resultado \\
 Potencia no finita (NaN / $-\infty$) & \texttt{power\_utils} detecta valor no finito & \texttt{power\_dbm: null} \\
-Emisión detectada sin licencia asociada & Match fallido tras búsqueda & Licencia: \textquotedbl NO\textquotedbl; Cumple\_FC/BW/P: null \\
+Emisión detectada sin licencia asociada & Match fallido tras búsqueda & Licencia: \enquote{NO}; Cumple\_FC/BW/P: null \\
 Emisión autorizada pero BW excedido & Cumple\_BW = False & Cumple\_BW: false; delta\_bw reportado \\
 Archivo corr inexistente o mal formado & Corrección se omite o error en carga & Advertencia en log; \texttt{Pxx} sin corregir \\
 \end{tabular}
@@ -470,7 +470,7 @@ Señal cercana al umbral & Verificar sensibilidad límite & Detección dependien
 Señal saturada & Verificar robustez ante saturación & power\_dbm puede ser null; status reportado \\
 Dos emisiones cercanas & Verificar resolución espectral & Dos entradas en results si separación $>$ RBW \\
 Emisión autorizada con licencia & Verificar cumplimiento correcto & Licencia: nombre; Cumple\_FC/BW/P: true \\
-Emisión no autorizada (sin licencia) & Verificar detección de infracción & Licencia: \textquotedbl NO\textquotedbl \\
+Emisión no autorizada (sin licencia) & Verificar detección de infracción & Licencia: \enquote{NO} \\
 Emisión con BW excedido & Verificar Cumple\_BW=False & Cumple\_BW: false; delta\_bw positivo \\
 \end{tabular}
 
