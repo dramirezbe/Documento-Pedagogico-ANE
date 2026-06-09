@@ -63,14 +63,14 @@
 % Marca texto pendiente. Antes de la entrega final no debe quedar ningún \pendiente{}.
 \newcommand{\pendiente}[1]{\textcolor{red}{\textbf{[PENDIENTE: #1]}}}
 
-% Entrada segura de capítulos. Si el archivo no existe, el documento compila con advertencia.
+% Entrada segura de capítulos.
+% Si el archivo existe, se incluye.
+% Si el archivo no existe, se omite sin crear capítulos artificiales.
 \newcommand{\inputchapter}[1]{
     \IfFileExists{#1.tex}{
         \input{#1}
     }{
-        \chapter*{Archivo no encontrado}
-        \addcontentsline{toc}{chapter}{Archivo no encontrado: #1}
-        \textcolor{red}{No se encontró el archivo \texttt{#1.tex}.}
+        \typeout{ADVERTENCIA: No se encontró el archivo #1.tex. Se omite del documento.}
     }
 }
 
