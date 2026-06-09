@@ -55,22 +55,27 @@ La tabla de contenido, la lista de figuras y la lista de tablas se generan autom
 
 El documento se organiza en capítulos principales y anexos. Cada capítulo se mantiene en un archivo independiente dentro de la carpeta \texttt{section/}, y el archivo \texttt{main.tex} actúa como punto de entrada para compilar el informe completo.
 
-La estructura general es la siguiente:
+La estructura efectiva del informe no se enumera manualmente en esta sección, porque puede cambiar durante el proceso de edición. Los capítulos y anexos incluidos se determinan directamente desde el archivo \texttt{main.tex}. Por tanto, la referencia oficial a la estructura vigente del documento es la tabla de contenido generada automáticamente al inicio del PDF.
+
+Esta decisión evita inconsistencias cuando se agregan, eliminan, renombran o comentan capítulos que todavía no están completamente desarrollados.
+
+De forma general, el informe contempla los siguientes bloques documentales:
 
 \begin{itemize}[leftmargin=*]
-    \item \hyperref[chap:introduction]{Capítulo~\ref*{chap:introduction}: Introducción general}.
-    \item \hyperref[chap:requirements]{Capítulo~\ref*{chap:requirements}: Requerimientos, restricciones y uso}.
-    \item \hyperref[chap:general-design]{Capítulo~\ref*{chap:general-design}: Diseño general del sistema}.
-    \item \hyperref[chap:hardware]{Capítulo~\ref*{chap:hardware}: Hardware del nodo de sensado}.
-    \item \hyperref[chap:sdr-acquisition]{Capítulo~\ref*{chap:sdr-acquisition}: Software del sensor y adquisición SDR}.
-    \item \hyperref[chap:platform-cloud]{Capítulo~\ref*{chap:platform-cloud}: Plataforma web en la nube}.
-    \item \hyperref[chap:spectral-localization]{Capítulo~\ref*{chap:spectral-localization}: Análisis espectral y localización}.
-    \item \hyperref[chap:test-protocols]{Capítulo~\ref*{chap:test-protocols}: Protocolos de prueba edge-cloud}.
-    \item \hyperref[chap:system-integration]{Capítulo~\ref*{chap:system-integration}: Integración general del sistema}.
-    \item \hyperref[chap:conclusions]{Capítulo~\ref*{chap:conclusions}: Conclusiones generales}.
-    \item \hyperref[chap:recommendations]{Capítulo~\ref*{chap:recommendations}: Recomendaciones}.
-    \item \hyperref[chap:references]{Capítulo~\ref*{chap:references}: Referencias}.
+    \item Introducción, contexto, alcance y convenciones del documento.
+    \item Requerimientos, restricciones y criterios de uso del sistema.
+    \item Diseño general y arquitectura del sistema.
+    \item Hardware del nodo de sensado y cadena RF.
+    \item Software del sensor, adquisición SDR y procesamiento en borde.
+    \item Plataforma web, servicios cloud, backend, frontend y base de datos.
+    \item Análisis espectral, localización y procesamiento de capturas.
+    \item Protocolos de prueba, validación y criterios de aceptación.
+    \item Integración general del sistema.
+    \item Conclusiones, recomendaciones y referencias.
+    \item Anexos técnicos, diagramas, manuales externos y resultados de pruebas.
 \end{itemize}
+
+Esta organización permite que cada autor trabaje sobre su archivo correspondiente sin modificar directamente el cuerpo completo del documento.
 
 Los anexos complementan el cuerpo principal del informe:
 
@@ -99,65 +104,69 @@ A partir de esta división, los capítulos técnicos documentan los subsistemas 
 
 \section{Descripción resumida de los capítulos}
 
-\subsection{\hyperref[chap:requirements]{Requerimientos, restricciones y uso}}
+Los capítulos principales documentan los componentes técnicos y metodológicos del sistema. La inclusión final de cada capítulo depende de las instrucciones activas en el archivo \texttt{main.tex}.
+
+\subsection{Requerimientos, restricciones y uso}
 
 Este capítulo consolida los requerimientos funcionales y no funcionales del sistema, las restricciones técnicas, los criterios de uso, las capacidades esperadas y los elementos que permiten contrastar el diseño con el alcance definido para el proyecto.
 
-\subsection{\hyperref[chap:general-design]{Diseño general del sistema}}
+\subsection{Diseño general del sistema}
 
 Este capítulo describe la arquitectura global del sistema, la separación por subsistemas, el flujo de información, las interfaces principales, las decisiones de diseño y la forma en que los componentes de borde y nube se integran dentro de una solución completa.
 
-\subsection{\hyperref[chap:hardware]{Hardware del nodo de sensado}}
+\subsection{Hardware del nodo de sensado}
 
 Este capítulo documenta el diseño físico del nodo de sensado, incluyendo componentes electrónicos, alimentación, ruta RF, antenas, conectividad, montaje, integración física y consideraciones de operación en campo.
 
-\subsection{\hyperref[chap:sdr-acquisition]{Software del sensor y adquisición SDR}}
+\subsection{Software del sensor y adquisición SDR}
 
 Este capítulo describe el software ejecutado en el nodo de borde, incluyendo control del SDR, adquisición de muestras, selección de parámetros, preprocesamiento, generación de productos espectrales, almacenamiento temporal y comunicación con la plataforma central.
 
-\subsection{\hyperref[chap:platform-cloud]{Plataforma web en la nube}}
+\subsection{Plataforma web en la nube}
 
 Este capítulo documenta la plataforma web, sus componentes de frontend, backend, base de datos, servicios de comunicación, visualización de datos, administración de sensores, usuarios, campañas y reportes.
 
-\subsection{\hyperref[chap:spectral-localization]{Análisis espectral y localización}}
+\subsection{Análisis espectral y localización}
 
 Este capítulo presenta los métodos de análisis espectral, procesamiento de capturas, extracción de parámetros técnicos, detección de emisiones, localización o asociación geográfica y visualización de resultados analíticos.
 
-\subsection{\hyperref[chap:test-protocols]{Protocolos de prueba edge-cloud}}
+\subsection{Protocolos de prueba edge-cloud}
 
 Este capítulo define procedimientos de prueba, criterios de aceptación, validaciones funcionales, pruebas de integración, pruebas de adquisición, pruebas de comunicación y criterios para verificar el comportamiento del sistema.
 
-\subsection{\hyperref[chap:system-integration]{Integración general del sistema}}
+\subsection{Integración general del sistema}
 
-Este capítulo consolida la integración entre hardware, software de borde, conectividad, plataforma cloud, base de datos, análisis espectral y operación por parte del usuario. Su objetivo es mostrar cómo interactúan los módulos en un flujo completo de operación.
+Este capítulo consolida la integración entre hardware, software de borde, conectividad, plataforma cloud, base de datos, análisis espectral y operación por parte del usuario.
 
-\subsection{\hyperref[chap:conclusions]{Conclusiones generales}}
+\subsection{Conclusiones generales}
 
 Este capítulo resume los resultados principales del proyecto, los aprendizajes obtenidos, el estado general del sistema, las limitaciones identificadas y los aportes más relevantes del desarrollo.
 
-\subsection{\hyperref[chap:recommendations]{Recomendaciones}}
+\subsection{Recomendaciones}
 
 Este capítulo presenta recomendaciones para continuidad, mantenimiento, mejora, pruebas futuras, escalamiento, documentación adicional y posibles líneas de trabajo posteriores.
 
-\subsection{\hyperref[chap:references]{Referencias}}
+\subsection{Referencias}
 
 Este capítulo consolida las referencias bibliográficas, normativas, técnicas o documentales utilizadas para respaldar el desarrollo del informe.
 
 \section{Descripción resumida de los anexos}
 
-\subsection{\hyperref[chap:ia-collaboration]{Técnica de desarrollo con agentes de inteligencia artificial}}
+Los anexos complementan el cuerpo principal del informe. Su inclusión final también depende de las instrucciones activas en el archivo \texttt{main.tex}.
+
+\subsection{Técnica de desarrollo con agentes de inteligencia artificial}
 
 Este anexo documenta la metodología de apoyo con agentes de inteligencia artificial utilizada durante el desarrollo documental, incluyendo criterios de uso, roles, ventajas, limitaciones y aprendizajes.
 
-\subsection{\hyperref[chap:additional-diagrams]{Diagramas adicionales}}
+\subsection{Diagramas adicionales}
 
 Este anexo consolida diagramas complementarios que apoyan la comprensión de la arquitectura, flujos de información, componentes o relaciones entre subsistemas.
 
-\subsection{\hyperref[chap:manuals-guides]{Manuales y documentos de apoyo}}
+\subsection{Manuales y documentos de apoyo}
 
 Este anexo referencia manuales, documentos externos, informes técnicos, videos de ensamble y archivos de soporte disponibles en la carpeta documental del proyecto. Estos documentos son material externo no editable dentro del repositorio \LaTeX.
 
-\subsection{\hyperref[chap:test-results]{Resultados de pruebas}}
+\subsection{Resultados de pruebas}
 
 Este anexo debe consolidar evidencias, resultados, capturas, salidas, tablas o registros asociados a las pruebas ejecutadas sobre el sistema.
 
