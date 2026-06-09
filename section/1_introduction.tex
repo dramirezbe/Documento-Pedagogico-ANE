@@ -1,68 +1,210 @@
+```latex
 \chapter{Introducción general}
+\label{chap:introduction}
 
 \section{Propósito y contexto del proyecto}
 
-Este documento constituye el informe final del sistema de monitoreo espectral \textbf{ANE-HX}, desarrollado como proyecto académico de ingeniería para la Agencia Nacional del Espectro (ANE) de Colombia. El sistema integra componentes de hardware, software de adquisición por radio definida por software (SDR), procesamiento en borde, plataforma web en la nube y algoritmos de análisis espectral para construir una solución funcional de monitoreo del espectro radioeléctrico.
+Este documento constituye el informe final del sistema de monitoreo espectral \textbf{ANE-HX}, desarrollado como proyecto académico de ingeniería orientado a la documentación técnica, integración, validación y transferencia de conocimiento de una solución de monitoreo del espectro radioeléctrico.
 
-El informe se organiza como memoria técnica del sistema, registro de decisiones de diseño, evidencia de pruebas realizadas e instrumento de transferencia de conocimiento hacia futuros equipos que deban mantener, reproducir o extender el desarrollo.
+El sistema integra componentes de hardware, adquisición por radio definida por software (SDR), procesamiento en borde, conectividad, plataforma web en la nube, almacenamiento de datos, visualización, análisis espectral, protocolos de prueba y documentación de soporte. Su propósito es consolidar en un único informe la arquitectura del sistema, las decisiones de diseño, los módulos implementados, los problemas encontrados, las pruebas realizadas y las recomendaciones para continuidad o mantenimiento.
+
+El informe se organiza como memoria técnica del sistema y como instrumento de transferencia de conocimiento. Por tanto, no se limita a describir el resultado final, sino que también registra criterios de diseño, limitaciones, ajustes realizados, evidencias de prueba, anexos técnicos y documentos externos de apoyo.
 
 \section{Problema o necesidad principal}
 
-El monitoreo del espectro radioeléctrico requiere capturar señales en campo, transportarlas a un entorno de análisis, extraer parámetros técnicos de las emisiones detectadas y contrastarlos contra información regulatoria. Un sistema que resuelva este flujo de extremo a extremo debe coordinar hardware de adquisición, conectividad celular, almacenamiento en la nube, algoritmos de procesamiento espectral y una interfaz para operadores.
+El monitoreo del espectro radioeléctrico requiere capturar señales en campo, procesarlas, extraer parámetros técnicos, transportar información hacia una plataforma de análisis, almacenar resultados, visualizar mediciones y contrastar hallazgos contra criterios técnicos o regulatorios.
 
-El proyecto ANE-HX aborda esta cadena completa mediante una arquitectura modular que separa el sensado en borde, la transmisión de datos, la persistencia y visualización en la nube, y el postprocesamiento analítico. Cada módulo se documenta en un capítulo independiente.
+Una solución de este tipo debe articular varios subsistemas:
+
+\begin{itemize}[leftmargin=*]
+    \item Nodo físico de sensado.
+    \item Antenas y cadena de recepción RF.
+    \item Equipo SDR para adquisición de señales.
+    \item Software de adquisición y preprocesamiento.
+    \item Conectividad entre el nodo de borde y la nube.
+    \item Plataforma web para operación, administración y visualización.
+    \item Base de datos para almacenamiento de mediciones.
+    \item Módulos de análisis espectral y localización.
+    \item Procedimientos de instalación, prueba, validación y mantenimiento.
+\end{itemize}
+
+El proyecto ANE-HX aborda esta necesidad mediante una arquitectura modular que separa el sensado en borde, la adquisición SDR, la transmisión de datos, la persistencia en la nube, el análisis espectral y la interacción con usuarios operadores o administradores.
 
 \section{Alcance del documento}
 
-El presente informe cubre el diseño, la implementación, las pruebas y los aprendizajes obtenidos durante el desarrollo del sistema. No se incluye el código fuente completo de los módulos de software, el cual reside en repositorios independientes referenciados en cada capítulo.
+El presente informe cubre el diseño, implementación, integración, pruebas, documentación de soporte y aprendizajes obtenidos durante el desarrollo del sistema. El documento no pretende reemplazar los repositorios de código fuente, los manuales externos ni los archivos de soporte almacenados fuera del repositorio \LaTeX. En cambio, los referencia y los organiza para facilitar su consulta.
 
-Los capítulos que contienen contenido técnico desarrollado son:
+El alcance documental incluye:
 
 \begin{itemize}[leftmargin=*]
-    \item Capítulo 2: Análisis de requerimientos, restricciones y uso.
-    \item Capítulo 4: Hardware del nodo de sensado espectral.
-    \item Capítulo 5: Software del sensor (adquisición SDR y preprocesamiento en borde).
-    \item Capítulo 6: Plataforma web en la nube (frontend, backend, base de datos y despliegue).
-    \item Capítulo 7: Análisis espectral y localización en la nube (postprocesamiento de capturas).
-    \item Anexo A: Técnica de desarrollo colaborativo usando agentes de inteligencia artificial.
+    \item Descripción general del sistema y su arquitectura.
+    \item Requerimientos, restricciones y criterios de uso.
+    \item Diseño físico y electrónico del nodo de sensado.
+    \item Software de adquisición SDR y procesamiento en borde.
+    \item Plataforma web, servicios cloud, backend, frontend y base de datos.
+    \item Análisis espectral, localización y procesamiento de capturas.
+    \item Protocolos de prueba y criterios de aceptación.
+    \item Integración general del sistema.
+    \item Conclusiones, recomendaciones y referencias.
+    \item Anexos de apoyo, diagramas, manuales, documentos externos y resultados de prueba.
 \end{itemize}
 
-Los capítulos restantes (3, 8, 9, 10, 11, 12 y anexos B, C, D) contienen la estructura prevista como placeholders para completar la documentación de diseño general, pruebas, integración, conclusiones, recomendaciones, referencias y material complementario.
+La tabla de contenido, la lista de figuras y la lista de tablas se generan automáticamente durante la compilación del documento. Por tanto, la estructura final del informe debe consultarse principalmente desde dichos índices, ya que se actualizan de acuerdo con los capítulos y anexos efectivamente incluidos desde el archivo \texttt{main.tex}.
 
-\section{Resumen de la arquitectura y los módulos principales}
+\section{Estructura general del informe}
 
-El sistema ANE-HX se organiza en tres dominios:
+El documento se organiza en capítulos principales y anexos. Cada capítulo se mantiene en un archivo independiente dentro de la carpeta \texttt{section/}, y el archivo \texttt{main.tex} actúa como punto de entrada para compilar el informe completo.
+
+La estructura general es la siguiente:
+
+\begin{itemize}[leftmargin=*]
+    \item \hyperref[chap:introduction]{Capítulo~\ref*{chap:introduction}: Introducción general}.
+    \item \hyperref[chap:requirements]{Capítulo~\ref*{chap:requirements}: Requerimientos, restricciones y uso}.
+    \item \hyperref[chap:general-design]{Capítulo~\ref*{chap:general-design}: Diseño general del sistema}.
+    \item \hyperref[chap:hardware]{Capítulo~\ref*{chap:hardware}: Hardware del nodo de sensado}.
+    \item \hyperref[chap:sdr-acquisition]{Capítulo~\ref*{chap:sdr-acquisition}: Software del sensor y adquisición SDR}.
+    \item \hyperref[chap:platform-cloud]{Capítulo~\ref*{chap:platform-cloud}: Plataforma web en la nube}.
+    \item \hyperref[chap:spectral-localization]{Capítulo~\ref*{chap:spectral-localization}: Análisis espectral y localización}.
+    \item \hyperref[chap:test-protocols]{Capítulo~\ref*{chap:test-protocols}: Protocolos de prueba edge-cloud}.
+    \item \hyperref[chap:system-integration]{Capítulo~\ref*{chap:system-integration}: Integración general del sistema}.
+    \item \hyperref[chap:conclusions]{Capítulo~\ref*{chap:conclusions}: Conclusiones generales}.
+    \item \hyperref[chap:recommendations]{Capítulo~\ref*{chap:recommendations}: Recomendaciones}.
+    \item \hyperref[chap:references]{Capítulo~\ref*{chap:references}: Referencias}.
+\end{itemize}
+
+Los anexos complementan el cuerpo principal del informe:
+
+\begin{itemize}[leftmargin=*]
+    \item \hyperref[chap:ia-collaboration]{Anexo~\ref*{chap:ia-collaboration}: Técnica de desarrollo con agentes de inteligencia artificial}.
+    \item \hyperref[chap:additional-diagrams]{Anexo~\ref*{chap:additional-diagrams}: Diagramas adicionales}.
+    \item \hyperref[chap:manuals-guides]{Anexo~\ref*{chap:manuals-guides}: Manuales y documentos de apoyo}.
+    \item \hyperref[chap:test-results]{Anexo~\ref*{chap:test-results}: Resultados de pruebas}.
+\end{itemize}
+
+Esta organización permite que cada autor trabaje sobre su archivo correspondiente sin modificar directamente el cuerpo completo del documento.
+
+\section{Resumen de la arquitectura y módulos principales}
+
+El sistema ANE-HX se organiza en tres dominios funcionales:
 
 \begin{enumerate}[leftmargin=*]
-    \item \textbf{Borde}: un nodo físico compuesto por una Raspberry Pi 5, un SDR HackRF One, una tarjeta auxiliar MonRaF2 (concentrador RF, LTE, GNSS y multiplexor de antenas) y antenas RF. El software embebido controla la adquisición, ejecuta preprocesamiento y transmite productos espectrales hacia la nube mediante conectividad celular.
-    \item \textbf{Nube}: una plataforma web con frontend SPA (React), backend de orquestación (Node.js), base de datos PostgreSQL con extensión TimescaleDB para series temporales, y un microservicio de postprocesamiento espectral en Python.
-    \item \textbf{Usuarios}: personas operadoras y administradoras que acceden a la plataforma web para visualizar métricas en tiempo real, gestionar campañas de medición, consultar reportes de cumplimiento normativo y administrar sensores.
+    \item \textbf{Borde:} corresponde al nodo físico de sensado. Incluye el hardware de adquisición, antenas, cadena RF, SDR, tarjeta auxiliar, alimentación, conectividad y software local de control o preprocesamiento.
+    
+    \item \textbf{Nube:} corresponde a la plataforma central de almacenamiento, visualización, administración y análisis. Incluye servicios de backend, frontend, base de datos, comunicación con sensores, visualización de métricas, gestión de campañas y procesamiento posterior.
+    
+    \item \textbf{Usuarios:} corresponde a los perfiles que interactúan con la plataforma, principalmente operadores, administradores o usuarios técnicos encargados de consultar mediciones, revisar resultados, gestionar sensores y generar reportes.
 \end{enumerate}
 
-\subsection{Capítulo 2: Análisis de requerimientos, restricciones y uso}
+A partir de esta división, los capítulos técnicos documentan los subsistemas del proyecto y su relación con el flujo completo de adquisición, transmisión, análisis y visualización de información espectral.
 
-Consolida los requerimientos funcionales y no funcionales pactados en el pliego técnico del proyecto. Organiza las especificaciones por categoría —parametrización, medición, cumplimiento normativo, gestión, análisis forense, red, hardware, exactitud e interoperabilidad— y las contrasta con el estado de implementación documentado en los capítulos técnicos. Incluye una matriz de problemas encontrados durante la implementación de los requerimientos y sus ajustes correspondientes.
+\section{Descripción resumida de los capítulos}
 
-\subsection{Capítulo 4: Hardware}
+\subsection{\hyperref[chap:requirements]{Requerimientos, restricciones y uso}}
 
-Documenta el diseño físico del nodo ANE2. Describe la arquitectura de potencia, la ruta RF desde las antenas hasta el SDR, el árbol de alimentación, la conectividad GPIO entre la Raspberry Pi 5 y la MonRaF2, y las mediciones de voltaje y temperatura bajo carga. Incluye decisiones de diseño como la separación de la fuente de potencia del cómputo frente a los periféricos SDR y LTE, y una matriz de problemas encontrados con sus respectivos ajustes.
+Este capítulo consolida los requerimientos funcionales y no funcionales del sistema, las restricciones técnicas, los criterios de uso, las capacidades esperadas y los elementos que permiten contrastar el diseño con el alcance definido para el proyecto.
 
-\subsection{Capítulo 5: Software del sensor}
+\subsection{\hyperref[chap:general-design]{Diseño general del sistema}}
 
-Describe la arquitectura del código que se ejecuta en el nodo de borde. Cubre el control de la HackRF One, la selección de antena, la adquisición de muestras IQ, el preprocesamiento (balance IQ, corrección DC, estimación de PSD, calibración en frecuencia), la demodulación de FM y AM, y la comunicación con el backend. El software opera mediante un orquestador que gestiona modos de operación como campañas programadas, PSD en tiempo real y calibración.
+Este capítulo describe la arquitectura global del sistema, la separación por subsistemas, el flujo de información, las interfaces principales, las decisiones de diseño y la forma en que los componentes de borde y nube se integran dentro de una solución completa.
 
-\subsection{Capítulo 6: Plataforma web en la nube}
+\subsection{\hyperref[chap:hardware]{Hardware del nodo de sensado}}
 
-Documenta la capa central de coordinación e interfaz de usuario. El frontend, construido con React y Vite, ofrece autenticación, tableros de monitoreo con gráficas en tiempo real vía WebSocket, gestión de sensores y generación de reportes de cumplimiento. El backend, basado en Node.js y Express, expone una API REST, maneja WebSockets para telemetría y audio, y orquesta las campañas de medición. La base de datos TimescaleDB almacena series temporales de métricas espectrales y coordenadas GPS.
+Este capítulo documenta el diseño físico del nodo de sensado, incluyendo componentes electrónicos, alimentación, ruta RF, antenas, conectividad, montaje, integración física y consideraciones de operación en campo.
 
-\subsection{Capítulo 7: Análisis espectral y localización en la nube}
+\subsection{\hyperref[chap:sdr-acquisition]{Software del sensor y adquisición SDR}}
 
-Describe el módulo de postprocesamiento encargado de convertir capturas espectrales crudas en parámetros técnicos interpretables: frecuencia central, ancho de banda, potencia, MER y BER para señales TDT. El módulo implementa tres modos de operación (detección automática, análisis por picos y cumplimiento contra licencias), utiliza un algoritmo de linealización con umbral fijo optimizado para la Raspberry Pi 5, y soporta filtrado geográfico mediante códigos DANE y nombre de municipio para la validación normativa contra bases de licencias oficiales.
+Este capítulo describe el software ejecutado en el nodo de borde, incluyendo control del SDR, adquisición de muestras, selección de parámetros, preprocesamiento, generación de productos espectrales, almacenamiento temporal y comunicación con la plataforma central.
 
-\subsection{Anexo A: Técnica de desarrollo con agentes IA}
+\subsection{\hyperref[chap:platform-cloud]{Plataforma web en la nube}}
 
-Documenta la metodología de trabajo colaborativo del equipo utilizando agentes de inteligencia artificial (Gemini CLI y GitHub Copilot CLI). Describe la instalación, la arquitectura multi-agente basada en roles, la metodología de prompting estructurada (ROLE $\rightarrow$ OBJECTIVE $\rightarrow$ CONTEXT $\rightarrow$ REASONING), los problemas encontrados durante la colaboración con IA y las lecciones aprendidas.
+Este capítulo documenta la plataforma web, sus componentes de frontend, backend, base de datos, servicios de comunicación, visualización de datos, administración de sensores, usuarios, campañas y reportes.
+
+\subsection{\hyperref[chap:spectral-localization]{Análisis espectral y localización}}
+
+Este capítulo presenta los métodos de análisis espectral, procesamiento de capturas, extracción de parámetros técnicos, detección de emisiones, localización o asociación geográfica y visualización de resultados analíticos.
+
+\subsection{\hyperref[chap:test-protocols]{Protocolos de prueba edge-cloud}}
+
+Este capítulo define procedimientos de prueba, criterios de aceptación, validaciones funcionales, pruebas de integración, pruebas de adquisición, pruebas de comunicación y criterios para verificar el comportamiento del sistema.
+
+\subsection{\hyperref[chap:system-integration]{Integración general del sistema}}
+
+Este capítulo consolida la integración entre hardware, software de borde, conectividad, plataforma cloud, base de datos, análisis espectral y operación por parte del usuario. Su objetivo es mostrar cómo interactúan los módulos en un flujo completo de operación.
+
+\subsection{\hyperref[chap:conclusions]{Conclusiones generales}}
+
+Este capítulo resume los resultados principales del proyecto, los aprendizajes obtenidos, el estado general del sistema, las limitaciones identificadas y los aportes más relevantes del desarrollo.
+
+\subsection{\hyperref[chap:recommendations]{Recomendaciones}}
+
+Este capítulo presenta recomendaciones para continuidad, mantenimiento, mejora, pruebas futuras, escalamiento, documentación adicional y posibles líneas de trabajo posteriores.
+
+\subsection{\hyperref[chap:references]{Referencias}}
+
+Este capítulo consolida las referencias bibliográficas, normativas, técnicas o documentales utilizadas para respaldar el desarrollo del informe.
+
+\section{Descripción resumida de los anexos}
+
+\subsection{\hyperref[chap:ia-collaboration]{Técnica de desarrollo con agentes de inteligencia artificial}}
+
+Este anexo documenta la metodología de apoyo con agentes de inteligencia artificial utilizada durante el desarrollo documental, incluyendo criterios de uso, roles, ventajas, limitaciones y aprendizajes.
+
+\subsection{\hyperref[chap:additional-diagrams]{Diagramas adicionales}}
+
+Este anexo consolida diagramas complementarios que apoyan la comprensión de la arquitectura, flujos de información, componentes o relaciones entre subsistemas.
+
+\subsection{\hyperref[chap:manuals-guides]{Manuales y documentos de apoyo}}
+
+Este anexo referencia manuales, documentos externos, informes técnicos, videos de ensamble y archivos de soporte disponibles en la carpeta documental del proyecto. Estos documentos son material externo no editable dentro del repositorio \LaTeX.
+
+\subsection{\hyperref[chap:test-results]{Resultados de pruebas}}
+
+Este anexo debe consolidar evidencias, resultados, capturas, salidas, tablas o registros asociados a las pruebas ejecutadas sobre el sistema.
 
 \section{Convenciones del documento}
 
-El informe está redactado en español, compilado con \LaTeX{} y utiliza codificación UTF-8. Cada capítulo sigue una estructura homogénea: propósito, contexto en el sistema, desarrollo técnico, entradas y salidas, decisiones de diseño, problemas y ajustes, validación, aprendizajes, limitaciones y recomendaciones. Las referencias a repositorios de software incluyen el enlace real o la indicación explícita de que el repositorio está pendiente de publicación. No se incluye código fuente extenso dentro del documento.
+El informe está redactado en español, compilado con \LaTeX{} y utiliza codificación UTF-8. Cada capítulo debe mantener una estructura clara y homogénea que facilite su revisión, trazabilidad y mantenimiento.
+
+En general, se recomienda que cada capítulo incluya:
+
+\begin{itemize}[leftmargin=*]
+    \item Propósito del capítulo.
+    \item Contexto dentro del sistema.
+    \item Descripción técnica del componente, módulo o proceso.
+    \item Entradas, salidas e interfaces.
+    \item Decisiones de diseño.
+    \item Problemas encontrados y ajustes realizados.
+    \item Validación, pruebas o evidencias.
+    \item Limitaciones.
+    \item Recomendaciones o trabajo futuro.
+\end{itemize}
+
+No se debe incluir código fuente extenso dentro del informe. Cuando sea necesario referenciar software, repositorios, scripts o servicios externos, se debe incluir su enlace o indicar explícitamente que el recurso está pendiente de publicación.
+
+\section{Mantenimiento de la estructura documental}
+
+La estructura del informe se controla desde el archivo \texttt{main.tex}. Si un capítulo o anexo todavía no está desarrollado, se recomienda una de las siguientes opciones:
+
+\begin{enumerate}[leftmargin=*]
+    \item Mantener el archivo \texttt{.tex} con una nota breve que indique su estado pendiente o parcial.
+    \item Retirar temporalmente la línea correspondiente en \texttt{main.tex}.
+    \item Usar una instrucción de inclusión que omita archivos inexistentes sin generar capítulos artificiales.
+\end{enumerate}
+
+Para evitar inconsistencias, este capítulo no debe listar manualmente el estado de avance de cada archivo. El estado de avance debe mantenerse en el \texttt{README.md}, en una tabla de control documental o en una sección específica de gestión del proyecto.
+
+\section{Recomendación de compilación}
+
+Después de agregar, quitar o renombrar capítulos, anexos, figuras o tablas, se recomienda compilar el documento al menos dos veces. Esto permite actualizar correctamente:
+
+\begin{itemize}[leftmargin=*]
+    \item Tabla de contenido.
+    \item Lista de figuras.
+    \item Lista de tablas.
+    \item Numeración de capítulos y anexos.
+    \item Referencias cruzadas.
+    \item Enlaces internos.
+\end{itemize}
+
+Si persisten errores de numeración, nombres automáticos o referencias, se recomienda eliminar los archivos auxiliares de compilación y volver a compilar desde cero.
+```
