@@ -4,9 +4,17 @@
 % PAQUETES BÁSICOS
 % =========================================================
 \usepackage[utf8]{inputenc}
-\usepackage{babel}
-\babelprovide[main]{spanish}
-\addto\captionsspanish{\renewcommand{\tablename}{Tabla}}
+\usepackage[spanish,es-tabla]{babel}
+
+\addto\captionsspanish{
+    \renewcommand{\contentsname}{Tabla de contenido}
+    \renewcommand{\listfigurename}{Lista de figuras}
+    \renewcommand{\listtablename}{Lista de tablas}
+    \renewcommand{\figurename}{Figura}
+    \renewcommand{\tablename}{Tabla}
+    \renewcommand{\chaptername}{Capítulo}
+    \renewcommand{\bibname}{Referencias}
+}
 \usepackage{csquotes}
 \usepackage{geometry}
 \usepackage{graphicx}
